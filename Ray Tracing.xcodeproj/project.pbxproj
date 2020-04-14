@@ -8,6 +8,12 @@
 
 /* Begin PBXBuildFile section */
 		6630E3D82443CD690066BCCC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3D72443CD690066BCCC /* main.cpp */; };
+		6630E3E02443D2BA0066BCCC /* libncurses.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6630E3DF2443CF020066BCCC /* libncurses.tbd */; };
+		6630E3E32445E2B20066BCCC /* data_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E12445E2B20066BCCC /* data_types.cpp */; };
+		6630E3E62445E2C70066BCCC /* shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E42445E2C70066BCCC /* shapes.cpp */; };
+		6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E72445E2D70066BCCC /* light_sources.cpp */; };
+		6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3EA2445E2E10066BCCC /* camera.cpp */; };
+		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +31,17 @@
 /* Begin PBXFileReference section */
 		6630E3D42443CD690066BCCC /* Ray Tracing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Ray Tracing"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6630E3D72443CD690066BCCC /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		6630E3DF2443CF020066BCCC /* libncurses.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libncurses.tbd; path = usr/lib/libncurses.tbd; sourceTree = SDKROOT; };
+		6630E3E12445E2B20066BCCC /* data_types.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = data_types.cpp; sourceTree = "<group>"; };
+		6630E3E22445E2B20066BCCC /* data_types.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = data_types.hpp; sourceTree = "<group>"; };
+		6630E3E42445E2C70066BCCC /* shapes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shapes.cpp; sourceTree = "<group>"; };
+		6630E3E52445E2C70066BCCC /* shapes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shapes.hpp; sourceTree = "<group>"; };
+		6630E3E72445E2D70066BCCC /* light_sources.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = light_sources.cpp; sourceTree = "<group>"; };
+		6630E3E82445E2D70066BCCC /* light_sources.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = light_sources.hpp; sourceTree = "<group>"; };
+		6630E3EA2445E2E10066BCCC /* camera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = camera.cpp; sourceTree = "<group>"; };
+		6630E3EB2445E2E10066BCCC /* camera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = camera.hpp; sourceTree = "<group>"; };
+		6630E3ED2445E4AB0066BCCC /* ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ray.cpp; sourceTree = "<group>"; };
+		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6630E3E02443D2BA0066BCCC /* libncurses.tbd in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +61,7 @@
 			children = (
 				6630E3D62443CD690066BCCC /* Ray Tracing */,
 				6630E3D52443CD690066BCCC /* Products */,
+				6630E3DE2443CF020066BCCC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,8 +77,26 @@
 			isa = PBXGroup;
 			children = (
 				6630E3D72443CD690066BCCC /* main.cpp */,
+				6630E3EE2445E4AB0066BCCC /* ray.hpp */,
+				6630E3ED2445E4AB0066BCCC /* ray.cpp */,
+				6630E3E22445E2B20066BCCC /* data_types.hpp */,
+				6630E3E12445E2B20066BCCC /* data_types.cpp */,
+				6630E3E52445E2C70066BCCC /* shapes.hpp */,
+				6630E3E42445E2C70066BCCC /* shapes.cpp */,
+				6630E3E82445E2D70066BCCC /* light_sources.hpp */,
+				6630E3E72445E2D70066BCCC /* light_sources.cpp */,
+				6630E3EB2445E2E10066BCCC /* camera.hpp */,
+				6630E3EA2445E2E10066BCCC /* camera.cpp */,
 			);
 			path = "Ray Tracing";
+			sourceTree = "<group>";
+		};
+		6630E3DE2443CF020066BCCC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				6630E3DF2443CF020066BCCC /* libncurses.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,7 +156,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */,
 				6630E3D82443CD690066BCCC /* main.cpp in Sources */,
+				6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */,
+				6630E3E32445E2B20066BCCC /* data_types.cpp in Sources */,
+				6630E3E62445E2C70066BCCC /* shapes.cpp in Sources */,
+				6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
