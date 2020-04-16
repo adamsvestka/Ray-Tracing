@@ -8,12 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		6630E3D82443CD690066BCCC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3D72443CD690066BCCC /* main.cpp */; };
-		6630E3E02443D2BA0066BCCC /* libncurses.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6630E3DF2443CF020066BCCC /* libncurses.tbd */; };
+		6630E3E02443D2BA0066BCCC /* libncurses.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6630E3DF2443CF020066BCCC /* libncurses.tbd */; settings = {ATTRIBUTES = (Weak, ); }; };
 		6630E3E32445E2B20066BCCC /* data_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E12445E2B20066BCCC /* data_types.cpp */; };
 		6630E3E62445E2C70066BCCC /* shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E42445E2C70066BCCC /* shapes.cpp */; };
 		6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E72445E2D70066BCCC /* light_sources.cpp */; };
 		6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3EA2445E2E10066BCCC /* camera.cpp */; };
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
+		6630E3F7244760C70066BCCC /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6630E3F024475B670066BCCC /* libX11.6.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,6 +43,8 @@
 		6630E3EB2445E2E10066BCCC /* camera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = camera.hpp; sourceTree = "<group>"; };
 		6630E3ED2445E4AB0066BCCC /* ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ray.cpp; sourceTree = "<group>"; };
 		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
+		6630E3F024475B670066BCCC /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
+		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,6 +53,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6630E3E02443D2BA0066BCCC /* libncurses.tbd in Frameworks */,
+				6630E3F7244760C70066BCCC /* libX11.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -76,6 +80,7 @@
 		6630E3D62443CD690066BCCC /* Ray Tracing */ = {
 			isa = PBXGroup;
 			children = (
+				6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */,
 				6630E3D72443CD690066BCCC /* main.cpp */,
 				6630E3EE2445E4AB0066BCCC /* ray.hpp */,
 				6630E3ED2445E4AB0066BCCC /* ray.cpp */,
@@ -94,6 +99,7 @@
 		6630E3DE2443CF020066BCCC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				6630E3F024475B670066BCCC /* libX11.6.dylib */,
 				6630E3DF2443CF020066BCCC /* libncurses.tbd */,
 			);
 			name = Frameworks;
@@ -280,20 +286,40 @@
 		6630E3DC2443CD690066BCCC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ray Tracing/Ray Tracing.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RTA4PXE74H;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = (
+					/opt/X11/lib,
+					/usr/local/lib,
+				);
+				OTHER_LDFLAGS = "-lX11";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
 		6630E3DD2443CD690066BCCC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "Ray Tracing/Ray Tracing.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RTA4PXE74H;
 				ENABLE_HARDENED_RUNTIME = YES;
+				FRAMEWORK_SEARCH_PATHS = "";
+				HEADER_SEARCH_PATHS = /usr/local/include;
+				LIBRARY_SEARCH_PATHS = (
+					/opt/X11/lib,
+					/usr/local/lib,
+				);
+				OTHER_LDFLAGS = "-lX11";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};

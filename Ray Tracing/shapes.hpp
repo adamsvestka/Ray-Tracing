@@ -8,10 +8,12 @@
 
 class Shape;
 class Sphere;
+class Cube;
 
 #pragma once
 
 #include "data_types.hpp"
+#include "ray.hpp"
 
 class Shape {
 protected:
@@ -24,12 +26,25 @@ public:
     virtual Vector3 getSurface(Vector3) = 0;
 };
 
+
 class Sphere : public Shape {
 private:
     float radius;
     
 public:
     Sphere(Vector3, float);
+    bool intersects(Vector3);
+    Vector3 getNormal(Vector3);
+    Vector3 getSurface(Vector3);
+};
+
+
+class Cube : public Shape {
+private:
+    float radius;
+    
+public:
+    Cube(Vector3, float);
     bool intersects(Vector3);
     Vector3 getNormal(Vector3);
     Vector3 getSurface(Vector3);

@@ -24,3 +24,16 @@ struct Vector3 {
     Vector3 operator/(float);
     float operator*(Vector3);
 };
+
+struct Color {
+    float r, g, b;
+    
+    Color(float, float, float);
+    
+    int hex();
+    
+    Color operator+(Color);
+    Color operator-(Color);
+    Color operator*(float);
+    Color operator/(float);
+};

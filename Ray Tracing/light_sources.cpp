@@ -14,7 +14,7 @@ Light::Light(Vector3 position, int strength) {
 }
 
 Vector3 Light::getVector(Ray ray) {
-    return ray.getIntersectingObject()->getCenter() - position;
+    return position - ray.getIntersectionPosition();
 }
 
 int Light::getIntensity() { return intensity; };

@@ -10,6 +10,8 @@ class Ray;
 
 #pragma once
 
+#include <vector>
+
 #include "data_types.hpp"
 #include "shapes.hpp"
 #include "light_sources.hpp"
@@ -18,7 +20,7 @@ class Ray;
 #define STEP_SIZE 0.02
 
 class Ray {
-public:
+private:
     Vector3 origin, direction, position;
     Shape *object;
     float distance;
@@ -29,8 +31,6 @@ public:
     Vector3 getIntersectionPosition();
     Shape *getIntersectingObject();
     
-    float traceObject(Shape**, int);
-    float traceLight(Light, Shape**, int);
-    
-    void operator++();
+    float traceObject(std::vector<Shape*>);
+    float traceLight(std::vector<Light>, std::vector<Shape*>);
 };

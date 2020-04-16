@@ -18,13 +18,16 @@ Ray::Ray(Vector3 position, Vector3 direction) {
 Vector3 Ray::getIntersectionPosition() { return position; }
 Shape *Ray::getIntersectingObject() { return object; }
 
-float Ray::traceObject(Shape *objects[], int count) {
-    for (int i = 0; i < RENDER_DISTANCE / STEP_SIZE; i++) {
-        this->operator++();
-        for (int i = 0; i < count; i++) {
-            if (objects[i]->intersects(position)) {
-                object = objects[i];
-                position = object->getSurface(position);
+float Ray::traceObject(std::vector<Shape*> objects) {
+    int repetitions = RENDER_DISTANCE / STEP_SIZE;
+    Vector3 increment = direction * STEP_SIZE;
+    
+    for (int i = 0; i < repetitions; i++) {
+        position = position + increment;
+        for (std::vector<Shape*>::iterator it = objects.begin(); it != objects.end(); ++it) {
+            if ((*it)->intersects(position)) {
+                object = *it;
+                position = (*it)->getSurface(position);
                 distance = (position - origin).length();
                 return distance;
             }
@@ -34,28 +37,31 @@ float Ray::traceObject(Shape *objects[], int count) {
     return -1;
 }
 
-float Ray::traceLight(Light light, Shape *objects[], int count) {
+float Ray::traceLight(std::vector<Light> lights, std::vector<Shape*> objects) {
     Vector3 surface_normal = getIntersectingObject()->getNormal(getIntersectionPosition());
-    Vector3 vector_to_light = light.getVector(*this);
-
-//        origin = position;
-    direction = Vector3{0, 0, 0} - vector_to_light.normal();
-//        distance = 0;
+    float intensity = 0;
     
-    count--;
-    Shape *objects2[count];
-    for (int i = 0, j = 0; i < count+1; i++) if (objects[i] != object) objects2[j++] = objects[i];
-    for (int i = 0; i < RENDER_DISTANCE / STEP_SIZE; i++) {
-        this->operator++();
-        for (int j = 0; j < count; j++) if (objects2[j]->intersects(position)) return -1;
+    for (std::vector<Light>::iterator light = lights.begin(); light != lights.end(); ++light) {
+        Vector3 vector_to_light = light->getVector(*this);
+
+    //        origin = position;
+        direction = vector_to_light.normal();
+    //        distance = 0;
+        
+        for (std::vector<Shape*>::iterator object = objects.begin(); object != objects.end(); ++object) if (*object == this->object) objects.erase(object--);
+        int repetitions = vector_to_light.length() / STEP_SIZE;
+        Vector3 increment = direction * STEP_SIZE;
+        
+        for (int i = 0; i < repetitions; ++i) {
+            position = position + increment;
+            for (std::vector<Shape*>::iterator object = objects.begin(); object != objects.end(); ++object) if ((*object)->intersects(position)) return -1;
+        }
+        
+        float cosine_term = surface_normal * vector_to_light.normal();
+        if (cosine_term < 0) cosine_term = 0;
+        
+        intensity = fmax(intensity, M_1_PI * cosine_term * light->getIntensity() / pow(vector_to_light.length(), 2));
     }
     
-    float cosine_term = surface_normal * vector_to_light.normal();
-    if (cosine_term < 0) cosine_term = 0;
-
-    return M_1_PI * cosine_term * light.getIntensity() / pow(vector_to_light.length(), 2);
-}
-
-void Ray::operator++() {
-    position = position + direction * STEP_SIZE;
+    return intensity;
 }
