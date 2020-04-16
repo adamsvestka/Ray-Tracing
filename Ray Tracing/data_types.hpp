@@ -28,6 +28,7 @@ struct Vector3 {
 struct Color {
     float r, g, b;
     
+    Color();
     Color(float, float, float);
     
     int hex();
@@ -36,4 +37,8 @@ struct Color {
     Color operator-(Color);
     Color operator*(float);
     Color operator/(float);
+};
+
+struct Material {
+    Color color;
 };

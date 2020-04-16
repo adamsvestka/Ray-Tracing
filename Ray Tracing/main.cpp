@@ -23,9 +23,9 @@ int main(int argc, const char * argv[]) {
     Camera camera({0, 0, 0}, 120, 50);
     
     vector<Shape*> objects;
-    objects.push_back(new Sphere({20, -2, 0}, 5));
-    objects.push_back(new Cube({15, 6, -3}, 1));
-    objects.push_back(new Sphere({16, 8, 3}, 1));
+    objects.push_back(new Sphere({20, -2, 0}, 5, {{0, 0, 0.5}}));
+    objects.push_back(new Cube({15, 6, -3}, 1, {{0, 0.5, 0}}));
+    objects.push_back(new Sphere({16, 8, 3}, 1, {{0.5, 0, 0}}));
     
     vector<Light> lights;
     lights.push_back(Light({0, 15, 2}, 1000));

@@ -45,6 +45,7 @@
 		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
 		6630E3F024475B670066BCCC /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
+		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +83,7 @@
 			children = (
 				6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */,
 				6630E3D72443CD690066BCCC /* main.cpp */,
+				66DA14C02448C570004432AC /* settings.hpp */,
 				6630E3EE2445E4AB0066BCCC /* ray.hpp */,
 				6630E3ED2445E4AB0066BCCC /* ray.cpp */,
 				6630E3E22445E2B20066BCCC /* data_types.hpp */,

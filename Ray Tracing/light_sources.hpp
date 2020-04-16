@@ -10,6 +10,8 @@ class Light;
 
 #pragma once
 
+#include "settings.hpp"
+
 #include "data_types.hpp"
 #include "ray.hpp"
 

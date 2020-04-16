@@ -14,19 +14,22 @@ class Camera;
 #include <vector>
 #include <cmath>
 
+//#define using_ncurses
+#ifdef using_ncurses
 #include <ncurses.h>
+#else
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
+#endif
+
+#include "settings.hpp"
 
 #include "data_types.hpp"
 #include "ray.hpp"
 #include "shapes.hpp"
 #include "light_sources.hpp"
 
-//#define using_ncurses
-#define render_spiral
-#define resolution 1
 
 class Camera {
 private:
@@ -46,14 +49,12 @@ public:
     Camera(Vector3, int, int);
     ~Camera();
     
+    void render(std::vector<Shape*>, std::vector<Light>);
     Ray getCameraRay(int, int);
     
-    bool nextSpiral();
     bool next();
     int minX();
     int maxX();
     int minY();
     int maxY();
-    
-    void render(std::vector<Shape*>, std::vector<Light>);
 };

@@ -12,9 +12,10 @@ Vector3 Shape::getCenter() { return center; };
 
 
 // MARK: - Sphere
-Sphere::Sphere(Vector3 position, float radius) {
+Sphere::Sphere(Vector3 position, float radius, Material material) {
     this->center = position;
     this->radius = radius;
+    this->material = material;
 }
 
 bool Sphere::intersects(Vector3 point) {
@@ -31,9 +32,10 @@ Vector3 Sphere::getSurface(Vector3 point) {
 
 
 // MARK: - Cube
-Cube::Cube(Vector3 position, float radius) {
+Cube::Cube(Vector3 position, float radius, Material material) {
     this->center = position;
     this->radius = radius;
+    this->material = material;
 }
 
 bool Cube::intersects(Vector3 point) {
@@ -47,11 +49,11 @@ Vector3 Cube::getNormal(Vector3 point) {
 
 Vector3 Cube::getSurface(Vector3 point) {
     Vector3 d = center - point;
-    if (abs(d.x + radius) < STEP_SIZE) point.x = -radius;
-    else if (abs(d.x - radius) < STEP_SIZE) point.x = radius;
-    if (abs(d.y + radius) < STEP_SIZE) point.y = -radius;
-    else if (abs(d.y - radius) < STEP_SIZE) point.y = radius;
-    if (abs(d.z + radius) < STEP_SIZE) point.z = -radius;
-    else if (abs(d.z - radius) < STEP_SIZE) point.z = radius;
+    if (abs(d.x + radius) < settings.step_size) point.x = -radius;
+    else if (abs(d.x - radius) < settings.step_size) point.x = radius;
+    if (abs(d.y + radius) < settings.step_size) point.y = -radius;
+    else if (abs(d.y - radius) < settings.step_size) point.y = radius;
+    if (abs(d.z + radius) < settings.step_size) point.z = -radius;
+    else if (abs(d.z - radius) < settings.step_size) point.z = radius;
     return point;
 }

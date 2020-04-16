@@ -12,12 +12,11 @@ class Ray;
 
 #include <vector>
 
+#include "settings.hpp"
+
 #include "data_types.hpp"
 #include "shapes.hpp"
 #include "light_sources.hpp"
-
-#define RENDER_DISTANCE 20
-#define STEP_SIZE 0.02
 
 class Ray {
 private:
@@ -32,5 +31,5 @@ public:
     Shape *getIntersectingObject();
     
     float traceObject(std::vector<Shape*>);
-    float traceLight(std::vector<Light>, std::vector<Shape*>);
+    Color traceLight(std::vector<Light>, std::vector<Shape*>);
 };
