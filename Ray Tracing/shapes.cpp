@@ -39,21 +39,23 @@ Cube::Cube(Vector3 position, float radius, Material material) {
 }
 
 bool Cube::intersects(Vector3 point) {
-    return abs(center.x - point.x) < radius && abs(center.y - point.y) < radius && abs(center.z - point.z) < radius;
+    return abs(point.x - center.x) < radius && abs(point.y - center.y) < radius && abs(point.z - center.z) < radius;
 }
 
 Vector3 Cube::getNormal(Vector3 point) {
-    Vector3 d = center - point;
-    return Vector3{(float)(abs(d.x) < radius ? 0 : (d.x > 0 ? -1 : 1)), (float)(abs(d.y) < radius ? 0 : (d.y > 0 ? -1 : 1)), (float)(abs(d.z) < radius ? 0 : (d.z > 0 ? -1 : 1))}.normal();
+    Vector3 d = point - center;
+    if (abs(d.x) > abs(d.y) && abs(d.x) > abs(d.z)) return {d.x < 0 ? 1.f : -1.f, 0, 0};
+    else if (abs(d.y) > abs(d.z)) return {0, d.y > 0 ? 1.f : -1.f, 0};
+    else return {0, 0, d.z > 0 ? 1.f : -1.f};
 }
 
 Vector3 Cube::getSurface(Vector3 point) {
-    Vector3 d = center - point;
-    if (abs(d.x + radius) < settings.step_size) point.x = -radius;
-    else if (abs(d.x - radius) < settings.step_size) point.x = radius;
-    if (abs(d.y + radius) < settings.step_size) point.y = -radius;
-    else if (abs(d.y - radius) < settings.step_size) point.y = radius;
-    if (abs(d.z + radius) < settings.step_size) point.z = -radius;
-    else if (abs(d.z - radius) < settings.step_size) point.z = radius;
+    Vector3 d = point - center;
+    if (d.x - settings.step_size < -radius) point.x = center.x - radius;
+    else if (d.x + settings.step_size > radius) point.x = center.x + radius;
+    else if (d.y - settings.step_size < -radius) point.y = center.y - radius;
+    else if (d.y + settings.step_size > radius) point.y = center.y + radius;
+    else if (d.z - settings.step_size < -radius) point.z = center.z - radius;
+    else if (d.z + settings.step_size > radius) point.z = center.z + radius;
     return point;
 }

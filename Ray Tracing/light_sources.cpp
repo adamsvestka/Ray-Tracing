@@ -8,8 +8,9 @@
 
 #include "light_sources.hpp"
 
-Light::Light(Vector3 position, int strength) {
+Light::Light(Vector3 position, Color color, int strength) {
     this->position = position;
+    this->color = color;
     intensity = strength;
 }
 

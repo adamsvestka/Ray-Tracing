@@ -36,27 +36,32 @@ float Ray::traceObject(std::vector<Shape*> objects) {
 
 Color Ray::traceLight(std::vector<Light> lights, std::vector<Shape*> objects) {
     Vector3 surface_normal = getIntersectingObject()->getNormal(getIntersectionPosition());
-    float intensity = 0;
+    if (settings.render_special == RENDER_NORMALS) return surface_normal.toColor();
+    
+    Color diffuse, specular, reflection;
+    diffuse = specular = reflection = Black;
+    
+    diffuse += settings.environment_color * settings.environment_intensity;
     
     for (std::vector<Light>::iterator light = lights.begin(); light != lights.end(); ++light) {
         Vector3 vector_to_light = light->getVector(*this);
 
-        direction = vector_to_light.normal();
+        Ray ray(position, vector_to_light.normal());
+        if (ray.traceObject(objects) > -1) break;
         
-        for (std::vector<Shape*>::iterator object = objects.begin(); object != objects.end(); ++object) if (*object == this->object) objects.erase(object--);
-        int repetitions = vector_to_light.length() / settings.step_size;
-        Vector3 increment = direction * settings.step_size;
+        float cosine_term = vector_to_light.normal() * surface_normal;
         
-        for (int i = 0; i < repetitions; ++i) {
-            position = position + increment;
-            for (std::vector<Shape*>::iterator object = objects.begin(); object != objects.end(); ++object) if ((*object)->intersects(position)) return Color{0, 0, 0};
+        if (object->material.Ks < 1) diffuse += light->color * (float)(light->getIntensity() * fmax(cosine_term, 0.f) / (vector_to_light * vector_to_light * 4 * M_PI));
+        if (object->material.Ks > 0) specular += light->color * (light->getIntensity() * pow(fmax(-(surface_normal * (cosine_term * 2) - vector_to_light.normal()) * direction, 0.f), object->material.n));
+        if (object->material.reflection > 0) {
+            Ray ray2(position, direction - surface_normal * 2 * (direction * surface_normal));
+            if (ray2.traceObject(objects) > -1) reflection += ray2.traceLight(lights, objects);
+            else reflection += settings.environment_color * settings.environment_intensity;
         }
-        
-        float cosine_term = surface_normal * vector_to_light.normal();
-        if (cosine_term < 0) cosine_term = 0;
-        
-        intensity = fmax(intensity, M_1_PI * cosine_term * light->getIntensity() / pow(vector_to_light.length(), 2));
     }
     
-    return object->material.color + Color{1, 1, 1} * intensity;
+    if (settings.render_special == RENDER_LIGHT) return (diffuse * object->material.albedo + specular);
+    return ((object->material.color * diffuse) * (object->material.albedo * (1 - object->material.Ks)) + (specular * object->material.Ks)) * (1 - object->material.reflection) + reflection * object->material.reflection;
+    
+    // I = Ka + Ke + sum(Vi * Li * (Kd * max(li . n, 0) + Ks * (max(hi . n, 0))) ^ s) + Ks * Ir;
 }

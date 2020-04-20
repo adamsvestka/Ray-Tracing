@@ -21,8 +21,10 @@ private:
     int intensity;
     
 public:
-    Light(Vector3 position, int strength);
+    Color color;
     
-    Vector3 getVector(Ray ray);
+    Light(Vector3, Color, int);
+    
+    Vector3 getVector(Ray);
     int getIntensity();
 };

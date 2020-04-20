@@ -32,7 +32,6 @@ Camera::Camera(Vector3 position, int fov, int region_size) {
     
     this->width = screenWidth / 2;
     this->height = screenHeight;
-    
     this->position = position;
     fovFactor = 1 / tan(fov / 2);
     region = region_size;
@@ -81,10 +80,9 @@ Camera::~Camera() {
 const char *intensity = " .':\"^>?ilI0UXm#&WM";
 //const char *intensity = " _.';:\"!^>?ilI0UXm#&WM";
 const unsigned short depth = strlen(intensity);
-void pixel(int x, int y, Color color) {
-    float power = fmax(fmax(color.r, color.g), color.b);
+void pixel(int x, int y, float power) {
     int i = floor(power * depth);
-    i = fmax(fmin(i, depth - 1), 0);
+    i = max(min(i, depth - 1), 0);
 
     mvaddch(y, 2 * x, intensity[i]);
     mvaddch(y, 2 * x + 1, intensity[i]);
@@ -116,28 +114,18 @@ Camera::Camera(Vector3 position, int fov, int region_size) {
     
     display = XOpenDisplay(NULL);
     scr = DefaultScreen(display);
+    gc = DefaultGC(display, scr);
     screen = ScreenOfDisplay(display, scr);
-    
-    screenWidth = screen->width;
-    screenHeight = screen->height;
-    window = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0, screenWidth, screenHeight, 1, BlackPixel(display, scr), WhitePixel(display, scr));
+    window = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0, screenWidth = screen->width, screenHeight = screen->height, 1, BlackPixel(display, scr), WhitePixel(display, scr));
 
     XSetStandardProperties(display, window, "Ray Tracing", "XTerm", None, NULL, 0, NULL);
-
     XSelectInput(display, window, ExposureMask | ButtonPressMask | KeyPressMask);
-
-    gc = XCreateGC(display, window, 0, 0);
-//    gc = DefaultGC(dis, screen);
-    
-    Atom WM_DELETE_WINDOW = XInternAtom(display, "WM_DELETE_WINDOW", False);
-    XSetWMProtocols(display, window, &WM_DELETE_WINDOW, 1);
 
     XClearWindow(display, window);
     XMapRaised(display, window);
     
     this->width = screenWidth / settings.resolution;
     this->height = screenHeight / settings.resolution;
-    
     this->position = position;
     fovFactor = 1 / tan(fov / 2);
     region = region_size;
@@ -166,7 +154,6 @@ Camera::~Camera() {
         if (event.type == KeyPress && XLookupString(&event.xkey, text, 255, &key, 0) == 1) if (text[0] == 'q') break;
     }
     
-    XFreeGC(display, gc);
     XDestroyWindow(display, window);
     XCloseDisplay(display);
 }
@@ -182,8 +169,8 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
                     for (int y = minY(); y < maxY(); y++) {
                         Ray ray = getCameraRay(x, y);
                         
-                        if (ray.traceObject(objects) > 0) XSetForeground(display, gc, ray.traceLight(lights, objects).hex());
-                        else XSetForeground(display, gc, 0x000000);
+                        if (ray.traceObject(objects) > 0) XSetForeground(display, gc, ray.traceLight(lights, objects));
+                        else XSetForeground(display, gc, settings.environment_color);
 //                        XDrawPoint(display, window, gc, x, y);
                         XFillRectangle(display, window, gc, x * settings.resolution, y * settings.resolution, settings.resolution, settings.resolution);
                     }
@@ -192,7 +179,7 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
              
             char *str = (char*)malloc(32 * sizeof(char));
             snprintf(str, 32, "Render time: %f sec", (double)(clock() - time) / CLOCKS_PER_SEC);
-            XSetForeground(display, gc, 0x00ff00);
+            XSetForeground(display, gc, Green);
             XDrawString(display, window, gc, 5, 15, str, (int)strlen(str));
             
             break;
@@ -203,7 +190,11 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
 // MARK: -
 
 Ray Camera::getCameraRay(int x, int y) {
+#ifdef using_ncurses
     float u = (4 * (float)x / width - 1) / 2 * width / height;
+#else
+    float u = (2 * (float)x / width - 1) * width / height;
+#endif
     float v = 1 - (2 * (float)y / height);
     
     Vector3 direction{fovFactor, u, v};
@@ -214,7 +205,7 @@ Ray Camera::getCameraRay(int x, int y) {
 
 bool Camera::next() {
     switch (settings.render_pattern) {
-        case 1: // MARK: Spiral
+        case PATTERN_SPIRAL: // MARK: Spiral
             switch (r) {
                 case 0: x += region; break;
                 case 1: y -= region; break;
