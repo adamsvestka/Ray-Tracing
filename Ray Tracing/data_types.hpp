@@ -28,6 +28,8 @@ struct Vector3 {
     Vector3 operator*(float);
     Vector3 operator/(float);
     float operator*(Vector3);
+    void operator+=(Vector3);
+    void operator-=(Vector3);
 };
 
 #define Zero    Vector3{0, 0, 0}

@@ -21,7 +21,7 @@ float Ray::traceObject(std::vector<Shape*> objects) {
     Vector3 increment = direction * settings.step_size;
     
     for (int i = 0; i < settings.repetitions; i++) {
-        position = position + increment;
+        position += increment;
         for (std::vector<Shape*>::iterator it = objects.begin(); it != objects.end(); ++it) {
             if ((*it)->intersects(position)) {
                 object = *it;
@@ -37,6 +37,7 @@ float Ray::traceObject(std::vector<Shape*> objects) {
 Color Ray::traceLight(std::vector<Light> lights, std::vector<Shape*> objects) {
     Vector3 surface_normal = getIntersectingObject()->getNormal(getIntersectionPosition());
     if (settings.render_special == RENDER_NORMALS) return surface_normal.toColor();
+    if (settings.render_special == RENDER_DEPTH) return White * (1 - (position - origin).length() / settings.render_distance);
     
     Color diffuse, specular, reflection;
     diffuse = specular = reflection = Black;

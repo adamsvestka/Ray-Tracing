@@ -48,6 +48,15 @@ float Vector3::operator*(Vector3 v) {
     return this->x * v.x + this->y * v.y + this->z * v.z;
 }
 
+void Vector3::operator+=(Vector3 v) {
+    x = x + v.x; y = y + v.y; z = z + v.z;
+}
+
+void Vector3::operator-=(Vector3 v) {
+    x = x - v.x; y = y - v.y; z = z - v.z;
+}
+
+
 // MARK: - Matrix3x3
 Matrix3x3 Matrix3x3::inverse() {
     Matrix3x3 minors;

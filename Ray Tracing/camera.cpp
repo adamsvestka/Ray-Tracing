@@ -213,6 +213,21 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
                 string time2 = "ETC: " + formatTime(elapsed / region_current * region_count - elapsed);
                 XDrawString(display, window, gc, 5, 45, time2.c_str(), (int)time2.length());
             } while (next());
+
+            XSetForeground(display, gc, Black);
+            XFillRectangle(display, window, gc, 2, 2, 158, 48);
+            
+            XSetForeground(display, gc, Green);
+            
+            float elapsed = (float)(clock() - start) / CLOCKS_PER_SEC;
+            string time = "Render time: " + formatTime(elapsed);
+            XDrawString(display, window, gc, 5, 15, time.c_str(), (int)time.length());
+
+            string str = "Regions: " + to_string(region_current) + "/" + to_string(region_count) + " @ " + to_string(region_size) + " px";
+            XDrawString(display, window, gc, 5, 30, str.c_str(), (int)str.length());
+            
+            string time2 = "ETC: " + formatTime(elapsed / region_current * region_count - elapsed);
+            XDrawString(display, window, gc, 5, 45, time2.c_str(), (int)time2.length());
             
             break;
         }
