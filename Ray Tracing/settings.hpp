@@ -11,7 +11,7 @@
 #include "data_types.hpp"
 
 enum RenderType {
-    RENDER_ALL, RENDER_NORMALS, RENDER_LIGHT
+    RENDER_DEFAULT, RENDER_NORMALS, RENDER_LIGHT, RENDER_SHADOWS
 };
 
 enum RenderPattern {
@@ -23,16 +23,16 @@ struct {
     // MARK: Ray
     int render_distance = 20;
 
-    float step_size = 0.05;
+    float step_size = 0.01;
     
     int repetitions = render_distance / step_size;
     
-    short render_special = RENDER_ALL;
+    short render_special = RENDER_DEFAULT;
     
     // MARK: Camera
     int render_pattern = PATTERN_SPIRAL;
     
-    int resolution = 5;
+    int resolution = 1;
     
     Color environment_color = Gray;
 

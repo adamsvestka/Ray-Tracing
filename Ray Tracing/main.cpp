@@ -25,7 +25,7 @@ int main(int argc, const char * argv[]) {
     
     vector<Shape*> objects;
     objects.push_back(new Sphere({15, 0, -1}, 1, {Magenta, 0.7, 100, 0.003, false}));
-    objects.push_back(new Cube({15, 0, -7}, 5, {Green, 0.6, false, false, 0.6}));
+    objects.push_back(new Cube({15, 0, -7}, 5, {0, -30, 20}, {Green, 0.6, false, false, 0.6}));
     objects.push_back(new Sphere({19, -4, 3}, 2, {White, 0.6, false, false, 0.9}));
     
     vector<Light> lights;

@@ -47,7 +47,10 @@ Color Ray::traceLight(std::vector<Light> lights, std::vector<Shape*> objects) {
         Vector3 vector_to_light = light->getVector(*this);
 
         Ray ray(position, vector_to_light.normal());
-        if (ray.traceObject(objects) > -1) break;
+        if (ray.traceObject(objects) > -1) {
+            if (settings.render_special == RENDER_SHADOWS) diffuse = Red;
+            break;
+        }
         
         float cosine_term = vector_to_light.normal() * surface_normal;
         
@@ -60,7 +63,7 @@ Color Ray::traceLight(std::vector<Light> lights, std::vector<Shape*> objects) {
         }
     }
     
-    if (settings.render_special == RENDER_LIGHT) return (diffuse * object->material.albedo + specular);
+    if (settings.render_special == RENDER_LIGHT || settings.render_special == RENDER_SHADOWS) return (diffuse * object->material.albedo + specular);
     return ((object->material.color * diffuse) * (object->material.albedo * (1 - object->material.Ks)) + (specular * object->material.Ks)) * (1 - object->material.reflection) + reflection * object->material.reflection;
     
     // I = Ka + Ke + sum(Vi * Li * (Kd * max(li . n, 0) + Ks * (max(hi . n, 0))) ^ s) + Ks * Ir;

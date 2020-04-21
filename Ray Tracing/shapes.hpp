@@ -46,9 +46,10 @@ public:
 class Cube : public Shape {
 private:
     float radius;
+    Matrix3x3 rotation, Irotation;
     
 public:
-    Cube(Vector3, float, Material);
+    Cube(Vector3, float, Vector3, Material);
     bool intersects(Vector3);
     Vector3 getNormal(Vector3);
     Vector3 getSurface(Vector3);

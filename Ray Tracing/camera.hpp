@@ -35,7 +35,8 @@ class Camera {
 private:
     Vector3 position;
     float fovFactor;
-    int width, height, x, y, region;
+    int width, height, x, y;
+    int region_size, region_count, region_current;
     int r, l, i;
 #ifndef using_ncurses
     Display *display;

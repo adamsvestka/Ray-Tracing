@@ -34,12 +34,14 @@ Camera::Camera(Vector3 position, int fov, int region_size) {
     this->height = screenHeight;
     this->position = position;
     fovFactor = 1 / tan(fov / 2);
-    region = region_size;
+    this->region_size = region_size;
+    region_count = ceil((float)this->width / region_size) * ceil((float)this->height / region_size);
+    region_current = 0;
     
     switch (settings.render_pattern) {
         case 1:
-            x = round(this->width / region / 2) * region;
-            y = round(this->height / region / 2) * region;
+            x = round(this->width / region_size / 2) * region_size;
+            y = round(this->height / region_size / 2) * region_size;
             r = i = 0;
             l = 1;
             break;
@@ -128,12 +130,14 @@ Camera::Camera(Vector3 position, int fov, int region_size) {
     this->height = screenHeight / settings.resolution;
     this->position = position;
     fovFactor = 1 / tan(fov / 2);
-    region = region_size;
+    this->region_size = region_size;
+    region_count = ceil((float)this->width / region_size) * ceil((float)this->height / region_size);
+    region_current = 0;
     
     switch (settings.render_pattern) {
         case 1:
-            x = round(this->width / region / 2) * region;
-            y = round(this->height / region / 2) * region;
+            x = round(this->width / region_size / 2) * region_size;
+            y = round(this->height / region_size / 2) * region_size;
             r = i = 0;
             l = 1;
             break;
@@ -158,8 +162,26 @@ Camera::~Camera() {
     XCloseDisplay(display);
 }
 
+#include <sstream>
+#include <iomanip>
+
+using namespace std;
+
+string formatTime(float seconds) {
+    int milliseconds = (int)(seconds * 1000) % 1000;
+    seconds = floor(seconds);
+    int minutes = seconds / 60;
+    seconds -= minutes * 60;
+    int hours = minutes / 60;
+    minutes -= hours * 60;
+    
+    stringstream ss;
+    ss << setfill('0') << setw(2) << hours << ':' << setw(2) << minutes << ':' << setw(2) << seconds << '.' << setw(3) << milliseconds;
+    return ss.str();
+}
+
 void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
-    clock_t time = clock();
+    clock_t start = clock();
     while (true) {
         XEvent event;
         XNextEvent(display, &event);
@@ -175,12 +197,22 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
                         XFillRectangle(display, window, gc, x * settings.resolution, y * settings.resolution, settings.resolution, settings.resolution);
                     }
                 }
+                
+                XSetForeground(display, gc, Black);
+                XFillRectangle(display, window, gc, 2, 2, 158, 48);
+                
+                XSetForeground(display, gc, Green);
+                
+                float elapsed = (float)(clock() - start) / CLOCKS_PER_SEC;
+                string time = "Render time: " + formatTime(elapsed);
+                XDrawString(display, window, gc, 5, 15, time.c_str(), (int)time.length());
+
+                string str = "Regions: " + to_string(region_current) + "/" + to_string(region_count) + " @ " + to_string(region_size) + " px";
+                XDrawString(display, window, gc, 5, 30, str.c_str(), (int)str.length());
+                
+                string time2 = "ETC: " + formatTime(elapsed / region_current * region_count - elapsed);
+                XDrawString(display, window, gc, 5, 45, time2.c_str(), (int)time2.length());
             } while (next());
-             
-            char *str = (char*)malloc(32 * sizeof(char));
-            snprintf(str, 32, "Render time: %f sec", (double)(clock() - time) / CLOCKS_PER_SEC);
-            XSetForeground(display, gc, Green);
-            XDrawString(display, window, gc, 5, 15, str, (int)strlen(str));
             
             break;
         }
@@ -204,27 +236,32 @@ Ray Camera::getCameraRay(int x, int y) {
 }
 
 bool Camera::next() {
+    region_current++;
     switch (settings.render_pattern) {
         case PATTERN_SPIRAL: // MARK: Spiral
-            switch (r) {
-                case 0: x += region; break;
-                case 1: y -= region; break;
-                case 2: x -= region; break;
-                case 3: y += region; break;
-            }
-            if (++i >= l) {
-                if (++r % 2 == 0) l++;
-                if (r > 3) r = 0;
-                i = 0;
-            }
+            do {
+                switch (r) {
+                    case 0: x += region_size; break;
+                    case 1: y -= region_size; break;
+                    case 2: x -= region_size; break;
+                    case 3: y += region_size; break;
+                }
+                if (++i >= l) {
+                    if (++r % 2 == 0) l++;
+                    if (r > 3) r = 0;
+                    i = 0;
+                }
+                
+                if (x >= width && y >= height) return false;
+            } while (x >= width || x + region_size <= 0 || y >= height || y + region_size <= 0);
             
-            return x < width || y < height;
+            return true;
             
         default: // MARK: Default
-            x += region;
+            x += region_size;
             if (x >= width) {
                 x = 0;
-                y += region;
+                y += region_size;
             }
             
             return y < height;
@@ -232,6 +269,6 @@ bool Camera::next() {
 }
 
 int Camera::minX() { return fmax(x, 0); };
-int Camera::maxX() { return fmin(x + region, width); };
+int Camera::maxX() { return fmin(x + region_size, width); };
 int Camera::minY() { return fmax(y, 0); };
-int Camera::maxY() { return fmin(y + region, height); };
+int Camera::maxY() { return fmin(y + region_size, height); };
