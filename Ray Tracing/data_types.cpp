@@ -167,3 +167,20 @@ void Color::operator+=(Color c) {
 void Color::operator-=(Color c) {
     *this = *this - c;
 }
+
+
+// MARK: - NeuralNetwork
+NeuralNetwork::NeuralNetwork(vector<vector<float>> nodes) {
+    this->nodes = nodes;
+}
+
+float NeuralNetwork::eval(vector<vector<float>> input) {
+    float d = 0;
+    for (int i = 0; i < nodes.size(); i++) {
+        for (int j = 0; j < nodes.size(); j++) {
+            d += nodes[i][j] * input[i][j];
+        }
+    }
+    
+    return d;
+}

@@ -13,6 +13,8 @@ class Camera;
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <sstream>
+#include <iomanip>
 
 //#define using_ncurses
 #ifdef using_ncurses
@@ -30,14 +32,16 @@ class Camera;
 #include "shapes.hpp"
 #include "light_sources.hpp"
 
+using namespace std;
 
 class Camera {
 private:
     Vector3 position;
     float fovFactor;
     int width, height, x, y;
-    int region_size, region_count, region_current;
+    int region_count, region_current;
     int r, l, i;
+    clock_t time;
 #ifndef using_ncurses
     Display *display;
     Screen *screen;
@@ -47,10 +51,14 @@ private:
 #endif
     
 public:
-    Camera(Vector3, int, int);
+    Camera(Vector3);
     ~Camera();
     
-    void render(std::vector<Shape*>, std::vector<Light>);
+    vector<vector<Color>> preRender(vector<Shape *>, vector<Light>);
+    vector<vector<bool>> processPreRender(vector<vector<Color>>);
+    void renderRegions(vector<Shape *>, vector<Light>, vector<vector<bool>>);
+    void renderInfo();
+    void render(vector<Shape *>, vector<Light>);
     Ray getCameraRay(int, int);
     
     bool next();

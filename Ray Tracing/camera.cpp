@@ -10,7 +10,7 @@
 
 // MARK: - NCURSES
 #ifdef using_ncurses
-Camera::Camera(Vector3 position, int fov, int region_size) {
+Camera::Camera(Vector3 position, int fov, int settings.region_size) {
     float screenHeight, screenWidth;
     
     initscr();
@@ -34,14 +34,14 @@ Camera::Camera(Vector3 position, int fov, int region_size) {
     this->height = screenHeight;
     this->position = position;
     fovFactor = 1 / tan(fov / 2);
-    this->region_size = region_size;
-    region_count = ceil((float)this->width / region_size) * ceil((float)this->height / region_size);
+    this->settings.region_size = settings.region_size;
+    region_count = ceil((float)this->width / settings.region_size) * ceil((float)this->height / settings.region_size);
     region_current = 0;
     
     switch (settings.render_pattern) {
         case 1:
-            x = round(this->width / region_size / 2) * region_size;
-            y = round(this->height / region_size / 2) * region_size;
+            x = round(this->width / settings.region_size / 2) * settings.region_size;
+            y = round(this->height / settings.region_size / 2) * settings.region_size;
             r = i = 0;
             l = 1;
             break;
@@ -111,7 +111,7 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
 
 // MARK: - X11
 #else
-Camera::Camera(Vector3 position, int fov, int region_size) {
+Camera::Camera(Vector3 position) {
     float screenHeight, screenWidth;
     
     display = XOpenDisplay(NULL);
@@ -129,15 +129,14 @@ Camera::Camera(Vector3 position, int fov, int region_size) {
     this->width = screenWidth / settings.resolution;
     this->height = screenHeight / settings.resolution;
     this->position = position;
-    fovFactor = 1 / tan(fov / 2);
-    this->region_size = region_size;
-    region_count = ceil((float)this->width / region_size) * ceil((float)this->height / region_size);
+    fovFactor = 1 / tan(settings.fov / 2);
+    region_count = ceil((float)this->width / settings.region_size) * ceil((float)this->height / settings.region_size);
     region_current = 0;
     
     switch (settings.render_pattern) {
         case 1:
-            x = round(this->width / region_size / 2) * region_size;
-            y = round(this->height / region_size / 2) * region_size;
+            x = round(this->width / settings.region_size / 2) * settings.region_size;
+            y = round(this->height / settings.region_size / 2) * settings.region_size;
             r = i = 0;
             l = 1;
             break;
@@ -162,11 +161,6 @@ Camera::~Camera() {
     XCloseDisplay(display);
 }
 
-#include <sstream>
-#include <iomanip>
-
-using namespace std;
-
 string formatTime(float seconds) {
     int milliseconds = (int)(seconds * 1000) % 1000;
     seconds = floor(seconds);
@@ -180,54 +174,115 @@ string formatTime(float seconds) {
     return ss.str();
 }
 
+vector<vector<Color>> Camera::preRender(vector<Shape*> objects, vector<Light> lights) {
+    const int regions_x = ceil((float)width / settings.region_size);
+    const int regions_y = ceil((float)height / settings.region_size);
+    
+    const auto temp = settings.step_size;
+    settings.step_size = settings.probe_step_size;
+    
+    vector<vector<Color>> buffer(regions_x);
+    for (int x = 0; x < regions_x; x++) {
+        buffer[x].resize(regions_y);
+        for (int y = 0; y < regions_y; y++) {
+            Ray ray = getCameraRay((x + 0.5) * settings.region_size, (y + 0.5) * settings.region_size);
+            
+            if (ray.traceObject(objects) > 0) buffer[x][y] = ray.traceLight(lights, objects);
+            else buffer[x][y] = settings.environment_color;
+            
+            XSetForeground(display, gc, buffer[x][y]);
+            XFillRectangle(display, window, gc, x * settings.resolution * settings.region_size, y * settings.resolution * settings.region_size, settings.resolution * settings.region_size, settings.resolution * settings.region_size);
+        }
+    }
+    settings.step_size = temp;
+    
+    return buffer;
+}
+
+vector<vector<bool>> Camera::processPreRender(vector<vector<Color>> buffer) {
+    const int regions_x = (int)buffer.size();
+    const int regions_y = (int)buffer[0].size();
+    vector<vector<bool>> processed(regions_x);
+    
+    vector<vector<float>> nodes = {{0, -0.25, 0}, {-0.25, 1, -0.25}, {0, -0.25, 0}};
+    NeuralNetwork nn(nodes);
+    
+    for (int x = 0; x < regions_x; x++) {
+        processed[x].resize(regions_y);
+        for (int y = 0; y < regions_y; y++) {
+            vector<vector<float>> matrixRed(3);
+            for (int i = 0; i < 3; i++) {
+                matrixRed[i].resize(3);
+                for (int j = 0; j < 3; j++) matrixRed[i][j] = buffer[min(max(x + i - 1, 0), regions_x - 1)][min(max(y + j - 1, 0), regions_y - 1)].r;
+            }
+            
+            const float d = abs(nn.eval(matrixRed));
+            if (d == 0) processed[x][y] = false;
+            else {
+                processed[x][y] = true;
+                
+                XSetForeground(display, gc, Red);
+                string str = to_string(d);
+                XDrawString(display, window, gc, x * settings.resolution * settings.region_size, y * settings.resolution * settings.region_size + 15, str.c_str(), 5);
+            }
+        }
+    }
+    
+    return processed;
+}
+
+void Camera::renderRegions(vector<Shape *> objects, vector<Light> lights, vector<vector<bool>> mask) {
+    do {
+        for (int x = minX(); x < maxX(); x++) {
+            for (int y = minY(); y < maxY(); y++) {
+                if (!mask[x/settings.region_size][y/settings.region_size]) continue;
+                Ray ray = getCameraRay(x, y);
+                
+                if (ray.traceObject(objects) > 0) XSetForeground(display, gc, ray.traceLight(lights, objects));
+                else XSetForeground(display, gc, settings.environment_color);
+                XFillRectangle(display, window, gc, x * settings.resolution, y * settings.resolution, settings.resolution, settings.resolution);
+            }
+        }
+        
+        renderInfo();
+    } while (next());
+}
+
+void Camera::renderInfo() {
+    XSetForeground(display, gc, Black);
+    XFillRectangle(display, window, gc, 2, 2, 158, 48);
+    
+    XSetForeground(display, gc, Green);
+    
+    const float elapsed = (float)(clock() - time) / CLOCKS_PER_SEC;
+    string time = "Render time: " + formatTime(elapsed);
+    XDrawString(display, window, gc, 5, 15, time.c_str(), (int)time.length());
+
+    string str = "Regions: " + to_string(region_current) + "/" + to_string(region_count) + " @ " + to_string(settings.region_size) + " px";
+    XDrawString(display, window, gc, 5, 30, str.c_str(), (int)str.length());
+    
+    string time2 = "ETC: " + formatTime(elapsed / region_current * region_count - elapsed);
+    XDrawString(display, window, gc, 5, 45, time2.c_str(), (int)time2.length());
+}
+
 void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
-    clock_t start = clock();
     while (true) {
         XEvent event;
         XNextEvent(display, &event);
         if (event.type == Expose && event.xexpose.count == 0) {
-            do {
-                for (int x = minX(); x < maxX(); x++) {
-                    for (int y = minY(); y < maxY(); y++) {
-                        Ray ray = getCameraRay(x, y);
-                        
-                        if (ray.traceObject(objects) > 0) XSetForeground(display, gc, ray.traceLight(lights, objects));
-                        else XSetForeground(display, gc, settings.environment_color);
-//                        XDrawPoint(display, window, gc, x, y);
-                        XFillRectangle(display, window, gc, x * settings.resolution, y * settings.resolution, settings.resolution, settings.resolution);
-                    }
-                }
-                
-                XSetForeground(display, gc, Black);
-                XFillRectangle(display, window, gc, 2, 2, 158, 48);
-                
-                XSetForeground(display, gc, Green);
-                
-                float elapsed = (float)(clock() - start) / CLOCKS_PER_SEC;
-                string time = "Render time: " + formatTime(elapsed);
-                XDrawString(display, window, gc, 5, 15, time.c_str(), (int)time.length());
-
-                string str = "Regions: " + to_string(region_current) + "/" + to_string(region_count) + " @ " + to_string(region_size) + " px";
-                XDrawString(display, window, gc, 5, 30, str.c_str(), (int)str.length());
-                
-                string time2 = "ETC: " + formatTime(elapsed / region_current * region_count - elapsed);
-                XDrawString(display, window, gc, 5, 45, time2.c_str(), (int)time2.length());
-            } while (next());
-
-            XSetForeground(display, gc, Black);
-            XFillRectangle(display, window, gc, 2, 2, 158, 48);
+            time = clock();
             
-            XSetForeground(display, gc, Green);
+            // Aproximate regions
+            const auto buffer = preRender(objects, lights);
             
-            float elapsed = (float)(clock() - start) / CLOCKS_PER_SEC;
-            string time = "Render time: " + formatTime(elapsed);
-            XDrawString(display, window, gc, 5, 15, time.c_str(), (int)time.length());
-
-            string str = "Regions: " + to_string(region_current) + "/" + to_string(region_count) + " @ " + to_string(region_size) + " px";
-            XDrawString(display, window, gc, 5, 30, str.c_str(), (int)str.length());
+            // Process what to render
+            const auto mask = processPreRender(buffer);
             
-            string time2 = "ETC: " + formatTime(elapsed / region_current * region_count - elapsed);
-            XDrawString(display, window, gc, 5, 45, time2.c_str(), (int)time2.length());
+            // Render
+            renderRegions(objects, lights, mask);
+            
+            // Render stats
+            renderInfo();
             
             break;
         }
@@ -256,10 +311,10 @@ bool Camera::next() {
         case PATTERN_SPIRAL: // MARK: Spiral
             do {
                 switch (r) {
-                    case 0: x += region_size; break;
-                    case 1: y -= region_size; break;
-                    case 2: x -= region_size; break;
-                    case 3: y += region_size; break;
+                    case 0: x += settings.region_size; break;
+                    case 1: y -= settings.region_size; break;
+                    case 2: x -= settings.region_size; break;
+                    case 3: y += settings.region_size; break;
                 }
                 if (++i >= l) {
                     if (++r % 2 == 0) l++;
@@ -268,15 +323,15 @@ bool Camera::next() {
                 }
                 
                 if (x >= width && y >= height) return false;
-            } while (x >= width || x + region_size <= 0 || y >= height || y + region_size <= 0);
+            } while (x >= width || x + settings.region_size <= 0 || y >= height || y + settings.region_size <= 0);
             
             return true;
             
         default: // MARK: Default
-            x += region_size;
+            x += settings.region_size;
             if (x >= width) {
                 x = 0;
-                y += region_size;
+                y += settings.region_size;
             }
             
             return y < height;
@@ -284,6 +339,6 @@ bool Camera::next() {
 }
 
 int Camera::minX() { return fmax(x, 0); };
-int Camera::maxX() { return fmin(x + region_size, width); };
+int Camera::maxX() { return fmin(x + settings.region_size, width); };
 int Camera::minY() { return fmax(y, 0); };
-int Camera::maxY() { return fmin(y + region_size, height); };
+int Camera::maxY() { return fmin(y + settings.region_size, height); };

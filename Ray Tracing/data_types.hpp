@@ -14,6 +14,9 @@ struct Material;
 #pragma once
 
 #include <cmath>
+#include <vector>
+
+using namespace std;
 
 struct Vector3 {
     float x, y, z;
@@ -87,6 +90,14 @@ struct Color {
 #define Purple      Color{0.6, 0.1, 1.0}
 #define Magenta     Color{1.0, 0.1, 1.0}
 #define Pink        Color{1.0, 0.4, 0.7}
+
+struct NeuralNetwork {
+    vector<vector<float>> nodes;
+    
+    NeuralNetwork(vector<vector<float>>);
+    
+    float eval(vector<vector<float>>);
+};
 
 struct Material {
     Color color;

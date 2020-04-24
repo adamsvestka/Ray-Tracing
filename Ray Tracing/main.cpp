@@ -20,8 +20,10 @@
 
 using namespace std;
 
+Settings settings;
+
 int main(int argc, const char * argv[]) {
-    Camera camera({0, 0, 0}, 120, 50);
+    Camera camera({0, 0, 0});
     
     vector<Shape*> objects;
     objects.push_back(new Sphere({15, 0, -1}, 1, {Magenta, 0.7, 100, 0.003, false}));

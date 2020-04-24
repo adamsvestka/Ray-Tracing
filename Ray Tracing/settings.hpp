@@ -18,7 +18,7 @@ enum RenderPattern {
     PATTERN_DEFAULT, PATTERN_SPIRAL
 };
 
-struct {
+struct Settings {
     
     // MARK: Ray
     int render_distance = 20;
@@ -32,10 +32,18 @@ struct {
     // MARK: Camera
     int render_pattern = PATTERN_SPIRAL;
     
-    int resolution = 5;
+    int resolution = 2;
+    
+    int fov = 120;
+    
+    int region_size = 50;
+    
+    float probe_step_size = 0.1;
     
     Color environment_color = Gray;
 
     float environment_intensity = 0.4;
     
-} settings;
+};
+
+extern Settings settings;
