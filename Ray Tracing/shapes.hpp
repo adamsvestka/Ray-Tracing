@@ -20,11 +20,13 @@ class Cube;
 class Shape {
 protected:
     Vector3 center;
+    Matrix3x3 rotation, Irotation;
     
 public:
     Material material;
     
     Vector3 getCenter();
+    Matrix3x3 getRotation();
     virtual bool intersects(Vector3) = 0;
     virtual Vector3 getNormal(Vector3) = 0;
     virtual Vector3 getSurface(Vector3) = 0;
@@ -46,7 +48,6 @@ public:
 class Cube : public Shape {
 private:
     float radius;
-    Matrix3x3 rotation, Irotation;
     
 public:
     Cube(Vector3, float, Vector3, Material);

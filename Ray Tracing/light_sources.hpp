@@ -25,6 +25,6 @@ public:
     
     Light(Vector3, Color, int);
     
-    Vector3 getVector(Ray);
+    Vector3 getVector(Vector3);
     int getIntensity();
 };

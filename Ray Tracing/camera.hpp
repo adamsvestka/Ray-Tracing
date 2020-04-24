@@ -54,12 +54,14 @@ public:
     Camera(Vector3);
     ~Camera();
     
-    vector<vector<Color>> preRender(vector<Shape *>, vector<Light>);
-    vector<vector<bool>> processPreRender(vector<vector<Color>>);
+    void drawPixel(int, int, int, Intersection);
+    vector<vector<float>> preRender(vector<Shape *>, vector<Light>);
+    vector<vector<bool>> processPreRender(vector<vector<float>>);
     void renderRegions(vector<Shape *>, vector<Light>, vector<vector<bool>>);
     void renderInfo();
     void render(vector<Shape *>, vector<Light>);
-    Ray getCameraRay(int, int);
+//    Ray getCameraRay(int, int);
+    Vector3 getCameraRay(int, int);
     
     bool next();
     int minX();

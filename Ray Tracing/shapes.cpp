@@ -16,10 +16,13 @@ Sphere::Sphere(Vector3 position, float radius, Material material) {
     this->center = position;
     this->radius = radius;
     this->material = material;
+    rotation = Irotation = Identity;
 }
 
-bool Sphere::intersects(Vector3 point) {
-    return abs((point - center).length()) < radius;
+bool Sphere::intersects(Vector3 d) {
+//    Vector3 d = point - center;
+    
+    return abs(d.length()) < radius;
 }
 
 Vector3 Sphere::getNormal(Vector3 point) {
@@ -41,8 +44,10 @@ Cube::Cube(Vector3 position, float radius, Vector3 angles, Material material) {
     Irotation = rotation.inverse();
 }
 
-bool Cube::intersects(Vector3 point) {
-    Vector3 d = rotation * (point - center);
+Matrix3x3 Shape::getRotation() { return rotation; }
+
+bool Cube::intersects(Vector3 d) {
+//    Vector3 d = rotation * (point - center);
     
     return abs(d.x) < radius && abs(d.y) < radius && abs(d.z) < radius;
 }
@@ -56,7 +61,6 @@ Vector3 Cube::getNormal(Vector3 point) {
 }
 
 Vector3 Cube::getSurface(Vector3 point) {
-//    return point;
     Vector3 d = rotation * (point - center);
     
     if (d.x - settings.step_size < -radius) d.x = -radius;

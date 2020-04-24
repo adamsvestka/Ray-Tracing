@@ -130,7 +130,7 @@ Camera::Camera(Vector3 position) {
     this->height = screenHeight / settings.resolution;
     this->position = position;
     fovFactor = 1 / tan(settings.fov / 2);
-    region_count = ceil((float)this->width / settings.region_size) * ceil((float)this->height / settings.region_size);
+    region_count = 0;
     region_current = 0;
     
     switch (settings.render_pattern) {
@@ -174,24 +174,36 @@ string formatTime(float seconds) {
     return ss.str();
 }
 
-vector<vector<Color>> Camera::preRender(vector<Shape*> objects, vector<Light> lights) {
+void Camera::drawPixel(int x, int y, int s, Intersection data) {
+    switch (settings.render_mode) {
+        case RENDER_SHADED: XSetForeground(display, gc, data.shaded); break;
+        case RENDER_COLOR: XSetForeground(display, gc, data.color); break;
+        case RENDER_LIGHT: XSetForeground(display, gc, data.hit ? data.light : Black); break;
+        case RENDER_SHADOWS: XSetForeground(display, gc, data.hit ? (data.shadow ? Red : data.light) : Black); break;
+        case RENDER_NORMALS: XSetForeground(display, gc, data.hit ? data.normal.toColor() : Black); break;
+        case RENDER_DEPTH: XSetForeground(display, gc, White * (1 - data.distance / settings.render_distance)); break;
+        default: XSetForeground(display, gc, data.shaded); break;
+    }
+    
+    XFillRectangle(display, window, gc, x * settings.resolution * s, y * settings.resolution * s, settings.resolution * s, settings.resolution * s);
+}
+
+vector<vector<float>> Camera::preRender(vector<Shape*> objects, vector<Light> lights) {
     const int regions_x = ceil((float)width / settings.region_size);
     const int regions_y = ceil((float)height / settings.region_size);
     
     const auto temp = settings.step_size;
     settings.step_size = settings.probe_step_size;
     
-    vector<vector<Color>> buffer(regions_x);
+    vector<vector<float>> buffer(regions_x);
     for (int x = 0; x < regions_x; x++) {
         buffer[x].resize(regions_y);
         for (int y = 0; y < regions_y; y++) {
-            Ray ray = getCameraRay((x + 0.5) * settings.region_size, (y + 0.5) * settings.region_size);
+            auto ray = castRay(position, getCameraRay((x + 0.5) * settings.region_size, (y + 0.5) * settings.region_size), objects, lights);
             
-            if (ray.traceObject(objects) > 0) buffer[x][y] = ray.traceLight(lights, objects);
-            else buffer[x][y] = settings.environment_color;
+            buffer[x][y] = 1 - ray.distance / settings.render_distance;
             
-            XSetForeground(display, gc, buffer[x][y]);
-            XFillRectangle(display, window, gc, x * settings.resolution * settings.region_size, y * settings.resolution * settings.region_size, settings.resolution * settings.region_size, settings.resolution * settings.region_size);
+            drawPixel(x, y, settings.region_size, ray);
         }
     }
     settings.step_size = temp;
@@ -199,31 +211,52 @@ vector<vector<Color>> Camera::preRender(vector<Shape*> objects, vector<Light> li
     return buffer;
 }
 
-vector<vector<bool>> Camera::processPreRender(vector<vector<Color>> buffer) {
+vector<vector<bool>> Camera::processPreRender(vector<vector<float>> buffer) {
     const int regions_x = (int)buffer.size();
     const int regions_y = (int)buffer[0].size();
     vector<vector<bool>> processed(regions_x);
     
-    vector<vector<float>> nodes = {{0, -0.25, 0}, {-0.25, 1, -0.25}, {0, -0.25, 0}};
+    vector<vector<float>> nodes = {{0, 1, 0}, {1, 1, 1}, {0, 1, 0}};
     NeuralNetwork nn(nodes);
     
     for (int x = 0; x < regions_x; x++) {
         processed[x].resize(regions_y);
         for (int y = 0; y < regions_y; y++) {
-            vector<vector<float>> matrixRed(3);
+            vector<vector<float>> matrixDepth(3);
             for (int i = 0; i < 3; i++) {
-                matrixRed[i].resize(3);
-                for (int j = 0; j < 3; j++) matrixRed[i][j] = buffer[min(max(x + i - 1, 0), regions_x - 1)][min(max(y + j - 1, 0), regions_y - 1)].r;
+                matrixDepth[i].resize(3);
+                for (int j = 0; j < 3; j++) matrixDepth[i][j] = buffer[min(max(x + i - 1, 0), regions_x - 1)][min(max(y + j - 1, 0), regions_y - 1)];
             }
             
-            const float d = abs(nn.eval(matrixRed));
+            const float d = abs(nn.eval(matrixDepth));
             if (d == 0) processed[x][y] = false;
             else {
                 processed[x][y] = true;
+                region_count++;
+
+                XSetForeground(display, gc, Gray);
+                const auto size = 0.3;
                 
-                XSetForeground(display, gc, Red);
-                string str = to_string(d);
-                XDrawString(display, window, gc, x * settings.resolution * settings.region_size, y * settings.resolution * settings.region_size + 15, str.c_str(), 5);
+                XPoint points[4][3] = {{
+                    {(short)((x * settings.resolution + size) * settings.region_size), (short)(y * settings.resolution * settings.region_size)},
+                    {(short)(x * settings.resolution * settings.region_size), (short)(y * settings.resolution * settings.region_size)},
+                    {(short)(x * settings.resolution * settings.region_size), (short)((y * settings.resolution + size) * settings.region_size)}
+                }, {
+                    {(short)(((x + 1) * settings.resolution - size) * (settings.region_size - 1.f/x)), (short)(y * settings.resolution * settings.region_size)},
+                    {(short)((x + 1) * settings.resolution * (settings.region_size - 1.f/x)), (short)(y * settings.resolution * settings.region_size)},
+                    {(short)((x + 1) * settings.resolution * (settings.region_size - 1.f/x)), (short)((y * settings.resolution + size) * settings.region_size)}
+                }, {
+                    {(short)((x * settings.resolution + size) * settings.region_size), (short)((y + 1) * settings.resolution * (settings.region_size - 1.f/y))},
+                    {(short)(x * settings.resolution * settings.region_size), (short)((y + 1) * settings.resolution * (settings.region_size - 1.f/y))},
+                    {(short)(x * settings.resolution * settings.region_size), (short)(((y + 1) * settings.resolution - size) * (settings.region_size - 1.f/y))}
+                }, {
+                    {(short)(((x + 1) * settings.resolution - size) * (settings.region_size - 1.f/x)), (short)((y + 1) * settings.resolution * (settings.region_size - 1.f/y))},
+                    {(short)((x + 1) * settings.resolution * (settings.region_size - 1.f/x)), (short)((y + 1) * settings.resolution * (settings.region_size - 1.f/y))},
+                    {(short)((x + 1) * settings.resolution * (settings.region_size - 1.f/x)), (short)(((y + 1) * settings.resolution - size) * (settings.region_size - 1.f/y))}
+                }};
+                
+                int npoints = sizeof(points[0]) / sizeof(XPoint);
+                for (int i = 0; i < 4; i++) XDrawLines(display, window, gc, points[i], npoints, CoordModeOrigin);
             }
         }
     }
@@ -233,14 +266,14 @@ vector<vector<bool>> Camera::processPreRender(vector<vector<Color>> buffer) {
 
 void Camera::renderRegions(vector<Shape *> objects, vector<Light> lights, vector<vector<bool>> mask) {
     do {
+        if (!mask[minX()/settings.region_size][minY()/settings.region_size]) continue;
+        region_current++;
+        
         for (int x = minX(); x < maxX(); x++) {
             for (int y = minY(); y < maxY(); y++) {
-                if (!mask[x/settings.region_size][y/settings.region_size]) continue;
-                Ray ray = getCameraRay(x, y);
+                auto ray = castRay(position, getCameraRay(x, y), objects, lights);
                 
-                if (ray.traceObject(objects) > 0) XSetForeground(display, gc, ray.traceLight(lights, objects));
-                else XSetForeground(display, gc, settings.environment_color);
-                XFillRectangle(display, window, gc, x * settings.resolution, y * settings.resolution, settings.resolution, settings.resolution);
+                drawPixel(x, y, 1, ray);
             }
         }
         
@@ -291,22 +324,28 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
 #endif
 // MARK: -
 
-Ray Camera::getCameraRay(int x, int y) {
-#ifdef using_ncurses
-    float u = (4 * (float)x / width - 1) / 2 * width / height;
-#else
+//Ray Camera::getCameraRay(int x, int y) {
+//#ifdef using_ncurses
+//    float u = (4 * (float)x / width - 1) / 2 * width / height;
+//#else
+//    float u = (2 * (float)x / width - 1) * width / height;
+//#endif
+//    float v = 1 - (2 * (float)y / height);
+//
+//    Vector3 direction{fovFactor, u, v};
+//    Ray ray(position, direction.normal());
+//
+//    return ray;
+//}
+
+Vector3 Camera::getCameraRay(int x, int y) {
     float u = (2 * (float)x / width - 1) * width / height;
-#endif
     float v = 1 - (2 * (float)y / height);
     
-    Vector3 direction{fovFactor, u, v};
-    Ray ray(position, direction.normal());
-    
-    return ray;
+    return Vector3{fovFactor, u, v}.normal();
 }
 
 bool Camera::next() {
-    region_current++;
     switch (settings.render_pattern) {
         case PATTERN_SPIRAL: // MARK: Spiral
             do {

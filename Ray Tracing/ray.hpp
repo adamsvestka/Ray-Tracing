@@ -18,18 +18,20 @@ class Ray;
 #include "shapes.hpp"
 #include "light_sources.hpp"
 
-class Ray {
-private:
-    Vector3 origin, direction, position;
-    Shape *object;
+using namespace std;
+
+struct Intersection {
+    bool hit;
+    Vector3 position;
     float distance;
-    
-public:
-    Ray(Vector3, Vector3);
-    
-    Vector3 getIntersectionPosition();
-    Shape *getIntersectingObject();
-    
-    float traceObject(std::vector<Shape*>);
-    Color traceLight(std::vector<Light>, std::vector<Shape*>);
+    Shape *object;
+
+    Color color;
+    Vector3 normal;
+    float light;
+    bool shadow, diffuse, specular, reflection, refraction;
+
+    Color shaded;
 };
+
+Intersection castRay(Vector3, Vector3, vector<Shape *>, vector<Light>);

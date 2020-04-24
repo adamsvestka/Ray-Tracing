@@ -11,7 +11,7 @@
 #include "data_types.hpp"
 
 enum RenderType {
-    RENDER_DEFAULT, RENDER_NORMALS, RENDER_LIGHT, RENDER_SHADOWS, RENDER_DEPTH
+    RENDER_SHADED, RENDER_COLOR, RENDER_LIGHT, RENDER_SHADOWS, RENDER_NORMALS, RENDER_DEPTH
 };
 
 enum RenderPattern {
@@ -27,7 +27,7 @@ struct Settings {
     
     int repetitions = render_distance / step_size;
     
-    short render_special = RENDER_DEFAULT;
+    short render_mode = RENDER_SHADED;
     
     // MARK: Camera
     int render_pattern = PATTERN_SPIRAL;
