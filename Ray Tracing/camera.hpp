@@ -16,14 +16,9 @@ class Camera;
 #include <sstream>
 #include <iomanip>
 
-//#define using_ncurses
-#ifdef using_ncurses
-#include <ncurses.h>
-#else
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
-#endif
 
 #include "settings.hpp"
 
@@ -57,10 +52,9 @@ public:
     void drawPixel(int, int, int, Intersection);
     vector<vector<float>> preRender(vector<Shape *>, vector<Light>);
     vector<vector<bool>> processPreRender(vector<vector<float>>);
-    void renderRegions(vector<Shape *>, vector<Light>, vector<vector<bool>>);
     void renderInfo();
+    void renderRegions(vector<Shape *>, vector<Light>, vector<vector<bool>>);
     void render(vector<Shape *>, vector<Light>);
-//    Ray getCameraRay(int, int);
     Vector3 getCameraRay(int, int);
     
     bool next();

@@ -16,7 +16,6 @@ float Vector3::length() {
 
 Color Vector3::toColor() {
     const float len = length();
-//    return Color(x / len, y / len, z / len);
     return Color(x > 0 ? x / len : -x / len, y > 0 ? y / len : -y / len, z > 0 ? z / len : -z / len);
 }
 
@@ -128,9 +127,6 @@ Color::Color() {
 }
 
 Color::Color(float r, float g, float b) {
-//    this->r = fmin(fmax(r, 0.0), 1.0);
-//    this->g = fmin(fmax(g, 0.0), 1.0);
-//    this->b = fmin(fmax(b, 0.0), 1.0);
     this->r = r;
     this->g = g;
     this->b = b;

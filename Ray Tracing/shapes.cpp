@@ -10,6 +10,8 @@
 
 Vector3 Shape::getCenter() { return center; };
 
+Matrix3x3 Shape::getRotation() { return rotation; }
+
 
 // MARK: - Sphere
 Sphere::Sphere(Vector3 position, float radius, Material material) {
@@ -20,8 +22,6 @@ Sphere::Sphere(Vector3 position, float radius, Material material) {
 }
 
 bool Sphere::intersects(Vector3 d) {
-//    Vector3 d = point - center;
-    
     return abs(d.length()) < radius;
 }
 
@@ -44,11 +44,7 @@ Cube::Cube(Vector3 position, float radius, Vector3 angles, Material material) {
     Irotation = rotation.inverse();
 }
 
-Matrix3x3 Shape::getRotation() { return rotation; }
-
 bool Cube::intersects(Vector3 d) {
-//    Vector3 d = rotation * (point - center);
-    
     return abs(d.x) < radius && abs(d.y) < radius && abs(d.z) < radius;
 }
 

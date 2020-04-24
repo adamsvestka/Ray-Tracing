@@ -8,109 +8,6 @@
 
 #include "camera.hpp"
 
-// MARK: - NCURSES
-#ifdef using_ncurses
-Camera::Camera(Vector3 position, int fov, int settings.region_size) {
-    float screenHeight, screenWidth;
-    
-    initscr();
-    cbreak();
-    noecho();
-//    nodelay(stdscr, TRUE);
-    keypad(stdscr, TRUE);
-    curs_set(0);
-    start_color();
-    getmaxyx(stdscr, screenHeight, screenWidth);
-
-    init_pair(0, COLOR_WHITE, COLOR_BLACK);
-    init_pair(1, COLOR_WHITE, COLOR_WHITE);
-    
-    attrset(COLOR_PAIR(1));
-    for (int x = 0; x < screenWidth; x++) for (int y = 0; y < screenHeight; y++) mvaddch(y, x, ' ');
-    refresh();
-    attrset(COLOR_PAIR(0));
-    
-    this->width = screenWidth / 2;
-    this->height = screenHeight;
-    this->position = position;
-    fovFactor = 1 / tan(fov / 2);
-    this->settings.region_size = settings.region_size;
-    region_count = ceil((float)this->width / settings.region_size) * ceil((float)this->height / settings.region_size);
-    region_current = 0;
-    
-    switch (settings.render_pattern) {
-        case 1:
-            x = round(this->width / settings.region_size / 2) * settings.region_size;
-            y = round(this->height / settings.region_size / 2) * settings.region_size;
-            r = i = 0;
-            l = 1;
-            break;
-            
-        default:
-            x = y = 0;
-            break;
-    }
-}
-
-Camera::~Camera() {
-    while (getch() != 'q');
-    
-    endwin();
-}
-
-//const char *intensity = " .:-=+*#%@";
-//const char *intensity = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
-// 21 M
-// 20 W8B
-// 19 &
-// 18 #$
-// 17 mwdb%
-// 16 XQZ
-// 15 Uqpkh
-// 14 0O@
-// 13 I1nua*
-// 12 lrxzYJCo
-// 11 itfv
-// 10 ?][}{L
-// 9 ><+)(jc
-// 8 ^|\/
-// 7 "!
-// 5 :;~-
-// 3 '
-// 2 .`,
-// 0 _
-const char *intensity = " .':\"^>?ilI0UXm#&WM";
-//const char *intensity = " _.';:\"!^>?ilI0UXm#&WM";
-const unsigned short depth = strlen(intensity);
-void pixel(int x, int y, float power) {
-    int i = floor(power * depth);
-    i = max(min(i, depth - 1), 0);
-
-    mvaddch(y, 2 * x, intensity[i]);
-    mvaddch(y, 2 * x + 1, intensity[i]);
-}
-
-void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
-    clock_t time = clock();
-    do {
-        for (int x = minX(); x < maxX(); x++) {
-            for (int y = minY(); y < maxY(); y++) {
-                Ray ray = getCameraRay(x, y);
-                if (ray.traceObject(objects) > 0) {
-                    pixel(x, y, ray.traceLight(lights, objects));
-                } else pixel(x, y, Color{0, 0, 0});
-            }
-        }
-        refresh();
-    } while (next());
-    
-    mvprintw(0, 0, "Render time: %f", (double)(clock() - time) / CLOCKS_PER_SEC);
-    
-    refresh();
-}
-
-// MARK: - X11
-#else
 Camera::Camera(Vector3 position) {
     float screenHeight, screenWidth;
     
@@ -161,6 +58,7 @@ Camera::~Camera() {
     XCloseDisplay(display);
 }
 
+// MARK: - Helper functions
 string formatTime(float seconds) {
     int milliseconds = (int)(seconds * 1000) % 1000;
     seconds = floor(seconds);
@@ -188,6 +86,7 @@ void Camera::drawPixel(int x, int y, int s, Intersection data) {
     XFillRectangle(display, window, gc, x * settings.resolution * s, y * settings.resolution * s, settings.resolution * s, settings.resolution * s);
 }
 
+// MARK: - Preprocessing
 vector<vector<float>> Camera::preRender(vector<Shape*> objects, vector<Light> lights) {
     const int regions_x = ceil((float)width / settings.region_size);
     const int regions_y = ceil((float)height / settings.region_size);
@@ -264,23 +163,7 @@ vector<vector<bool>> Camera::processPreRender(vector<vector<float>> buffer) {
     return processed;
 }
 
-void Camera::renderRegions(vector<Shape *> objects, vector<Light> lights, vector<vector<bool>> mask) {
-    do {
-        if (!mask[minX()/settings.region_size][minY()/settings.region_size]) continue;
-        region_current++;
-        
-        for (int x = minX(); x < maxX(); x++) {
-            for (int y = minY(); y < maxY(); y++) {
-                auto ray = castRay(position, getCameraRay(x, y), objects, lights);
-                
-                drawPixel(x, y, 1, ray);
-            }
-        }
-        
-        renderInfo();
-    } while (next());
-}
-
+// MARK: - Rendering
 void Camera::renderInfo() {
     XSetForeground(display, gc, Black);
     XFillRectangle(display, window, gc, 2, 2, 158, 48);
@@ -296,6 +179,23 @@ void Camera::renderInfo() {
     
     string time2 = "ETC: " + formatTime(elapsed / region_current * region_count - elapsed);
     XDrawString(display, window, gc, 5, 45, time2.c_str(), (int)time2.length());
+}
+
+void Camera::renderRegions(vector<Shape *> objects, vector<Light> lights, vector<vector<bool>> mask) {
+    do {
+        if (!mask[minX()/settings.region_size][minY()/settings.region_size]) continue;
+        region_current++;
+        
+        for (int x = minX(); x < maxX(); x++) {
+            for (int y = minY(); y < maxY(); y++) {
+                auto ray = castRay(position, getCameraRay(x, y), objects, lights);
+                
+                drawPixel(x, y, 1, ray);
+            }
+        }
+        
+        renderInfo();
+    } while (next());
 }
 
 void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
@@ -321,23 +221,8 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
         }
     }
 }
-#endif
-// MARK: -
 
-//Ray Camera::getCameraRay(int x, int y) {
-//#ifdef using_ncurses
-//    float u = (4 * (float)x / width - 1) / 2 * width / height;
-//#else
-//    float u = (2 * (float)x / width - 1) * width / height;
-//#endif
-//    float v = 1 - (2 * (float)y / height);
-//
-//    Vector3 direction{fovFactor, u, v};
-//    Ray ray(position, direction.normal());
-//
-//    return ray;
-//}
-
+// MARK: - Region management
 Vector3 Camera::getCameraRay(int x, int y) {
     float u = (2 * (float)x / width - 1) * width / height;
     float v = 1 - (2 * (float)y / height);
