@@ -25,7 +25,7 @@ struct Settings {
     
     float probe_step_size = 0.1;
     
-    float quick_step_size = 0.1;
+    float quick_step_size = 0.05;
     
     float precise_step_size = 0.01;
     
@@ -42,7 +42,7 @@ struct Settings {
     
     short field_of_view = 120;
     
-    short render_region_size = 25;
+    short render_region_size = 20;
     
     Color environment_color = Gray;
 

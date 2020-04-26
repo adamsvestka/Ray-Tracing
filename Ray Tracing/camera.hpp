@@ -35,15 +35,16 @@ private:
     float fovFactor;
     int width, height, x, y;
     int region_count, region_current;
-    int r, l, i;
     clock_t time;
-#ifndef using_ncurses
+    
+    int r, l, i;
+    int minX, maxX, minY, maxY;
+    
     Display *display;
     Screen *screen;
     int scr;
     Window window;
     GC gc;
-#endif
     
 public:
     Camera(Vector3);
@@ -53,13 +54,10 @@ public:
     vector<vector<Intersection>> preRender(vector<Shape *>, vector<Light>);
     vector<vector<short>> processPreRender(vector<vector<Intersection>>);
     void renderInfo();
-    void renderRegions(vector<Shape *>, vector<Light>, vector<vector<short>>);
+    void renderRegion(vector<Shape *>, vector<Light>, vector<vector<short>>);
     void render(vector<Shape *>, vector<Light>);
     Vector3 getCameraRay(int, int);
     
+    void generateRange();
     bool next();
-    int minX();
-    int maxX();
-    int minY();
-    int maxY();
 };

@@ -8,6 +8,7 @@
 
 #include "camera.hpp"
 
+// MARK: Initialization
 Camera::Camera(Vector3 position) {
     float screenHeight, screenWidth;
     
@@ -42,6 +43,10 @@ Camera::Camera(Vector3 position) {
             x = y = 0;
             break;
    }
+   minX = fmax(x, 0);
+   maxX = fmin(x + settings.render_region_size, width);
+   minY = fmax(y, 0);
+   maxY = fmin(y + settings.render_region_size, height);
 }
 
 Camera::~Camera() {
@@ -190,11 +195,11 @@ void Camera::renderInfo() {
     XDrawString(display, window, gc, 5, 15, ss.str().c_str(), (int)ss.str().length());
 
     ss.str("");
-    ss << "Regions: " << region_current << "/" << region_count << " @ " << settings.render_region_size << " px";
+    ss << "Region: " << region_current << "/" << region_count << " @ " << settings.render_region_size << " px";
     XDrawString(display, window, gc, 5, 30, ss.str().c_str(), (int)ss.str().length());
     
     ss.str("");
-    ss << "ETC: " << formatTime(elapsed / region_current * region_count - elapsed);
+    ss << "ETC: " << formatTime(elapsed / region_current * region_count - elapsed) << " - " << fixed << setprecision(region_current == region_count ? 0 : 1) << 100.f * region_current / region_count << defaultfloat << "%";
     XDrawString(display, window, gc, 5, 45, ss.str().c_str(), (int)ss.str().length());
     
     ss.str("");
@@ -202,22 +207,19 @@ void Camera::renderInfo() {
     XDrawString(display, window, gc, 5, 60, ss.str().c_str(), (int)ss.str().length());
 }
 
-void Camera::renderRegions(vector<Shape *> objects, vector<Light> lights, vector<vector<short>> mask) {
-    do {
-        const auto type = mask[minX()/settings.render_region_size][minY()/settings.render_region_size];
-        if (!type) continue;
-        region_current++;
-        
-        for (int x = minX(); x < maxX(); x++) {
-            for (int y = minY(); y < maxY(); y++) {
-                auto ray = castRay(position, getCameraRay(x, y), objects, lights, type == 1 ? settings.quick_step_size : settings.precise_step_size);
-                
-                drawPixel(x, y, 1, ray);
-            }
+void Camera::renderRegion(vector<Shape *> objects, vector<Light> lights, vector<vector<short>> mask) {
+    const auto type = mask[minX/settings.render_region_size][minY/settings.render_region_size];
+    if (!type) return;
+    
+    region_current++;
+    
+    for (int x = minX; x < maxX; x++) {
+        for (int y = minY; y < maxY; y++) {
+            auto ray = castRay(position, getCameraRay(x, y), objects, lights, type == 1 ? settings.quick_step_size : settings.precise_step_size);
+            
+            drawPixel(x, y, 1, ray);
         }
-        
-        renderInfo();
-    } while (next());
+    }
 }
 
 void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
@@ -234,7 +236,11 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
             const auto mask = processPreRender(buffer);
             
             // Render
-            renderRegions(objects, lights, mask);
+            do {
+                renderRegion(objects, lights, mask);
+                renderInfo();
+                XFlush(display);
+            } while (next());
             
             // Render stats
             renderInfo();
@@ -250,6 +256,13 @@ Vector3 Camera::getCameraRay(int x, int y) {
     float v = 1 - (2 * (float)y / height);
     
     return Vector3{fovFactor, u, v}.normal();
+}
+
+void Camera::generateRange() {
+    minX = fmax(x, 0);
+    maxX = fmin(x + settings.render_region_size, width);
+    minY = fmax(y, 0);
+    maxY = fmin(y + settings.render_region_size, height);
 }
 
 bool Camera::next() {
@@ -271,6 +284,8 @@ bool Camera::next() {
                 if (x >= width && y >= height) return false;
             } while (x >= width || x + settings.render_region_size <= 0 || y >= height || y + settings.render_region_size <= 0);
             
+            generateRange();
+            
             return true;
             
         default: // MARK: Default
@@ -280,11 +295,8 @@ bool Camera::next() {
                 y += settings.render_region_size;
             }
             
+            generateRange();
+            
             return y < height;
     }
 }
-
-int Camera::minX() { return fmax(x, 0); };
-int Camera::maxX() { return fmin(x + settings.render_region_size, width); };
-int Camera::minY() { return fmax(y, 0); };
-int Camera::maxY() { return fmin(y + settings.render_region_size, height); };
