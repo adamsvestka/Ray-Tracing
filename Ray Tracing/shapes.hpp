@@ -27,6 +27,7 @@ public:
     
     Vector3 getCenter();
     Matrix3x3 getRotation();
+    Matrix3x3 getInverseRotation();
     virtual bool intersects(Vector3) = 0;
     virtual Vector3 getNormal(Vector3) = 0;
     virtual Vector3 getSurface(Vector3) = 0;

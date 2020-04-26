@@ -50,10 +50,10 @@ public:
     ~Camera();
     
     void drawPixel(int, int, int, Intersection);
-    vector<vector<float>> preRender(vector<Shape *>, vector<Light>);
-    vector<vector<bool>> processPreRender(vector<vector<float>>);
+    vector<vector<Intersection>> preRender(vector<Shape *>, vector<Light>);
+    vector<vector<short>> processPreRender(vector<vector<Intersection>>);
     void renderInfo();
-    void renderRegions(vector<Shape *>, vector<Light>, vector<vector<bool>>);
+    void renderRegions(vector<Shape *>, vector<Light>, vector<vector<short>>);
     void render(vector<Shape *>, vector<Light>);
     Vector3 getCameraRay(int, int);
     

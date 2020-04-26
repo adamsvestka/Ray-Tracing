@@ -9,8 +9,8 @@
 #include "shapes.hpp"
 
 Vector3 Shape::getCenter() { return center; };
-
 Matrix3x3 Shape::getRotation() { return rotation; }
+Matrix3x3 Shape::getInverseRotation() { return Irotation; }
 
 
 // MARK: - Sphere
@@ -59,11 +59,11 @@ Vector3 Cube::getNormal(Vector3 point) {
 Vector3 Cube::getSurface(Vector3 point) {
     Vector3 d = rotation * (point - center);
     
-    if (d.x - settings.step_size < -radius) d.x = -radius;
-    else if (d.x + settings.step_size > radius) d.x = radius;
-    else if (d.y - settings.step_size < -radius) d.y = -radius;
-    else if (d.y + settings.step_size > radius) d.y = radius;
-    else if (d.z - settings.step_size < -radius) d.z = -radius;
-    else if (d.z + settings.step_size > radius) d.z = radius;
+    if (d.x - settings.quick_step_size < -radius) d.x = -radius;
+    else if (d.x + settings.quick_step_size > radius) d.x = radius;
+    else if (d.y - settings.quick_step_size < -radius) d.y = -radius;
+    else if (d.y + settings.quick_step_size > radius) d.y = radius;
+    else if (d.z - settings.quick_step_size < -radius) d.z = -radius;
+    else if (d.z + settings.quick_step_size > radius) d.z = radius;
     return Irotation * d + center;
 }

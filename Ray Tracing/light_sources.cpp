@@ -14,8 +14,10 @@ Light::Light(Vector3 position, Color color, int strength) {
     intensity = strength;
 }
 
-Vector3 Light::getVector(Vector3 point) {
-    return position - point;
+Vector3 Light::getPosition() {
+    return position;
 }
 
-int Light::getIntensity() { return intensity; };
+Color Light::getValue() {
+    return color * intensity;
+};

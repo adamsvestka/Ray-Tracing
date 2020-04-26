@@ -39,6 +39,10 @@ Vector3 Vector3::operator*(float n) {
     return Vector3{this->x * n, this->y * n, this->z * n};
 }
 
+Vector3 Vector3::operator*(int n) {
+    return Vector3{this->x * n, this->y * n, this->z * n};
+}
+
 Vector3 Vector3::operator/(float n) {
     return Vector3{this->x / n, this->y / n, this->z / n};
 }
@@ -148,6 +152,10 @@ Color Color::operator*(float n) {
     return Color(this->r * n, this->g * n, this->b * n);
 }
 
+Color Color::operator*(int n) {
+    return Color(this->r * n, this->g * n, this->b * n);
+}
+
 Color Color::operator/(float n) {
     return Color(this->r / n, this->g / n, this->b / n);
 }
@@ -166,17 +174,24 @@ void Color::operator-=(Color c) {
 
 
 // MARK: - NeuralNetwork
-NeuralNetwork::NeuralNetwork(vector<vector<float>> nodes) {
+NeuralNetwork::NeuralNetwork(vector<vector<vector<float>>> nodes) {
     this->nodes = nodes;
 }
 
-float NeuralNetwork::eval(vector<vector<float>> input) {
-    float d = 0;
+vector<float> NeuralNetwork::eval(vector<float> input) {
+    vector<vector<float>> layers(nodes.size() + 1);
+    layers[0] = input;
+    
     for (int i = 0; i < nodes.size(); i++) {
-        for (int j = 0; j < nodes.size(); j++) {
-            d += nodes[i][j] * input[i][j];
+        for (int j = 0; j < nodes[i].size(); j++) {
+            for (int k = 0; k < nodes[i][j].size(); k++) {
+                if (abs(nodes[i][j][k]) >= layers[i+1].size()) layers[i+1].resize(abs(nodes[i][j][k])+1, 0);
+                if (nodes[i][j][k] > 0) layers[i+1][nodes[i][j][k]] += (nodes[i][j][k] - (int)nodes[i][j][k]) * layers[i][j];
+                else layers[i+1][-nodes[i][j][k]] += (nodes[i][j][k] - (int)nodes[i][j][k]) * layers[i][j];
+            }
         }
+        if (i < nodes.size() - 1) for (int j = 0; j < layers[i+1].size(); j++) layers[i+1][j] = layers[i+1][j] != 0 ? 1 : 0;
     }
     
-    return d;
+    return layers[layers.size()-1];
 }

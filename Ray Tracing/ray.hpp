@@ -34,4 +34,4 @@ struct Intersection {
     Color shaded;
 };
 
-Intersection castRay(Vector3, Vector3, vector<Shape *>, vector<Light>);
+Intersection castRay(Vector3, Vector3, vector<Shape *>, vector<Light>, float, bool=false, short=0);

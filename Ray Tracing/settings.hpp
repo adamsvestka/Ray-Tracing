@@ -21,24 +21,28 @@ enum RenderPattern {
 struct Settings {
     
     // MARK: Ray
-    int render_distance = 20;
-
-    float step_size = 0.1;
-    
-    int repetitions = render_distance / step_size;
-    
-    short render_mode = RENDER_SHADED;
-    
-    // MARK: Camera
-    int render_pattern = PATTERN_SPIRAL;
-    
-    int resolution = 2;
-    
-    int fov = 120;
-    
-    int region_size = 50;
+    short max_render_distance = 20;
     
     float probe_step_size = 0.1;
+    
+    float quick_step_size = 0.1;
+    
+    float precise_step_size = 0.01;
+    
+    short max_light_bounces = 5;
+    
+    short surface_smoothing = 5;
+        
+    // MARK: Camera
+    short render_mode = RENDER_SHADED;
+    
+    short render_pattern = PATTERN_SPIRAL;
+    
+    short resolution_decrese = 1;
+    
+    short field_of_view = 120;
+    
+    short render_region_size = 25;
     
     Color environment_color = Gray;
 

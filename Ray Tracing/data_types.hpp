@@ -29,6 +29,7 @@ struct Vector3 {
     Vector3 operator-(Vector3);
     Vector3 operator-();
     Vector3 operator*(float);
+    Vector3 operator*(int);
     Vector3 operator/(float);
     float operator*(Vector3);
     void operator+=(Vector3);
@@ -62,11 +63,12 @@ struct Color {
     
     Color();
     Color(float, float, float);
-        
+    
     operator int();
     Color operator+(Color);
     Color operator-(Color);
     Color operator*(float);
+    Color operator*(int);
     Color operator/(float);
     Color operator*(Color);
     void operator+=(Color);
@@ -77,6 +79,7 @@ struct Color {
 #define Gray        Color{0.1, 0.1, 0.1}
 #define Black       Color{0.0, 0.0, 0.0}
 
+#define DarkRed     Color{0.3, 0.03, 0.03}
 #define Red         Color{1.0, 0.1, 0.1}
 #define Orange      Color{1.0, 0.5, 0.1}
 #define Yellow      Color{1.0, 1.0, 0.1}
@@ -92,11 +95,11 @@ struct Color {
 #define Pink        Color{1.0, 0.4, 0.7}
 
 struct NeuralNetwork {
-    vector<vector<float>> nodes;
+    vector<vector<vector<float>>> nodes;
     
-    NeuralNetwork(vector<vector<float>>);
+    NeuralNetwork(vector<vector<vector<float>>>);
     
-    float eval(vector<vector<float>>);
+    vector<float> eval(vector<float>);
 };
 
 struct Material {

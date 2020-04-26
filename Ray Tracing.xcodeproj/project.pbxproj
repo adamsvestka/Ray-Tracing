@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		6630E3D82443CD690066BCCC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3D72443CD690066BCCC /* main.cpp */; };
-		6630E3E02443D2BA0066BCCC /* libncurses.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6630E3DF2443CF020066BCCC /* libncurses.tbd */; settings = {ATTRIBUTES = (Weak, ); }; };
 		6630E3E32445E2B20066BCCC /* data_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E12445E2B20066BCCC /* data_types.cpp */; };
 		6630E3E62445E2C70066BCCC /* shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E42445E2C70066BCCC /* shapes.cpp */; };
 		6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E72445E2D70066BCCC /* light_sources.cpp */; };
@@ -53,7 +52,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6630E3E02443D2BA0066BCCC /* libncurses.tbd in Frameworks */,
 				6630E3F7244760C70066BCCC /* libX11.6.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

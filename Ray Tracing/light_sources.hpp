@@ -18,13 +18,12 @@ class Light;
 class Light {
 private:
     Vector3 position;
+    Color color;
     int intensity;
     
 public:
-    Color color;
-    
     Light(Vector3, Color, int);
     
-    Vector3 getVector(Vector3);
-    int getIntensity();
+    Vector3 getPosition();
+    Color getValue();
 };
