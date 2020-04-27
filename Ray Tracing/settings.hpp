@@ -15,7 +15,7 @@ enum RenderType {
 };
 
 enum RenderPattern {
-    PATTERN_DEFAULT, PATTERN_SPIRAL
+    PATTERN_HORIZONTAL, PATTERN_VERTICAL, PATTERN_SPIRAL
 };
 
 struct Settings {
@@ -25,7 +25,7 @@ struct Settings {
     
     float probe_step_size = 0.1;
     
-    float quick_step_size = 0.05;
+    float quick_step_size = 0.1;
     
     float precise_step_size = 0.01;
     
@@ -36,13 +36,13 @@ struct Settings {
     // MARK: Camera
     short render_mode = RENDER_SHADED;
     
-    short render_pattern = PATTERN_SPIRAL;
+    short render_pattern = PATTERN_VERTICAL;
     
     short resolution_decrese = 1;
     
     short field_of_view = 120;
     
-    short render_region_size = 20;
+    short render_region_size = 10;
     
     Color environment_color = Gray;
 

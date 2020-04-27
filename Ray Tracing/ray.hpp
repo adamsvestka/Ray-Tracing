@@ -20,18 +20,28 @@ class Ray;
 
 using namespace std;
 
+struct Input {
+    float step_size;
+    short bounce_count;
+    
+    bool shadows;
+    bool reflections;
+    
+    Input(float);
+};
+
 struct Intersection {
     bool hit;
     Vector3 position;
     float distance;
     Shape *object;
-
-    Color color;
+    
     Vector3 normal;
     float light;
-    bool shadow, diffuse, specular, reflection, refraction;
-
-    Color shaded;
+    bool shadow;
+    Color diffuse, specular, reflection, refraction;
+    
+    Color shaded();
 };
 
-Intersection castRay(Vector3, Vector3, vector<Shape *>, vector<Light>, float, bool=false, short=0);
+Intersection castRay(Vector3, Vector3, vector<Shape *>, vector<Light>, Input mask);

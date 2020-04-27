@@ -12,13 +12,13 @@
 Camera::Camera(Vector3 position) {
     float screenHeight, screenWidth;
     
-    display = XOpenDisplay(NULL);
+    display = XOpenDisplay(nullptr);
     scr = DefaultScreen(display);
     gc = DefaultGC(display, scr);
     screen = ScreenOfDisplay(display, scr);
     window = XCreateSimpleWindow(display, DefaultRootWindow(display), 0, 0, screenWidth = screen->width, screenHeight = screen->height, 1, BlackPixel(display, scr), WhitePixel(display, scr));
 
-    XSetStandardProperties(display, window, "Ray Tracing", "XTerm", None, NULL, 0, NULL);
+    XSetStandardProperties(display, window, "Ray Tracing", "XTerm", None, nullptr, 0, nullptr);
     XSelectInput(display, window, ExposureMask | ButtonPressMask | KeyPressMask);
 
     XClearWindow(display, window);
@@ -31,22 +31,7 @@ Camera::Camera(Vector3 position) {
     region_count = 0;
     region_current = 0;
     
-    switch (settings.render_pattern) {
-        case 1:
-            x = round(this->width / settings.render_region_size / 2) * settings.render_region_size;
-            y = round(this->height / settings.render_region_size / 2) * settings.render_region_size;
-            r = i = 0;
-            l = 1;
-            break;
-           
-        default:
-            x = y = 0;
-            break;
-   }
-   minX = fmax(x, 0);
-   maxX = fmin(x + settings.render_region_size, width);
-   minY = fmax(y, 0);
-   maxY = fmin(y + settings.render_region_size, height);
+    resetPosition();
 }
 
 Camera::~Camera() {
@@ -79,17 +64,43 @@ string formatTime(float seconds) {
 
 void Camera::drawPixel(int x, int y, int s, Intersection data) {
     switch (settings.render_mode) {
-        case RENDER_SHADED: XSetForeground(display, gc, data.shaded); break;
-        case RENDER_COLOR: XSetForeground(display, gc, data.color); break;
+        case RENDER_COLOR: XSetForeground(display, gc, data.object->material.color); break;
         case RENDER_LIGHT: XSetForeground(display, gc, data.hit ? data.light : Black); break;
         case RENDER_SHADOWS: XSetForeground(display, gc, data.hit ? (data.shadow ? Red : data.light) : Black); break;
         case RENDER_NORMALS: XSetForeground(display, gc, data.hit ? data.normal.toColor() : Black); break;
         case RENDER_DEPTH: XSetForeground(display, gc, White * (1 - data.distance / settings.max_render_distance)); break;
-        default: XSetForeground(display, gc, data.shaded); break;
+        case RENDER_SHADED:
+        default: XSetForeground(display, gc, data.shaded()); break;
     }
     
     XFillRectangle(display, window, gc, x * settings.resolution_decrese * s, y * settings.resolution_decrese * s, settings.resolution_decrese * s, settings.resolution_decrese * s);
 }
+
+void Camera::drawBox(int x, int y) {
+    const auto size = 0.3;
+
+    XPoint points[4][3] = {{
+        {(short)((x * settings.resolution_decrese + size) * settings.render_region_size), (short)(y * settings.resolution_decrese * settings.render_region_size)},
+        {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)(y * settings.resolution_decrese * settings.render_region_size)},
+        {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)((y * settings.resolution_decrese + size) * settings.render_region_size)}
+    }, {
+        {(short)(((x + 1) * settings.resolution_decrese - size) * settings.render_region_size - 2), (short)(y * settings.resolution_decrese * settings.render_region_size)},
+        {(short)((x + 1) * settings.resolution_decrese * settings.render_region_size - 2), (short)(y * settings.resolution_decrese * settings.render_region_size)},
+        {(short)((x + 1) * settings.resolution_decrese * settings.render_region_size - 2), (short)((y * settings.resolution_decrese + size) * settings.render_region_size)}
+    }, {
+        {(short)((x * settings.resolution_decrese + size) * settings.render_region_size), (short)((y + 1) * settings.resolution_decrese * settings.render_region_size - 2)},
+        {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)((y + 1) * settings.resolution_decrese * settings.render_region_size - 2)},
+        {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)(((y + 1) * settings.resolution_decrese - size) * settings.render_region_size - 2)}
+    }, {
+        {(short)(((x + 1) * settings.resolution_decrese - size) * settings.render_region_size - 2), (short)((y + 1) * settings.resolution_decrese * settings.render_region_size - 2)},
+        {(short)((x + 1) * settings.resolution_decrese * settings.render_region_size - 2), (short)((y + 1) * settings.resolution_decrese * settings.render_region_size - 2)},
+        {(short)((x + 1) * settings.resolution_decrese * settings.render_region_size - 2), (short)(((y + 1) * settings.resolution_decrese - size) * settings.render_region_size - 2)}
+    }};
+
+    int npoints = sizeof(points[0]) / sizeof(XPoint);
+    for (int i = 0; i < 4; i++) XDrawLines(display, window, gc, points[i], npoints, CoordModeOrigin);
+}
+
 
 // MARK: - Preprocessing
 vector<vector<Intersection>> Camera::preRender(vector<Shape*> objects, vector<Light> lights) {
@@ -100,7 +111,7 @@ vector<vector<Intersection>> Camera::preRender(vector<Shape*> objects, vector<Li
     for (int x = 0; x < regions_x; x++) {
         buffer[x].resize(regions_y);
         for (int y = 0; y < regions_y; y++) {
-            auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, settings.probe_step_size);
+            auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, Input(settings.probe_step_size));
             
             buffer[x][y] = ray;
             
@@ -116,10 +127,10 @@ vector<vector<short>> Camera::processPreRender(vector<vector<Intersection>> buff
     const int regions_y = (int)buffer[0].size();
     vector<vector<short>> processed(regions_x);
     
-    vector<vector<vector<float>>> nodes = {{{0}, {0.1}, {0}, {0.1}, {0.1}, {0.1}, {0}, {0.1}, {0}}};
-    vector<vector<vector<float>>> nodes2 = {{{0}, {-0.5}, {0}, {-1.5}, {0.5, 1.5, 2.5, 3.5}, {-2.5}, {0}, {-3.5}, {0}}, {{0.5}, {0.5}, {0.5}, {0.5}}};
-    NeuralNetwork nnDepth(nodes);
-    NeuralNetwork nnEdge(nodes2);
+    vector<vector<vector<float>>> nodesDepth = {{{0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}}};
+    vector<vector<vector<float>>> nodesEdge = {{{-0.5}, {-1.5}, {-2.5}, {-3.5}, {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}, {-4.5}, {-5.5}, {-6.5}, {-7.5}}, {{0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}}};
+    NeuralNetwork filterDepth(nodesDepth);
+    NeuralNetwork filterEdge(nodesEdge);
     
     vector<Shape *> ids;
     
@@ -142,39 +153,21 @@ vector<vector<short>> Camera::processPreRender(vector<vector<Intersection>> buff
                 }
             }
             
-            if (nnDepth.eval(matrixDepth)[0] == 0) processed[x][y] = false;
+            if (filterDepth.eval(matrixDepth)[0] == 0) processed[x][y] = false;
             else {
-                if (abs(nnEdge.eval(matrixObjects)[0]) != 0) {
+                if (abs(filterEdge.eval(matrixObjects)[0]) != 0) {
                     processed[x][y] = 2;
                     XSetForeground(display, gc, DarkRed);
+                    
+                    region_count += settings.quick_step_size / settings.precise_step_size;
                 } else {
                     processed[x][y] = 1;
                     XSetForeground(display, gc, Gray);
+                    
+                    region_count++;
                 }
                 
-                region_count++;
-                const auto size = 0.3;
-                
-                XPoint points[4][3] = {{
-                    {(short)((x * settings.resolution_decrese + size) * settings.render_region_size), (short)(y * settings.resolution_decrese * settings.render_region_size)},
-                    {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)(y * settings.resolution_decrese * settings.render_region_size)},
-                    {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)((y * settings.resolution_decrese + size) * settings.render_region_size)}
-                }, {
-                    {(short)(((x + 1) * settings.resolution_decrese - size) * (settings.render_region_size - 1.f/x)), (short)(y * settings.resolution_decrese * settings.render_region_size)},
-                    {(short)((x + 1) * settings.resolution_decrese * (settings.render_region_size - 1.f/x)), (short)(y * settings.resolution_decrese * settings.render_region_size)},
-                    {(short)((x + 1) * settings.resolution_decrese * (settings.render_region_size - 1.f/x)), (short)((y * settings.resolution_decrese + size) * settings.render_region_size)}
-                }, {
-                    {(short)((x * settings.resolution_decrese + size) * settings.render_region_size), (short)((y + 1) * settings.resolution_decrese * (settings.render_region_size - 1.f/y))},
-                    {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)((y + 1) * settings.resolution_decrese * (settings.render_region_size - 1.f/y))},
-                    {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)(((y + 1) * settings.resolution_decrese - size) * (settings.render_region_size - 1.f/y))}
-                }, {
-                    {(short)(((x + 1) * settings.resolution_decrese - size) * (settings.render_region_size - 1.f/x)), (short)((y + 1) * settings.resolution_decrese * (settings.render_region_size - 1.f/y))},
-                    {(short)((x + 1) * settings.resolution_decrese * (settings.render_region_size - 1.f/x)), (short)((y + 1) * settings.resolution_decrese * (settings.render_region_size - 1.f/y))},
-                    {(short)((x + 1) * settings.resolution_decrese * (settings.render_region_size - 1.f/x)), (short)(((y + 1) * settings.resolution_decrese - size) * (settings.render_region_size - 1.f/y))}
-                }};
-                
-                int npoints = sizeof(points[0]) / sizeof(XPoint);
-                for (int i = 0; i < 4; i++) XDrawLines(display, window, gc, points[i], npoints, CoordModeOrigin);
+                drawBox(x, y);
             }
         }
     }
@@ -193,13 +186,13 @@ void Camera::renderInfo() {
     stringstream ss;
     ss << "Render time: " << formatTime(elapsed);
     XDrawString(display, window, gc, 5, 15, ss.str().c_str(), (int)ss.str().length());
-
+    
     ss.str("");
     ss << "Region: " << region_current << "/" << region_count << " @ " << settings.render_region_size << " px";
     XDrawString(display, window, gc, 5, 30, ss.str().c_str(), (int)ss.str().length());
     
     ss.str("");
-    ss << "ETC: " << formatTime(elapsed / region_current * region_count - elapsed) << " - " << fixed << setprecision(region_current == region_count ? 0 : 1) << 100.f * region_current / region_count << defaultfloat << "%";
+    ss << "ETC: " << formatTime(fmax(elapsed / (region_current ? region_current : 1) * region_count - elapsed, 0.0)) << " - " << fixed << setprecision(region_current >= region_count ? 0 : 1) << 100.f * region_current / region_count << defaultfloat << "%";
     XDrawString(display, window, gc, 5, 45, ss.str().c_str(), (int)ss.str().length());
     
     ss.str("");
@@ -207,15 +200,10 @@ void Camera::renderInfo() {
     XDrawString(display, window, gc, 5, 60, ss.str().c_str(), (int)ss.str().length());
 }
 
-void Camera::renderRegion(vector<Shape *> objects, vector<Light> lights, vector<vector<short>> mask) {
-    const auto type = mask[minX/settings.render_region_size][minY/settings.render_region_size];
-    if (!type) return;
-    
-    region_current++;
-    
+void Camera::renderRegion(vector<Shape *> objects, vector<Light> lights, short mask) {
     for (int x = minX; x < maxX; x++) {
         for (int y = minY; y < maxY; y++) {
-            auto ray = castRay(position, getCameraRay(x, y), objects, lights, type == 1 ? settings.quick_step_size : settings.precise_step_size);
+            auto ray = castRay(position, getCameraRay(x, y), objects, lights, Input(mask == 1 ? settings.quick_step_size : settings.precise_step_size));
             
             drawPixel(x, y, 1, ray);
         }
@@ -237,13 +225,21 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
             
             // Render
             do {
-                renderRegion(objects, lights, mask);
-                renderInfo();
+                XSetForeground(display, gc, Orange);
+                drawBox(minX / settings.render_region_size, minY / settings.render_region_size);
                 XFlush(display);
-            } while (next());
+                
+                const auto type = mask[minX/settings.render_region_size][minY/settings.render_region_size];
+                renderRegion(objects, lights, type);
+                if (type == 2) region_current += settings.quick_step_size / settings.precise_step_size;
+                else region_current++;
+                renderInfo();
+            } while (next(mask));
             
             // Render stats
             renderInfo();
+            
+            XFlush(display);
             
             break;
         }
@@ -265,8 +261,43 @@ void Camera::generateRange() {
     maxY = fmin(y + settings.render_region_size, height);
 }
 
-bool Camera::next() {
+void Camera::resetPosition() {
     switch (settings.render_pattern) {
+        case PATTERN_SPIRAL:
+            x = round(this->width / settings.render_region_size / 2) * settings.render_region_size;
+            y = round(this->height / settings.render_region_size / 2) * settings.render_region_size;
+            r = i = 0;
+            l = 1;
+            break;
+
+        case PATTERN_HORIZONTAL:
+        case PATTERN_VERTICAL:
+        default:
+            x = y = 0;
+            break;
+    }
+    
+    minX = fmax(x, 0);
+    maxX = fmin(x + settings.render_region_size, width);
+    minY = fmax(y, 0);
+    maxY = fmin(y + settings.render_region_size, height);
+}
+
+bool Camera::next(vector<vector<short>> mask) {
+    switch (settings.render_pattern) {
+        case PATTERN_VERTICAL: // MARK: Vertical
+            do {
+                y += settings.render_region_size;
+                if (y >= height) {
+                    y = 0;
+                    x += settings.render_region_size;
+                }
+            } while (x < width && !mask[x/settings.render_region_size][y/settings.render_region_size]);
+            
+            generateRange();
+            
+            return x < width;
+            
         case PATTERN_SPIRAL: // MARK: Spiral
             do {
                 switch (r) {
@@ -282,18 +313,21 @@ bool Camera::next() {
                 }
                 
                 if (x >= width && y >= height) return false;
-            } while (x >= width || x + settings.render_region_size <= 0 || y >= height || y + settings.render_region_size <= 0);
+            } while (x >= width || x + settings.render_region_size <= 0 || y >= height || y + settings.render_region_size <= 0 || !mask[x/settings.render_region_size][y/settings.render_region_size]);
             
             generateRange();
             
             return true;
-            
-        default: // MARK: Default
-            x += settings.render_region_size;
-            if (x >= width) {
-                x = 0;
-                y += settings.render_region_size;
-            }
+
+        case PATTERN_HORIZONTAL: // MARK: Horizontal
+        default:
+            do {
+                x += settings.render_region_size;
+                if (x >= width) {
+                    x = 0;
+                    y += settings.render_region_size;
+                }
+            } while (y < height && !mask[x/settings.render_region_size][y/settings.render_region_size]);
             
             generateRange();
             
