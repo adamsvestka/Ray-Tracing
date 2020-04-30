@@ -24,8 +24,7 @@ struct Input {
     float step_size;
     short bounce_count;
     
-    bool shadows;
-    bool reflections;
+    bool calculate_lighting;
     
     Input(float);
 };
@@ -39,7 +38,7 @@ struct Intersection {
     Vector3 normal;
     float light;
     bool shadow;
-    Color diffuse, specular, reflection, refraction;
+    Color ambient, diffuse, specular, reflection, transmission;
     
     Color shaded();
 };

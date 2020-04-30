@@ -36,7 +36,7 @@ struct Settings {
     // MARK: Camera
     short render_mode = RENDER_SHADED;
     
-    short render_pattern = PATTERN_VERTICAL;
+    short render_pattern = PATTERN_SPIRAL;
     
     short resolution_decrese = 1;
     

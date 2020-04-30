@@ -35,6 +35,10 @@ Vector3 Vector3::operator-() {
     return Vector3{-this->x, -this->y, -this->z};
 }
 
+Vector3 Vector3::operator*(double n) {
+    return Vector3{this->x * (float)n, this->y * (float)n, this->z * (float)n};
+}
+
 Vector3 Vector3::operator*(float n) {
     return Vector3{this->x * n, this->y * n, this->z * n};
 }
@@ -43,7 +47,15 @@ Vector3 Vector3::operator*(int n) {
     return Vector3{this->x * n, this->y * n, this->z * n};
 }
 
+Vector3 Vector3::operator/(double n) {
+    return Vector3{this->x / (float)n, this->y / (float)n, this->z / (float)n};
+}
+
 Vector3 Vector3::operator/(float n) {
+    return Vector3{this->x / n, this->y / n, this->z / n};
+}
+
+Vector3 Vector3::operator/(int n) {
     return Vector3{this->x / n, this->y / n, this->z / n};
 }
 
@@ -148,6 +160,10 @@ Color Color::operator-(Color c) {
     return Color(this->r - c.r, this->g - c.g, this->b - c.b);
 }
 
+Color Color::operator*(double n) {
+    return Color(this->r * (float)n, this->g * (float)n, this->b * (float)n);
+}
+
 Color Color::operator*(float n) {
     return Color(this->r * n, this->g * n, this->b * n);
 }
@@ -156,7 +172,15 @@ Color Color::operator*(int n) {
     return Color(this->r * n, this->g * n, this->b * n);
 }
 
+Color Color::operator/(double n) {
+    return Color(this->r / (float)n, this->g / (float)n, this->b / (float)n);
+}
+
 Color Color::operator/(float n) {
+    return Color(this->r / n, this->g / n, this->b / n);
+}
+
+Color Color::operator/(int n) {
     return Color(this->r / n, this->g / n, this->b / n);
 }
 

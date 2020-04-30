@@ -6,7 +6,7 @@
 //  Copyright © 2020 Adam Svestka. All rights reserved.
 //
 
-class Light;
+struct Light;
 
 #pragma once
 
@@ -15,15 +15,8 @@ class Light;
 #include "data_types.hpp"
 #include "ray.hpp"
 
-class Light {
-private:
+struct Light {
     Vector3 position;
     Color color;
     int intensity;
-    
-public:
-    Light(Vector3, Color, int);
-    
-    Vector3 getPosition();
-    Color getValue();
 };

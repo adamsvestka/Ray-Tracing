@@ -26,13 +26,14 @@ int main(int argc, const char * argv[]) {
     Camera camera({0, 0, 0});
     
     vector<Shape*> objects;
-    objects.push_back(new Sphere({15, 0, -1}, 1, {Magenta, 0.7, 100, 0.003, false}));
-    objects.push_back(new Cube({15, 0, -7}, 5, {0, -30, 20}, {Green, 0.6, false, false, 0.6}));
-    objects.push_back(new Sphere({19, -4, 3}, 2, {White, 0.6, false, false, 0.9}));
+    objects.push_back(new Sphere({15, 0, -1}, 1, {Magenta, false, false, 1, false}));
+    objects.push_back(new Cube({15, 0, -7}, 5, {0, -30, 20}, {Green/2, 100, 0.5, 1, false}));
+    objects.push_back(new Sphere({19, -4, 3}, 2, {Gray, 250, 0.9, 1, false}));
+    objects.push_back(new Sphere({12, -0.9, -0.3}, 1, {Red, false, false, 1.3, true}));
     
     vector<Light> lights;
-    lights.push_back(Light({10, 5, 5}, White, 1000));  // FIXME: High brightness messes up hue
-//    lights.push_back(Light({20, 2, -6}, Blue, 1000));
+    lights.push_back(Light{{10, 5, 5}, White, 1000});  // FIXME: High brightness messes up hue
+//    lights.push_back(Light{{10, 2, 6}, Cyan, 1000});
     
     camera.render(objects, lights);
     

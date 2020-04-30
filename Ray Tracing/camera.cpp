@@ -225,6 +225,8 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
             
             // Render
             do {
+//                if (buffer[minX/settings.render_region_size][minY/settings.render_region_size].object != objects[3]) continue;
+                
                 XSetForeground(display, gc, Orange);
                 drawBox(minX / settings.render_region_size, minY / settings.render_region_size);
                 XFlush(display);

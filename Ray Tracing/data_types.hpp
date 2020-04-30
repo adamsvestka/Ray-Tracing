@@ -28,9 +28,12 @@ struct Vector3 {
     Vector3 operator+(Vector3);
     Vector3 operator-(Vector3);
     Vector3 operator-();
+    Vector3 operator*(double);
     Vector3 operator*(float);
     Vector3 operator*(int);
+    Vector3 operator/(double);
     Vector3 operator/(float);
+    Vector3 operator/(int);
     float operator*(Vector3);
     void operator+=(Vector3);
     void operator-=(Vector3);
@@ -67,9 +70,12 @@ struct Color {
     operator int();
     Color operator+(Color);
     Color operator-(Color);
+    Color operator*(double);
     Color operator*(float);
     Color operator*(int);
+    Color operator/(double);
     Color operator/(float);
+    Color operator/(int);
     Color operator*(Color);
     void operator+=(Color);
     void operator-=(Color);
@@ -104,8 +110,6 @@ struct NeuralNetwork {
 
 struct Material {
     Color color;
-    float albedo;
-    float n, Ks;
-    float reflection;
-//    float refraction;
+    float n, Ks, ior;
+    bool transparent;
 };
