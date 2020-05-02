@@ -31,6 +31,7 @@ public:
     virtual bool intersects(Vector3) = 0;
     virtual Vector3 getNormal(Vector3) = 0;
     virtual Vector3 getSurface(Vector3) = 0;
+    virtual Color getTexture(Vector3) = 0;
 };
 
 
@@ -39,10 +40,11 @@ private:
     float radius;
     
 public:
-    Sphere(Vector3, float, Material);
+    Sphere(Vector3, float, Vector3, Material);
     bool intersects(Vector3);
     Vector3 getNormal(Vector3);
     Vector3 getSurface(Vector3);
+    Color getTexture(Vector3);
 };
 
 
@@ -55,4 +57,5 @@ public:
     bool intersects(Vector3);
     Vector3 getNormal(Vector3);
     Vector3 getSurface(Vector3);
+    Color getTexture(Vector3);
 };

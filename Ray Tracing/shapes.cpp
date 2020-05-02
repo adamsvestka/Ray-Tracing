@@ -14,11 +14,13 @@ Matrix3x3 Shape::getInverseRotation() { return Irotation; }
 
 
 // MARK: - Sphere
-Sphere::Sphere(Vector3 position, float radius, Material material) {
+Sphere::Sphere(Vector3 position, float radius, Vector3 angles, Material material) {
     this->center = position;
     this->radius = radius;
     this->material = material;
-    rotation = Irotation = Identity;
+    
+    rotation = rot_mat(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
+    Irotation = rotation.inverse();
 }
 
 bool Sphere::intersects(Vector3 d) {
@@ -31,6 +33,13 @@ Vector3 Sphere::getNormal(Vector3 point) {
 
 Vector3 Sphere::getSurface(Vector3 point) {
     return center + getNormal(point) * radius;
+}
+
+Color Sphere::getTexture(Vector3 point) {
+    float u = asin(point.z / radius) / M_PI + 0.5;
+    float v = atan2(point.x / radius, point.y / radius) / (2 * M_PI) + 0.5;
+    
+    return material.texture(u, v);
 }
 
 
@@ -66,4 +75,11 @@ Vector3 Cube::getSurface(Vector3 point) {
     else if (d.z - settings.quick_step_size < -radius) d.z = -radius;
     else if (d.z + settings.quick_step_size > radius) d.z = radius;
     return Irotation * d + center;
+}
+
+Color Cube::getTexture(Vector3 point) {
+    float u = point.x / (2 * radius) + 0.5;
+    float v = point.y / (2 * radius) + 0.5;
+    
+    return material.texture(u, v);
 }

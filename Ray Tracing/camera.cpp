@@ -64,9 +64,11 @@ string formatTime(float seconds) {
 
 void Camera::drawPixel(int x, int y, int s, Intersection data) {
     switch (settings.render_mode) {
-        case RENDER_COLOR: XSetForeground(display, gc, data.object->material.color); break;
+        case RENDER_COLOR: XSetForeground(display, gc, data.texture); break;
+        case RENDER_REFLECTION: XSetForeground(display, gc, data.reflection); break;
+        case RENDER_TRANSMISSION: XSetForeground(display, gc, data.transmission); break;
         case RENDER_LIGHT: XSetForeground(display, gc, data.hit ? data.light : Black); break;
-        case RENDER_SHADOWS: XSetForeground(display, gc, data.hit ? (data.shadow ? Red : data.light) : Black); break;
+        case RENDER_SHADOWS: XSetForeground(display, gc, data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Red : data.light) : Black); break;
         case RENDER_NORMALS: XSetForeground(display, gc, data.hit ? data.normal.toColor() : Black); break;
         case RENDER_DEPTH: XSetForeground(display, gc, White * (1 - data.distance / settings.max_render_distance)); break;
         case RENDER_SHADED:
@@ -76,7 +78,7 @@ void Camera::drawPixel(int x, int y, int s, Intersection data) {
     XFillRectangle(display, window, gc, x * settings.resolution_decrese * s, y * settings.resolution_decrese * s, settings.resolution_decrese * s, settings.resolution_decrese * s);
 }
 
-void Camera::drawBox(int x, int y) {
+void Camera::drawBox(int x, int y, Input mask) {
     const auto size = 0.3;
 
     XPoint points[4][3] = {{
@@ -98,7 +100,18 @@ void Camera::drawBox(int x, int y) {
     }};
 
     int npoints = sizeof(points[0]) / sizeof(XPoint);
-    for (int i = 0; i < 4; i++) XDrawLines(display, window, gc, points[i], npoints, CoordModeOrigin);
+    
+    if (!mask.step_size) XSetForeground(display, gc, Orange);
+    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Yellow/2);
+    else if (mask.step_size == settings.precise_step_size) XSetForeground(display, gc, DarkRed);
+    else XSetForeground(display, gc, Gray);
+    XDrawLines(display, window, gc, points[0], npoints, CoordModeOrigin); XDrawLines(display, window, gc, points[3], npoints, CoordModeOrigin);
+    
+    if (!mask.step_size) XSetForeground(display, gc, Orange);
+    else if (mask.reflections) XSetForeground(display, gc, DarkBlue);
+    else if (mask.step_size == settings.precise_step_size) XSetForeground(display, gc, DarkRed);
+    else XSetForeground(display, gc, Gray);
+    XDrawLines(display, window, gc, points[1], npoints, CoordModeOrigin); XDrawLines(display, window, gc, points[2], npoints, CoordModeOrigin);
 }
 
 
@@ -111,63 +124,69 @@ vector<vector<Intersection>> Camera::preRender(vector<Shape*> objects, vector<Li
     for (int x = 0; x < regions_x; x++) {
         buffer[x].resize(regions_y);
         for (int y = 0; y < regions_y; y++) {
-            auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, Input(settings.probe_step_size));
+            auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, {settings.probe_step_size, 0, true, true, vector<bool>(objects.size(), true)});
             
-            buffer[x][y] = ray;
-            
-            drawPixel(x, y, settings.render_region_size, ray);
+            drawPixel(x, y, settings.render_region_size, (buffer[x][y] = ray));
         }
     }
     
     return buffer;
 }
 
-vector<vector<short>> Camera::processPreRender(vector<vector<Intersection>> buffer) {
+vector<vector<Input>> Camera::processPreRender(vector<vector<Intersection>> buffer) {
     const int regions_x = (int)buffer.size();
     const int regions_y = (int)buffer[0].size();
-    vector<vector<short>> processed(regions_x);
+    vector<vector<Input>> processed(regions_x, vector<Input>(regions_y, Input{settings.quick_step_size, 0, true, false, vector<bool>(buffer[0][0].shadows.size(), true)}));
     
-    vector<vector<vector<float>>> nodesDepth = {{{0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}}};
-    vector<vector<vector<float>>> nodesEdge = {{{-0.5}, {-1.5}, {-2.5}, {-3.5}, {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}, {-4.5}, {-5.5}, {-6.5}, {-7.5}}, {{0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}}};
-    NeuralNetwork filterDepth(nodesDepth);
-    NeuralNetwork filterEdge(nodesEdge);
+    vector<vector<vector<float>>> depth_nodes = {{{0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}}};
+    vector<vector<vector<float>>> edge_nodes = {{{-0.5}, {-1.5}, {-2.5}, {-3.5}, {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}, {-4.5}, {-5.5}, {-6.5}, {-7.5}}, {{0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}}};
+    NeuralNetwork depth_filter(depth_nodes);
+    NeuralNetwork edge_filter(edge_nodes);
     
     vector<Shape *> ids;
     
     for (int x = 0; x < regions_x; x++) {
-        processed[x].resize(regions_y);
         for (int y = 0; y < regions_y; y++) {
-            vector<float> matrixDepth(9);
-            vector<float> matrixObjects(9);
+            vector<float> depth_matrix(9);
+            vector<float> object_matrix(9);
+            vector<float> reflect_matrix(9);
+            vector<vector<float>> shadow_matrix(buffer[0][0].shadows.size());
+            for (auto it = shadow_matrix.begin(); it != shadow_matrix.end(); it++) it->resize(9);
+            
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    const auto item = buffer[min(max(x + i - 1, 0), regions_x - 1)][min(max(y + j - 1, 0), regions_y - 1)];
-                    matrixDepth[3*i+j] = 1 - item.distance / settings.max_render_distance;
+                    auto item = buffer[min(max(x + i - 1, 0), regions_x - 1)][min(max(y + j - 1, 0), regions_y - 1)];
+                    auto index = 3 * j + i;
+                    
+                    depth_matrix[index] = item.hit;
                     
                     const auto it = find(ids.begin(), ids.end(), item.object);
-                    if (it != ids.end()) matrixObjects[3*i+j] = distance(ids.begin(), it);
+                    if (it != ids.end()) object_matrix[index] = distance(ids.begin(), it);
                     else {
-                        matrixObjects[3*i+j] = ids.size();
+                        object_matrix[index] = ids.size();
                         ids.push_back(item.object);
                     }
+
+                    if (item.hit && item.object->material.Ks) reflect_matrix[index] = item.reflection;
+                    else reflect_matrix[3*i+j] = settings.background_color;
+                    
+                    for (int k = 0; k < shadow_matrix.size(); k++) shadow_matrix[k][index] = item.shadows[k];
                 }
             }
             
-            if (filterDepth.eval(matrixDepth)[0] == 0) processed[x][y] = false;
+            if (depth_filter.eval(depth_matrix)[0] == 0) processed[x][y].step_size = false;
             else {
-                if (abs(filterEdge.eval(matrixObjects)[0]) != 0) {
-                    processed[x][y] = 2;
-                    XSetForeground(display, gc, DarkRed);
-                    
+                if (abs(edge_filter.eval(object_matrix)[0]) != 0) {
+                    processed[x][y].step_size = settings.precise_step_size;
                     region_count += settings.quick_step_size / settings.precise_step_size;
-                } else {
-                    processed[x][y] = 1;
-                    XSetForeground(display, gc, Gray);
-                    
-                    region_count++;
-                }
+                } else region_count++;
                 
-                drawBox(x, y);
+                processed[x][y].reflections = edge_filter.eval(reflect_matrix)[0];
+                
+                processed[x][y].shadows.resize(buffer[0][0].shadows.size());
+                for (int i = 0; i < shadow_matrix.size(); i++) processed[x][y].shadows[i] = edge_filter.eval(shadow_matrix[i])[0];
+                
+                drawBox(x, y, processed[x][y]);
             }
         }
     }
@@ -200,10 +219,13 @@ void Camera::renderInfo() {
     XDrawString(display, window, gc, 5, 60, ss.str().c_str(), (int)ss.str().length());
 }
 
-void Camera::renderRegion(vector<Shape *> objects, vector<Light> lights, short mask) {
+void Camera::renderRegion(vector<Shape *> objects, vector<Light> lights, Input mask, Intersection estimate) {
     for (int x = minX; x < maxX; x++) {
         for (int y = minY; y < maxY; y++) {
-            auto ray = castRay(position, getCameraRay(x, y), objects, lights, Input(mask == 1 ? settings.quick_step_size : settings.precise_step_size));
+            auto ray = castRay(position, getCameraRay(x, y), objects, lights, mask);
+            
+            if (!mask.reflections && ray.hit && ray.object->material.Ks) ray.reflection = estimate.reflection == Black ? settings.background_color : estimate.reflection;
+            for (int i = 0; i < mask.shadows.size(); i++) if (!mask.shadows[i] && ray.hit) ray.shadows[i] = estimate.shadows[i];
             
             drawPixel(x, y, 1, ray);
         }
@@ -225,15 +247,14 @@ void Camera::render(std::vector<Shape*> objects, std::vector<Light> lights) {
             
             // Render
             do {
-//                if (buffer[minX/settings.render_region_size][minY/settings.render_region_size].object != objects[3]) continue;
-                
                 XSetForeground(display, gc, Orange);
-                drawBox(minX / settings.render_region_size, minY / settings.render_region_size);
+                drawBox(minX / settings.render_region_size, minY / settings.render_region_size, {0});
                 XFlush(display);
                 
                 const auto type = mask[minX/settings.render_region_size][minY/settings.render_region_size];
-                renderRegion(objects, lights, type);
-                if (type == 2) region_current += settings.quick_step_size / settings.precise_step_size;
+                renderRegion(objects, lights, type, buffer[minX/settings.render_region_size][minY/settings.render_region_size]);
+                
+                if (type.step_size == settings.precise_step_size) region_current += settings.quick_step_size / settings.precise_step_size;
                 else region_current++;
                 renderInfo();
             } while (next(mask));
@@ -285,7 +306,7 @@ void Camera::resetPosition() {
     maxY = fmin(y + settings.render_region_size, height);
 }
 
-bool Camera::next(vector<vector<short>> mask) {
+bool Camera::next(vector<vector<Input>> mask) {
     switch (settings.render_pattern) {
         case PATTERN_VERTICAL: // MARK: Vertical
             do {
@@ -294,7 +315,7 @@ bool Camera::next(vector<vector<short>> mask) {
                     y = 0;
                     x += settings.render_region_size;
                 }
-            } while (x < width && !mask[x/settings.render_region_size][y/settings.render_region_size]);
+            } while (x < width && !mask[x/settings.render_region_size][y/settings.render_region_size].step_size);
             
             generateRange();
             
@@ -315,7 +336,7 @@ bool Camera::next(vector<vector<short>> mask) {
                 }
                 
                 if (x >= width && y >= height) return false;
-            } while (x >= width || x + settings.render_region_size <= 0 || y >= height || y + settings.render_region_size <= 0 || !mask[x/settings.render_region_size][y/settings.render_region_size]);
+            } while (x >= width || x + settings.render_region_size <= 0 || y >= height || y + settings.render_region_size <= 0 || !mask[x/settings.render_region_size][y/settings.render_region_size].step_size);
             
             generateRange();
             
@@ -329,7 +350,7 @@ bool Camera::next(vector<vector<short>> mask) {
                     x = 0;
                     y += settings.render_region_size;
                 }
-            } while (y < height && !mask[x/settings.render_region_size][y/settings.render_region_size]);
+            } while (y < height && !mask[x/settings.render_region_size][y/settings.render_region_size].step_size);
             
             generateRange();
             

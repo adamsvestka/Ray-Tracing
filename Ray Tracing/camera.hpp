@@ -50,16 +50,16 @@ public:
     Camera(Vector3);
     ~Camera();
 
-    void drawBox(int, int);
+    void drawBox(int, int, Input);
     void drawPixel(int, int, int, Intersection);
     vector<vector<Intersection>> preRender(vector<Shape *>, vector<Light>);
-    vector<vector<short>> processPreRender(vector<vector<Intersection>>);
+    vector<vector<Input>> processPreRender(vector<vector<Intersection>>);
     void renderInfo();
-    void renderRegion(vector<Shape *>, vector<Light>, short);
+    void renderRegion(vector<Shape *>, vector<Light>, Input, Intersection);
     void render(vector<Shape *>, vector<Light>);
     Vector3 getCameraRay(int, int);
     
     void generateRange();
     void resetPosition();
-    bool next(vector<vector<short>>);
+    bool next(vector<vector<Input>>);
 };

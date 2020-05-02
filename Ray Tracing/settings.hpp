@@ -11,7 +11,7 @@
 #include "data_types.hpp"
 
 enum RenderType {
-    RENDER_SHADED, RENDER_COLOR, RENDER_LIGHT, RENDER_SHADOWS, RENDER_NORMALS, RENDER_DEPTH
+    RENDER_SHADED, RENDER_COLOR, RENDER_REFLECTION, RENDER_TRANSMISSION, RENDER_LIGHT, RENDER_SHADOWS, RENDER_NORMALS, RENDER_DEPTH
 };
 
 enum RenderPattern {
@@ -31,8 +31,8 @@ struct Settings {
     
     short max_light_bounces = 5;
     
-    short surface_smoothing = 5;
-        
+    short surface_smoothing = 4;
+    
     // MARK: Camera
     short render_mode = RENDER_SHADED;
     
@@ -44,9 +44,9 @@ struct Settings {
     
     short render_region_size = 10;
     
-    Color environment_color = Gray;
-
-    float environment_intensity = 0.4;
+    Color ambient_lighting = Gray / 2;
+    
+    Color background_color = Gray;
     
 };
 

@@ -11,6 +11,7 @@ class Ray;
 #pragma once
 
 #include <vector>
+#include <valarray>
 
 #include "settings.hpp"
 
@@ -24,9 +25,8 @@ struct Input {
     float step_size;
     short bounce_count;
     
-    bool calculate_lighting;
-    
-    Input(float);
+    bool lighting, reflections;
+    vector<bool> shadows;
 };
 
 struct Intersection {
@@ -37,8 +37,9 @@ struct Intersection {
     
     Vector3 normal;
     float light;
-    bool shadow;
-    Color ambient, diffuse, specular, reflection, transmission;
+    vector<bool> shadows;
+    valarray<Color> diffuse, specular;
+    Color ambient, texture, reflection, transmission;
     
     Color shaded();
 };

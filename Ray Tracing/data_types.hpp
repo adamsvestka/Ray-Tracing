@@ -15,6 +15,7 @@ struct Material;
 
 #include <cmath>
 #include <vector>
+#include <functional>
 
 using namespace std;
 
@@ -91,10 +92,12 @@ struct Color {
 #define Yellow      Color{1.0, 1.0, 0.1}
 #define Lime        Color{0.5, 1.0, 0.1}
 
+#define DarkGreen     Color{0.03, 0.3, 0.03}
 #define Green       Color{0.1, 1.0, 0.1}
 #define Turquoise   Color{0.1, 0.7, 0.7}
 #define Cyan        Color{0.1, 1.0, 1.0}
 
+#define DarkBlue     Color{0.03, 0.03, 0.3}
 #define Blue        Color{0.1, 0.1, 1.0}
 #define Purple      Color{0.6, 0.1, 1.0}
 #define Magenta     Color{1.0, 0.1, 1.0}
@@ -109,7 +112,8 @@ struct NeuralNetwork {
 };
 
 struct Material {
-    Color color;
+//    Color color;
+    function<Color(float, float)> texture;
     float n, Ks, ior;
     bool transparent;
 };
