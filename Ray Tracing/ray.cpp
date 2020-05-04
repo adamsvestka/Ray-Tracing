@@ -24,7 +24,7 @@ Color Intersection::shaded() {
         Color light = Black;
         for (int i = 0; i < shadows.size(); i++) if (!shadows[i]) light += texture * diffuse[i] * (1 - object->material.Ks) + specular[i] * object->material.Ks;
         
-        return (ambient * (1 - object->material.Ks) + light) * !object->material.transparent + reflection * object->material.Ks + transmission * object->material.transparent;
+        return (ambient * (1 - object->material.Ks) + light) * !object->material.transparent + reflection * object->material.Ks * kr + transmission * object->material.transparent * (1 - kr);
     }
     
     // I = Ka + Ke + sum(Vi * Li * (Kd * max(li . n, 0) + Ks * (max(hi . n, 0))) ^ s) + Ks * Ir + Kt * It;
@@ -78,7 +78,7 @@ Vector3 refract(Vector3 direction, Vector3 normal, float ior) {
 }
 
 // MARK: castRay
-Intersection castRay(Vector3 origin, Vector3 direction, vector<Shape *> objects, vector<Light> lights, Input mask) {
+Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &objects, const vector<Light *> &lights, Input mask) {
     Intersection info;
     
     info.hit = false;
@@ -87,6 +87,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, vector<Shape *> objects,
     info.object = nullptr;
     info.normal = Zero;
     info.light = 0;
+    info.kr = 1;
     info.shadows = vector<bool>(lights.size(), false);
     info.diffuse = info.specular = valarray<Color>(Black, objects.size());
     info.ambient = settings.ambient_lighting;
@@ -146,12 +147,12 @@ Intersection castRay(Vector3 origin, Vector3 direction, vector<Shape *> objects,
         shadow_mask.lighting = false;
         for (int i = 0; i < lights.size(); i++) {
             auto light = lights[i];
-            Vector3 vector_to_light = light.position - info.position;
+            Vector3 vector_to_light = light->position - info.position;
             
             const float cosine_term = vector_to_light.normal() * info.normal;
             
-            if (info.object->material.Ks < 1) info.diffuse[i] = light.color * light.intensity * (float)(fmax(cosine_term, 0.f) / (vector_to_light * vector_to_light * 4 * M_PI));
-            if (info.object->material.Ks > 0) info.specular[i] = light.color * (float)pow(light.intensity, 0.3) * (pow(fmax(-(info.normal * (cosine_term * 2) - vector_to_light.normal()) * direction, 0.f), info.object->material.n));
+            if (info.object->material.Ks < 1) info.diffuse[i] = light->color * light->intensity * (float)(fmax(cosine_term, 0.f) / (vector_to_light * vector_to_light * 4 * M_PI));
+            if (info.object->material.Ks > 0) info.specular[i] = light->color * (float)pow(light->intensity, 0.3) * (pow(fmax(-(info.normal * (cosine_term * 2) - vector_to_light.normal()) * direction, 0.f), info.object->material.n));
             
             if (mask.shadows[i] && castRay(info.position, vector_to_light.normal(), objects, lights, shadow_mask).hit) {
                 info.shadows[i] = true;
@@ -161,10 +162,11 @@ Intersection castRay(Vector3 origin, Vector3 direction, vector<Shape *> objects,
             info.light += info.diffuse[i] * (1 - info.object->material.Ks) + info.specular[i] * info.object->material.Ks;
         }
     }
-
+    
     // MARK: Reflection
     auto reflect_mask = mask;
     reflect_mask.reflections = true;
+    reflect_mask.transmission = true;
     reflect_mask.shadows = vector<bool>(lights.size(), true);
     
     if (mask.reflections && (info.object->material.Ks > 0 || info.object->material.transparent)) {
@@ -176,11 +178,11 @@ Intersection castRay(Vector3 origin, Vector3 direction, vector<Shape *> objects,
     
     // MARK: Transmission
     if (info.object->material.transparent) {
-        if ((info.object->material.Ks = fresnel(direction, info.normal, info.object->material.ior)) < 1) {
+        if ((info.kr = fresnel(direction, info.normal, info.object->material.ior)) < 1 && mask.transmission) {
             reflect_mask.step_size = settings.precise_step_size;
             
             auto ray = castRay(info.position, refract(direction, info.normal, info.object->material.ior), objects, lights, reflect_mask);
-            info.transmission = (ray.shaded()) * (1 - info.object->material.Ks);
+            info.transmission = ray.shaded();
         }
     }
     

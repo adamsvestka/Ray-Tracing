@@ -25,13 +25,13 @@ protected:
 public:
     Material material;
     
-    Vector3 getCenter();
-    Matrix3x3 getRotation();
-    Matrix3x3 getInverseRotation();
-    virtual bool intersects(Vector3) = 0;
-    virtual Vector3 getNormal(Vector3) = 0;
-    virtual Vector3 getSurface(Vector3) = 0;
-    virtual Color getTexture(Vector3) = 0;
+    Vector3 getCenter() const;
+    Matrix3x3 getRotation() const;
+    Matrix3x3 getInverseRotation() const;
+    virtual bool intersects(Vector3) const = 0;
+    virtual Vector3 getNormal(Vector3) const = 0;
+    virtual Vector3 getSurface(Vector3) const = 0;
+    virtual Color getTexture(Vector3) const = 0;
 };
 
 
@@ -41,10 +41,10 @@ private:
     
 public:
     Sphere(Vector3, float, Vector3, Material);
-    bool intersects(Vector3);
-    Vector3 getNormal(Vector3);
-    Vector3 getSurface(Vector3);
-    Color getTexture(Vector3);
+    bool intersects(Vector3) const;
+    Vector3 getNormal(Vector3) const;
+    Vector3 getSurface(Vector3) const;
+    Color getTexture(Vector3) const;
 };
 
 
@@ -54,8 +54,8 @@ private:
     
 public:
     Cube(Vector3, float, Vector3, Material);
-    bool intersects(Vector3);
-    Vector3 getNormal(Vector3);
-    Vector3 getSurface(Vector3);
-    Color getTexture(Vector3);
+    bool intersects(Vector3) const;
+    Vector3 getNormal(Vector3) const;
+    Vector3 getSurface(Vector3) const;
+    Color getTexture(Vector3) const;
 };

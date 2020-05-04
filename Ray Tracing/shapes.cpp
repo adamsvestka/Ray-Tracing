@@ -8,9 +8,9 @@
 
 #include "shapes.hpp"
 
-Vector3 Shape::getCenter() { return center; };
-Matrix3x3 Shape::getRotation() { return rotation; }
-Matrix3x3 Shape::getInverseRotation() { return Irotation; }
+Vector3 Shape::getCenter() const { return center; };
+Matrix3x3 Shape::getRotation() const { return rotation; }
+Matrix3x3 Shape::getInverseRotation() const { return Irotation; }
 
 
 // MARK: - Sphere
@@ -23,19 +23,19 @@ Sphere::Sphere(Vector3 position, float radius, Vector3 angles, Material material
     Irotation = rotation.inverse();
 }
 
-bool Sphere::intersects(Vector3 d) {
+bool Sphere::intersects(Vector3 d) const {
     return abs(d.length()) < radius;
 }
 
-Vector3 Sphere::getNormal(Vector3 point) {
+Vector3 Sphere::getNormal(Vector3 point) const {
     return (point - center).normal();
 }
 
-Vector3 Sphere::getSurface(Vector3 point) {
+Vector3 Sphere::getSurface(Vector3 point) const {
     return center + getNormal(point) * radius;
 }
 
-Color Sphere::getTexture(Vector3 point) {
+Color Sphere::getTexture(Vector3 point) const {
     float u = asin(point.z / radius) / M_PI + 0.5;
     float v = atan2(point.x / radius, point.y / radius) / (2 * M_PI) + 0.5;
     
@@ -53,11 +53,11 @@ Cube::Cube(Vector3 position, float radius, Vector3 angles, Material material) {
     Irotation = rotation.inverse();
 }
 
-bool Cube::intersects(Vector3 d) {
+bool Cube::intersects(Vector3 d) const {
     return abs(d.x) < radius && abs(d.y) < radius && abs(d.z) < radius;
 }
 
-Vector3 Cube::getNormal(Vector3 point) {
+Vector3 Cube::getNormal(Vector3 point) const {
     Vector3 d = rotation * (point - center);
     
     if (abs(d.x) > abs(d.y) && abs(d.x) > abs(d.z)) return Irotation * Vector3{d.x > 0 ? 1.f : -1.f, 0, 0};
@@ -65,7 +65,7 @@ Vector3 Cube::getNormal(Vector3 point) {
     else return Irotation * Vector3{0, 0, d.z > 0 ? 1.f : -1.f};
 }
 
-Vector3 Cube::getSurface(Vector3 point) {
+Vector3 Cube::getSurface(Vector3 point) const {
     Vector3 d = rotation * (point - center);
     
     if (d.x - settings.quick_step_size < -radius) d.x = -radius;
@@ -77,7 +77,7 @@ Vector3 Cube::getSurface(Vector3 point) {
     return Irotation * d + center;
 }
 
-Color Cube::getTexture(Vector3 point) {
+Color Cube::getTexture(Vector3 point) const {
     float u = point.x / (2 * radius) + 0.5;
     float v = point.y / (2 * radius) + 0.5;
     

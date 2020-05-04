@@ -16,28 +16,31 @@ struct Material;
 #include <cmath>
 #include <vector>
 #include <functional>
+#include <thread>
+#include <queue>
+#include <atomic>
 
 using namespace std;
 
 struct Vector3 {
     float x, y, z;
     
-    float length();
-    Vector3 normal();
+    float length() const;
+    Vector3 normal() const;
     
-    Color toColor();
-    Vector3 operator+(Vector3);
-    Vector3 operator-(Vector3);
-    Vector3 operator-();
-    Vector3 operator*(double);
-    Vector3 operator*(float);
-    Vector3 operator*(int);
-    Vector3 operator/(double);
-    Vector3 operator/(float);
-    Vector3 operator/(int);
-    float operator*(Vector3);
-    void operator+=(Vector3);
-    void operator-=(Vector3);
+    Color toColor() const;
+    Vector3 operator+(const Vector3) const;
+    Vector3 operator-(const Vector3) const;
+    Vector3 operator-() const;
+    Vector3 operator*(const double) const;
+    Vector3 operator*(const float) const;
+    Vector3 operator*(const int) const;
+    Vector3 operator/(const double) const;
+    Vector3 operator/(const float) const;
+    Vector3 operator/(const int) const;
+    float operator*(const Vector3) const;
+    void operator+=(const Vector3);
+    void operator-=(const Vector3);
 };
 
 #define Zero    Vector3{0, 0, 0}
@@ -48,12 +51,12 @@ struct Matrix3x3 {
     
     Matrix3x3 inverse();
     
-    float operator()(int, int);
-    Matrix3x3 operator+(Matrix3x3);
-    Matrix3x3 operator-(Matrix3x3);
-    Matrix3x3 operator*(float);
-    Matrix3x3 operator*(Matrix3x3);
-    Vector3 operator*(Vector3);
+    float operator()(const int, const int) const;
+    Matrix3x3 operator+(const Matrix3x3) const;
+    Matrix3x3 operator-(const Matrix3x3) const;
+    Matrix3x3 operator*(const float) const;
+    Matrix3x3 operator*(const Matrix3x3) const;
+    Vector3 operator*(const Vector3) const;
 };
 
 #define Identity    Matrix3x3{1, 0, 0, 0, 1, 0, 0, 0, 1}
@@ -68,18 +71,19 @@ struct Color {
     Color();
     Color(float, float, float);
     
-    operator int();
-    Color operator+(Color);
-    Color operator-(Color);
-    Color operator*(double);
-    Color operator*(float);
-    Color operator*(int);
-    Color operator/(double);
-    Color operator/(float);
-    Color operator/(int);
-    Color operator*(Color);
-    void operator+=(Color);
-    void operator-=(Color);
+    operator int() const;
+    bool operator==(const Color) const;
+    Color operator+(const Color) const;
+    Color operator-(const Color) const;
+    Color operator*(const double) const;
+    Color operator*(const float) const;
+    Color operator*(const int) const;
+    Color operator/(const double) const;
+    Color operator/(const float) const;
+    Color operator/(const int) const;
+    Color operator*(const Color) const;
+    void operator+=(const Color);
+    void operator-=(const Color);
 };
 
 #define White       Color{1.0, 1.0, 1.0}
@@ -110,6 +114,45 @@ struct NeuralNetwork {
     
     vector<float> eval(vector<float>);
 };
+
+
+template<typename T>
+class ConcurrentQueue {
+private:
+    queue<T> queue_;
+    mutex mutex_;
+    condition_variable cond_;
+    atomic<bool> exit_ = {false};
+    
+public:
+    void push(T const& data) {
+        exit_.store(false);
+        unique_lock<mutex> lk(mutex_);
+        queue_.push(data);
+        lk.unlock();
+        cond_.notify_one();
+    }
+    
+    bool empty() {
+        unique_lock<mutex> lk(mutex_);
+        return queue_.empty();
+    }
+    
+    bool pop(T& popped_value) {
+        unique_lock<mutex> lk(mutex_);
+        cond_.wait(lk, [&]() -> bool { return !queue_.empty() || exit_.load(); });
+        if (exit_.load()) return false;
+        popped_value = queue_.front();
+        queue_.pop();
+        return true;
+    }
+    
+    void stop() {
+        exit_.store(true);
+        cond_.notify_all();
+    }
+};
+
 
 struct Material {
 //    Color color;

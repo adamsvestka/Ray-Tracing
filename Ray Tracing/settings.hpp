@@ -38,11 +38,15 @@ struct Settings {
     
     short render_pattern = PATTERN_SPIRAL;
     
-    short resolution_decrese = 1;
+    bool show_debug = true;
     
     short field_of_view = 120;
     
+    short resolution_decrese = 1;
+    
     short render_region_size = 10;
+    
+    short rendering_threads = 15;
     
     Color ambient_lighting = Gray / 2;
     

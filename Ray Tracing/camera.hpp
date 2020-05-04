@@ -15,6 +15,8 @@ class Camera;
 #include <cmath>
 #include <sstream>
 #include <iomanip>
+#include <thread>
+#include <chrono>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -29,13 +31,30 @@ class Camera;
 
 using namespace std;
 
+struct RenderRegion {
+    int x, y, w, h;
+    vector<vector<Color>> buffer;
+    
+    RenderRegion() {
+        x = y = w = h = 0;
+    }
+    
+    RenderRegion(int minX, int maxX, int minY, int maxY) {
+        x = minX;
+        y = minY;
+        w = maxX - minX;
+        h = maxY - minY;
+        buffer.resize(w, vector<Color>(h, Black));
+    }
+};
+
 class Camera {
 private:
     Vector3 position;
     float fovFactor;
     int width, height, x, y;
     int region_count, region_current;
-    clock_t time;
+    chrono::steady_clock::time_point time;
     
     int r, l, i;
     int minX, maxX, minY, maxY;
@@ -51,15 +70,14 @@ public:
     ~Camera();
 
     void drawBox(int, int, Input);
-    void drawPixel(int, int, int, Intersection);
-    vector<vector<Intersection>> preRender(vector<Shape *>, vector<Light>);
-    vector<vector<Input>> processPreRender(vector<vector<Intersection>>);
+    vector<vector<Intersection>> preRender(const vector<Shape *> &, const vector<Light *> &);
+    vector<vector<Input>> processPreRender(const vector<vector<Intersection>> &);
     void renderInfo();
-    void renderRegion(vector<Shape *>, vector<Light>, Input, Intersection);
-    void render(vector<Shape *>, vector<Light>);
+    RenderRegion renderRegion(const vector<Shape *> &, const vector<Light *> &, RenderRegion, Input, const Intersection &);
+    void render(const vector<Shape *> &, const vector<Light *> &);
     Vector3 getCameraRay(int, int);
     
     void generateRange();
     void resetPosition();
-    bool next(vector<vector<Input>>);
+    bool next(const vector<vector<Input>> &);
 };

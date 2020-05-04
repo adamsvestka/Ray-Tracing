@@ -25,7 +25,7 @@ struct Input {
     float step_size;
     short bounce_count;
     
-    bool lighting, reflections;
+    bool lighting, reflections, transmission;
     vector<bool> shadows;
 };
 
@@ -33,10 +33,10 @@ struct Intersection {
     bool hit;
     Vector3 position;
     float distance;
-    Shape *object;
+    const Shape *object;
     
     Vector3 normal;
-    float light;
+    float light, kr;
     vector<bool> shadows;
     valarray<Color> diffuse, specular;
     Color ambient, texture, reflection, transmission;
@@ -44,4 +44,4 @@ struct Intersection {
     Color shaded();
 };
 
-Intersection castRay(Vector3, Vector3, vector<Shape *>, vector<Light>, Input mask);
+Intersection castRay(Vector3, Vector3, const vector<Shape *> &, const vector<Light *> &, Input mask);
