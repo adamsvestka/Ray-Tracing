@@ -15,6 +15,7 @@ class Cube;
 #include "settings.hpp"
 
 #include "data_types.hpp"
+#include "shaders.hpp"
 #include "ray.hpp"
 
 class Shape {

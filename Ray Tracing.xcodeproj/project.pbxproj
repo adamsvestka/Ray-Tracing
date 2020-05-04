@@ -14,6 +14,7 @@
 		6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3EA2445E2E10066BCCC /* camera.cpp */; };
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
 		6630E3F7244760C70066BCCC /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6630E3F024475B670066BCCC /* libX11.6.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6667DFF924604DFC00A1DDE1 /* shaders.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,6 +45,8 @@
 		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
 		6630E3F024475B670066BCCC /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
+		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
+		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -82,14 +85,16 @@
 				6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */,
 				6630E3D72443CD690066BCCC /* main.cpp */,
 				66DA14C02448C570004432AC /* settings.hpp */,
-				6630E3EE2445E4AB0066BCCC /* ray.hpp */,
-				6630E3ED2445E4AB0066BCCC /* ray.cpp */,
 				6630E3E22445E2B20066BCCC /* data_types.hpp */,
 				6630E3E12445E2B20066BCCC /* data_types.cpp */,
+				6667DFFA24604DFC00A1DDE1 /* shaders.hpp */,
+				6667DFF924604DFC00A1DDE1 /* shaders.cpp */,
 				6630E3E52445E2C70066BCCC /* shapes.hpp */,
 				6630E3E42445E2C70066BCCC /* shapes.cpp */,
 				6630E3E82445E2D70066BCCC /* light_sources.hpp */,
 				6630E3E72445E2D70066BCCC /* light_sources.cpp */,
+				6630E3EE2445E4AB0066BCCC /* ray.hpp */,
+				6630E3ED2445E4AB0066BCCC /* ray.cpp */,
 				6630E3EB2445E2E10066BCCC /* camera.hpp */,
 				6630E3EA2445E2E10066BCCC /* camera.cpp */,
 			);
@@ -168,6 +173,7 @@
 				6630E3E32445E2B20066BCCC /* data_types.cpp in Sources */,
 				6630E3E62445E2C70066BCCC /* shapes.cpp in Sources */,
 				6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */,
+				6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -39,7 +39,7 @@ Color Sphere::getTexture(Vector3 point) const {
     float u = asin(point.z / radius) / M_PI + 0.5;
     float v = atan2(point.x / radius, point.y / radius) / (2 * M_PI) + 0.5;
     
-    return material.texture(u, v);
+    return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
 }
 
 
@@ -81,5 +81,5 @@ Color Cube::getTexture(Vector3 point) const {
     float u = point.x / (2 * radius) + 0.5;
     float v = point.y / (2 * radius) + 0.5;
     
-    return material.texture(u, v);
+    return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
 }

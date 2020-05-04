@@ -9,10 +9,10 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <ncurses.h>
 
 #include "settings.hpp"
 #include "data_types.hpp"
+#include "shaders.hpp"
 #include "shapes.hpp"
 #include "light_sources.hpp"
 #include "ray.hpp"
@@ -28,8 +28,8 @@ int main(int argc, const char * argv[]) {
     Camera camera({0, 0, 0});
     
     vector<Shape *> objects;
-    objects.push_back(new Sphere({15, 0, -1}, 1, {0, -30, 0}, {[](float u, float v) { return ((int)(u * 10) % 2 != (int)(v * 20) % 2) ? Purple / 2 : Green / 2; }, false, false, 1, false}));
-    objects.push_back(new Cube({15, 0, -7}, 5, {0, -30, 20}, {[](float u, float v) { return ((int)(u * 10) % 2 != (int)(v * 10) % 2) ? Red : Yellow; }, 100, 0.5, 1, false}));
+    objects.push_back(new Sphere({15, 0, -1}, 1, {0, -30, 0}, {[c = Checkerboard(10, 20)](float u, float v) { return colorRamp(c(u, v), Purple / 2, Green / 2); }, false, false, 1, false}));
+    objects.push_back(new Cube({15, 0, -7}, 5, {0, -30, 20}, {[c = Checkerboard(8, 8), n = Noise(0, 32)](float u, float v) { return colorRamp(c(u, v), Red, Yellow) - White / 4 * n(u, v); }, 100, 0.5, 1, false}));
     objects.push_back(new Sphere({19, -4, 3}, 2, Zero, {[](float, float) { return Gray; }, 250, 0.8, 1, false}));
     objects.push_back(new Sphere({12, -0.9, -0.3}, 1, Zero, {[](float, float) { return Red; }, false, true, 1.3, true}));
     

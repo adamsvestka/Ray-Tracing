@@ -8,15 +8,6 @@
 
 #include "ray.hpp"
 
-// MARK: Input
-//Input::Input(float step_size) {
-//    this->step_size = step_size;
-//    bounce_count = 0;
-//
-//    lighting = true;
-//}
-
-
 // MARK: Intersection
 Color Intersection::shaded() {
     if (!hit) return settings.background_color;
@@ -141,7 +132,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     info.normal = info.object->getNormal(info.position);
     
     // MARK: Diffuse, Specular
-    if (!info.object->material.transparent) {
+    if (mask.diffuse && !info.object->material.transparent) {
         auto shadow_mask = mask;
         shadow_mask.step_size = settings.quick_step_size;
         shadow_mask.lighting = false;
@@ -159,14 +150,13 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
                 continue;
             }
             
-            info.light += info.diffuse[i] * (1 - info.object->material.Ks) + info.specular[i] * info.object->material.Ks;
+            info.light += info.diffuse[i].value() * (1 - info.object->material.Ks) + info.specular[i].value() * info.object->material.Ks;
         }
     }
     
     // MARK: Reflection
     auto reflect_mask = mask;
-    reflect_mask.reflections = true;
-    reflect_mask.transmission = true;
+    reflect_mask.diffuse = reflect_mask.reflections = reflect_mask.transmission = true;
     reflect_mask.shadows = vector<bool>(lights.size(), true);
     
     if (mask.reflections && (info.object->material.Ks > 0 || info.object->material.transparent)) {

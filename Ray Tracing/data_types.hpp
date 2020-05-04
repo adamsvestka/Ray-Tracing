@@ -15,7 +15,6 @@ struct Material;
 
 #include <cmath>
 #include <vector>
-#include <functional>
 #include <thread>
 #include <queue>
 #include <atomic>
@@ -70,6 +69,8 @@ struct Color {
     
     Color();
     Color(float, float, float);
+    
+    float value() const;
     
     operator int() const;
     bool operator==(const Color) const;
@@ -151,12 +152,4 @@ public:
         exit_.store(true);
         cond_.notify_all();
     }
-};
-
-
-struct Material {
-//    Color color;
-    function<Color(float, float)> texture;
-    float n, Ks, ior;
-    bool transparent;
 };

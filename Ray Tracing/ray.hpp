@@ -25,7 +25,7 @@ struct Input {
     float step_size;
     short bounce_count;
     
-    bool lighting, reflections, transmission;
+    bool lighting, diffuse, reflections, transmission;
     vector<bool> shadows;
 };
 

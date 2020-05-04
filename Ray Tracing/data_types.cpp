@@ -148,6 +148,10 @@ Color::Color(float r, float g, float b) {
     this->b = b;
 }
 
+float Color::value() const {
+    return (r + g + b) / 3.f;
+}
+
 Color::operator int() const {
     return ((int)(fmin(fmax(r, 0.0), 1.0) * 255) << 16) + ((int)(fmin(fmax(g, 0.0), 1.0) * 255) << 8) + (int)(fmin(fmax(b, 0.0), 1.0) * 255);
 }
@@ -223,45 +227,3 @@ vector<float> NeuralNetwork::eval(vector<float> input) {
     
     return layers[layers.size()-1];
 }
-
-
-//template<typename T>
-//class ConcurrentQueue {
-//private:
-//    queue<T> queue_;
-//    mutex mutex_;
-//    condition_variable cond_;
-//    atomic<bool> exit_ = {false};
-//
-//public:
-//    void push(T const& data) {
-//        exit_.store(false);
-//        unique_lock<mutex> lk(mutex_);
-//        queue_.push(data);
-//        lk.unlock();
-//        cond_.notify_one();
-//    }
-//
-//    bool empty() const {
-//        unique_lock<mutex> lk(mutex_);
-//        return queue_.empty();
-//    }
-//
-//    T pop() {
-//        unique_lock<mutex> lk(mutex_);
-//        cond_.wait(lk, [&]() -> bool { return !queue_.empty() || exit_.load(); });
-//        if (exit_.load()) return nullptr;
-//        auto popped_value = queue_.front();
-//        queue_.pop();
-//        return popped_value;
-//    }
-//
-//    void clear() {
-//        exit_.store(true);
-//        unique_lock<mutex> lk(mutex_);
-//        while (!queue_.empty()) {
-//            delete queue_.front();
-//            queue_.pop();
-//        }
-//    }
-//};
