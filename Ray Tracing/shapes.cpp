@@ -36,8 +36,8 @@ Vector3 Sphere::getSurface(Vector3 point) const {
 }
 
 Color Sphere::getTexture(Vector3 point) const {
-    float u = asin(point.z / radius) / M_PI + 0.5;
-    float v = atan2(point.x / radius, point.y / radius) / (2 * M_PI) + 0.5;
+    float u = asin(min(max(point.z / radius, -1.f), 1.f)) / (2 * M_PI) + 0.25;
+    float v = atan2(min(max(point.x / radius, -1.f), 1.f), min(max(point.y / radius, -1.f), 1.f)) / (2 * M_PI) + 0.5;
     
     return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
 }

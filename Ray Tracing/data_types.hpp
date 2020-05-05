@@ -94,6 +94,7 @@ struct Color {
 #define DarkRed     Color{0.3, 0.03, 0.03}
 #define Red         Color{1.0, 0.1, 0.1}
 #define Orange      Color{1.0, 0.5, 0.1}
+#define DarkYellow  Color{0.3, 0.3, 0.03}
 #define Yellow      Color{1.0, 1.0, 0.1}
 #define Lime        Color{0.5, 1.0, 0.1}
 

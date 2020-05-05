@@ -72,6 +72,7 @@ Color getPixel(int x, int y, Intersection data) {
     }
 }
 
+// MARK: Draw box
 void Camera::drawBox(int x, int y, Input mask) {
     const auto size = 0.3;
     
@@ -102,21 +103,21 @@ void Camera::drawBox(int x, int y, Input mask) {
     }
     
     if (mask.step_size == settings.precise_step_size) XSetForeground(display, gc, DarkRed);
-    else if (mask.transmission) XSetForeground(display, gc, Green / 2);
+    else if (mask.transmission) XSetForeground(display, gc, DarkGreen);
     else XSetForeground(display, gc, Gray);
     XDrawLines(display, window, gc, points[0], npoints, CoordModeOrigin);
     
     if (mask.reflections) XSetForeground(display, gc, DarkBlue);
-    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Yellow / 2);
+    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, DarkYellow);
     else XSetForeground(display, gc, Gray);
     XDrawLines(display, window, gc, points[1], npoints, CoordModeOrigin);
     
-    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Yellow / 2);
+    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, DarkYellow);
     else if (mask.reflections) XSetForeground(display, gc, DarkBlue);
     else XSetForeground(display, gc, Gray);
     XDrawLines(display, window, gc, points[2], npoints, CoordModeOrigin);
     
-    if (mask.transmission) XSetForeground(display, gc, Green / 2);
+    if (mask.transmission) XSetForeground(display, gc, DarkGreen);
     else if (mask.step_size == settings.precise_step_size) XSetForeground(display, gc, DarkRed);
     else XSetForeground(display, gc, Gray);
     XDrawLines(display, window, gc, points[3], npoints, CoordModeOrigin);
@@ -210,9 +211,9 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                     default: break;
                 }
                 
-                if (settings.show_debug && processed[x][y].step_size) {
+                if (processed[x][y].step_size) {
                     region_count++;
-                    drawBox(x, y, processed[x][y]);
+                    if (settings.show_debug) drawBox(x, y, processed[x][y]);
                 }
             }
         }

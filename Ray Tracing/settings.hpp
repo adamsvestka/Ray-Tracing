@@ -38,7 +38,7 @@ struct Settings {
     
     short render_pattern = PATTERN_SPIRAL;
     
-    bool show_debug = true;
+    bool show_debug = false;
     
     short field_of_view = 120;
     

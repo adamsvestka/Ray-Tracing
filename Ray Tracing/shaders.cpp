@@ -8,7 +8,7 @@
 
 #include "shaders.hpp"
 
-// MARK: - Interpolation
+// MARK: - Functions
 float smoothstep(float x) {
   return x * x * (3 - 2 * x);
 }
@@ -19,16 +19,23 @@ Color colorRamp(float n, Color a, Color b) {
 
 
 // MARK: - Textures
-
-Checkerboard::Checkerboard(int scaleX, int scaleY) : scaleX(scaleX), scaleY(scaleY) {};
+Checkerboard::Checkerboard(int scale) : scale(scale) {}
 
 float Checkerboard::operator()(float x, float y) const {
-    return (int)(x * scaleX) % 2 != (int)(y * scaleY) % 2;
+    return (int)(x * scale) % 2 != (int)(y * scale) % 2;
 }
 
 
-Noise::Noise(int seed, int scale) {
-   this->scale = scale;
+Brick::Brick(int scale, float ratio, float mortar) : scale(scale), ratio(ratio), mortar(mortar) {}
+
+float Brick::operator()(float x, float y) const {
+    float ix = fmod(x * scale, 1);
+    float iy = fmod(y * scale / ratio + (float)((int)(x * scale) % 2) / scale * ratio * 2, 1);
+    return iy < mortar / ratio || ix < mortar;
+}
+
+
+Noise::Noise(int scale, int seed) : scale(scale) {
    points.resize(scale, vector<pair<float, float>>(scale));
    
    default_random_engine engine(seed);

@@ -17,6 +17,7 @@
 
 using namespace std;
 
+// MARK: - Material
 struct Material {
     function<Color(float, float)> texture;
     float n, Ks, ior;
@@ -24,16 +25,30 @@ struct Material {
 };
 
 
+// MARK: - Functions
 float smoothstep(float);
 Color colorRamp(float, Color, Color);
 
 
+// MARK: - Textures
 class Checkerboard {
 private:
-    int scaleX, scaleY;
+    int scale;
     
 public:
-    Checkerboard(int, int);
+    Checkerboard(int);
+    
+    float operator()(float, float) const;
+};
+
+
+class Brick {
+private:
+    int scale;
+    float ratio, mortar;
+    
+public:
+    Brick(int, float, float);
     
     float operator()(float, float) const;
 };

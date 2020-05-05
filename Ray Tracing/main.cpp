@@ -28,8 +28,8 @@ int main(int argc, const char * argv[]) {
     Camera camera({0, 0, 0});
     
     vector<Shape *> objects;
-    objects.push_back(new Sphere({15, 0, -1}, 1, {0, -30, 0}, {[c = Checkerboard(10, 20)](float u, float v) { return colorRamp(c(u, v), Purple / 2, Green / 2); }, false, false, 1, false}));
-    objects.push_back(new Cube({15, 0, -7}, 5, {0, -30, 20}, {[c = Checkerboard(8, 8), n = Noise(0, 32)](float u, float v) { return colorRamp(c(u, v), Red, Yellow) - White / 4 * n(u, v); }, 100, 0.5, 1, false}));
+    objects.push_back(new Sphere({15, 0, -1}, 1, {0, -30, 0}, {[c = Checkerboard(20), n = Noise(16, 0)](float u, float v) { return colorRamp(c(u, v), Purple / 2, Green / 2) - White / 6 * n(u, v); }, false, false, 1, false}));
+    objects.push_back(new Cube({15, 0, -7}, 5, {0, -30, 20}, {[c = Checkerboard(8), b = Brick(8, 2, 0.1), n = Noise(32, 0)](float u, float v) { return colorRamp(b(u, v), Red, Yellow) - White / 4 * n(u, v); }, 100, 0.5, 1, false}));
     objects.push_back(new Sphere({19, -4, 3}, 2, Zero, {[](float, float) { return Gray; }, 250, 0.8, 1, false}));
     objects.push_back(new Sphere({12, -0.9, -0.3}, 1, Zero, {[](float, float) { return Red; }, false, true, 1.3, true}));
     
