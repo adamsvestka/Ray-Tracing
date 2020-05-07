@@ -12,10 +12,9 @@
 Color Intersection::shaded() {
     if (!hit) return settings.background_color;
     else {
-        Color light = Black;
-        for (int i = 0; i < shadows.size(); i++) if (!shadows[i]) light += texture * diffuse[i] * (1 - object->material.Ks) + specular[i] * object->material.Ks;
-        
-        return (ambient * (1 - object->material.Ks) + light) * !object->material.transparent + reflection * object->material.Ks * kr + transmission * object->material.transparent * (1 - kr);
+        Color lighting = Black;
+        for (int i = 0; i < shadows.size(); i++) if (!shadows[i]) lighting += texture * diffuse[i] * (1 - object->material.Ks) + specular[i] * object->material.Ks;
+        return (ambient * (1 - object->material.Ks) + lighting) * !object->material.transparent + reflection * object->material.Ks * kr + transmission * object->material.transparent * (1 - kr);
     }
     
     // I = Ka + Ke + sum(Vi * Li * (Kd * max(li . n, 0) + Ks * (max(hi . n, 0))) ^ s) + Ks * Ir + Kt * It;
@@ -92,14 +91,14 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     vector<pair<Vector3, Vector3>> pos(objects.size());
     vector<bool> inter(objects.size());
     for (int j = 0; j < objects.size(); j++) {
-        pos[j] = {objects[j]->getRotation() * (origin - objects[j]->getCenter()), objects[j]->getRotation() * increment};
-        inter[j] = objects[j]->intersects(pos[j].first + pos[j].second.normal() * 0.001);
+        pos[j] = {objects[j]->toObjectSpace(origin), objects[j]->getInverseRotation() * increment};
+        inter[j] = objects[j]->intersects(pos[j].first + pos[j].second.normal() * 0.001, pos[j].second);
     }
     
     for (int i = 0; i < repetitions && !info.hit; i++) {
         for (int j = 0; j < objects.size(); j++) {
             pos[j].first += pos[j].second;
-            if (objects[j]->intersects(pos[j].first) != inter[j] && !(!mask.lighting && objects[j]->material.transparent)) {
+            if (objects[j]->intersects(pos[j].first, pos[j].second) != inter[j] && !(!mask.lighting && objects[j]->material.transparent)) {
                 info.hit = true;
                 info.object = objects[j];
                 // Don't waste time calculating light if not necessary
@@ -112,11 +111,11 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
                 Vector3 a = pos[j].first - pos[j].second, b = pos[j].first, c;
                 for (int k = 0; k < settings.surface_smoothing; k++) {
                     c = (a + b) / 2;
-                    if (info.object->intersects(c) != inter[j]) b = c;
+                    if (info.object->intersects(c, c - a) != inter[j]) b = c;
                     else a = c;
                 }
-                info.texture = info.object->getTexture(a);
-                info.position = info.object->getSurface(info.object->getInverseRotation() * a + info.object->getCenter());
+                info.position = info.object->getSurface(a, b - a);
+                info.texture = info.object->getTexture(info.object->toObjectSpace(info.position));
                 info.distance = (info.position - origin).length();
                 
                 break;
@@ -129,7 +128,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
         return info;
     }
     
-    info.normal = info.object->getNormal(info.position);
+    info.normal = info.object->getNormal(info.object->toObjectSpace(info.position), info.object->getInverseRotation() * increment);
     
     // MARK: Diffuse, Specular
     if (mask.diffuse && !info.object->material.transparent) {
@@ -137,15 +136,12 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
         shadow_mask.step_size = settings.quick_step_size;
         shadow_mask.lighting = false;
         for (int i = 0; i < lights.size(); i++) {
-            auto light = lights[i];
-            Vector3 vector_to_light = light->position - info.position;
+            const auto &light = lights[i];
             
-            const float cosine_term = vector_to_light.normal() * info.normal;
+            if (info.object->material.Ks < 1) info.diffuse[i] = light->getDiffuseValue(info.position, info.normal);
+            if (info.object->material.Ks > 0) info.specular[i] = light->getSpecularValue(info.position, info.normal, direction, info.object->material.n);
             
-            if (info.object->material.Ks < 1) info.diffuse[i] = light->color * light->intensity * (float)(fmax(cosine_term, 0.f) / (vector_to_light * vector_to_light * 4 * M_PI));
-            if (info.object->material.Ks > 0) info.specular[i] = light->color * (float)pow(light->intensity, 0.3) * (pow(fmax(-(info.normal * (cosine_term * 2) - vector_to_light.normal()) * direction, 0.f), info.object->material.n));
-            
-            if (mask.shadows[i] && castRay(info.position, vector_to_light.normal(), objects, lights, shadow_mask).hit) {
+            if (mask.shadows[i] && light->shadow && castRay(info.position, light->getVector(info.position).normal(), objects, lights, shadow_mask).hit) {
                 info.shadows[i] = true;
                 continue;
             }

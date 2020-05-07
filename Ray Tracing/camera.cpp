@@ -196,8 +196,10 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                     0, true, true,
                     processed[x][y].reflections = edge_filter.eval(reflect_matrix)[0],
                     processed[x][y].transmission = edge_filter.eval(refract_matrix)[0],
-                    vector<bool>(buffer[0][0].shadows.size(), edge_filter.eval(shadow_matrix[i])[0])
+                    vector<bool>(buffer[0][0].shadows.size(), true)
                 };
+                
+                for (int i = 0; i < processed[x][y].shadows.size(); i++) processed[x][y].shadows[i] = edge_filter.eval(shadow_matrix[i])[0];
                 
                 switch (settings.render_mode) {
                     case RENDER_REFLECTION: if (!processed[x][y].reflections) processed[x][y].step_size = false; processed[x][y].diffuse = processed[x][y].transmission = false; break;
@@ -317,11 +319,6 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
             task_queue.stop();
             for (auto& it : threads) it.join();
             
-//            // Render stats
-//            renderInfo();
-//            
-//            XFlush(display);
-            
             break;
         }
     }
@@ -345,8 +342,8 @@ void Camera::generateRange() {
 void Camera::resetPosition() {
     switch (settings.render_pattern) {
         case PATTERN_SPIRAL:
-            x = round(this->width / settings.render_region_size / 2) * settings.render_region_size;
-            y = round(this->height / settings.render_region_size / 2) * settings.render_region_size;
+            x = floor(this->width / settings.render_region_size / 2) * settings.render_region_size;
+            y = floor(this->height / settings.render_region_size / 2) * settings.render_region_size;
             r = i = 0;
             l = 1;
             break;
@@ -382,10 +379,10 @@ bool Camera::next(const vector<vector<Input>> &mask) {
         case PATTERN_SPIRAL: // MARK: Spiral
             do {
                 switch (r) {
-                    case 0: x += settings.render_region_size; break;
-                    case 1: y -= settings.render_region_size; break;
-                    case 2: x -= settings.render_region_size; break;
-                    case 3: y += settings.render_region_size; break;
+                    case 0: x -= settings.render_region_size; break;
+                    case 1: y += settings.render_region_size; break;
+                    case 2: x += settings.render_region_size; break;
+                    case 3: y -= settings.render_region_size; break;
                 }
                 if (++i >= l) {
                     if (++r % 2 == 0) l++;

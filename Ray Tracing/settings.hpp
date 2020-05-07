@@ -21,7 +21,7 @@ enum RenderPattern {
 struct Settings {
     
     // MARK: Ray
-    short max_render_distance = 20;
+    short max_render_distance = 100;
     
     float probe_step_size = 0.1;
     
@@ -38,7 +38,7 @@ struct Settings {
     
     short render_pattern = PATTERN_SPIRAL;
     
-    bool show_debug = false;
+    bool show_debug = true;
     
     short field_of_view = 120;
     
@@ -46,11 +46,11 @@ struct Settings {
     
     short render_region_size = 10;
     
-    short rendering_threads = 15;
+    short rendering_threads = 25;
     
     Color ambient_lighting = Gray / 2;
     
-    Color background_color = Gray;
+    Color background_color = Azure;
     
 };
 

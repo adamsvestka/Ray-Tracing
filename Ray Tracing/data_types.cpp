@@ -142,11 +142,7 @@ Color::Color() {
     r = g = b = 0;
 }
 
-Color::Color(float r, float g, float b) {
-    this->r = r;
-    this->g = g;
-    this->b = b;
-}
+Color::Color(float r, float g, float b) : r(r), g(g), b(b) {}
 
 float Color::value() const {
     return (r + g + b) / 3.f;

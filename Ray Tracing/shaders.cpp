@@ -19,6 +19,7 @@ Color colorRamp(float n, Color a, Color b) {
 
 
 // MARK: - Textures
+///
 Checkerboard::Checkerboard(int scale) : scale(scale) {}
 
 float Checkerboard::operator()(float x, float y) const {
@@ -26,15 +27,17 @@ float Checkerboard::operator()(float x, float y) const {
 }
 
 
+///
 Brick::Brick(int scale, float ratio, float mortar) : scale(scale), ratio(ratio), mortar(mortar) {}
 
 float Brick::operator()(float x, float y) const {
     float ix = fmod(x * scale, 1);
-    float iy = fmod(y * scale / ratio + (float)((int)(x * scale) % 2) / scale * ratio * 2, 1);
+    float iy = fmod(y * scale / ratio + !((int)(x * scale) % 2) / 2.f, 1);
     return iy < mortar / ratio || ix < mortar;
 }
 
 
+///
 Noise::Noise(int scale, int seed) : scale(scale) {
    points.resize(scale, vector<pair<float, float>>(scale));
    

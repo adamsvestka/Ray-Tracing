@@ -32,7 +32,6 @@
 /* Begin PBXFileReference section */
 		6630E3D42443CD690066BCCC /* Ray Tracing */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Ray Tracing"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6630E3D72443CD690066BCCC /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
-		6630E3DF2443CF020066BCCC /* libncurses.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libncurses.tbd; path = usr/lib/libncurses.tbd; sourceTree = SDKROOT; };
 		6630E3E12445E2B20066BCCC /* data_types.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = data_types.cpp; sourceTree = "<group>"; };
 		6630E3E22445E2B20066BCCC /* data_types.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = data_types.hpp; sourceTree = "<group>"; };
 		6630E3E42445E2C70066BCCC /* shapes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shapes.cpp; sourceTree = "<group>"; };
@@ -85,18 +84,9 @@
 				6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */,
 				6630E3D72443CD690066BCCC /* main.cpp */,
 				66DA14C02448C570004432AC /* settings.hpp */,
-				6630E3E22445E2B20066BCCC /* data_types.hpp */,
-				6630E3E12445E2B20066BCCC /* data_types.cpp */,
-				6667DFFA24604DFC00A1DDE1 /* shaders.hpp */,
-				6667DFF924604DFC00A1DDE1 /* shaders.cpp */,
-				6630E3E52445E2C70066BCCC /* shapes.hpp */,
-				6630E3E42445E2C70066BCCC /* shapes.cpp */,
-				6630E3E82445E2D70066BCCC /* light_sources.hpp */,
-				6630E3E72445E2D70066BCCC /* light_sources.cpp */,
-				6630E3EE2445E4AB0066BCCC /* ray.hpp */,
-				6630E3ED2445E4AB0066BCCC /* ray.cpp */,
-				6630E3EB2445E2E10066BCCC /* camera.hpp */,
-				6630E3EA2445E2E10066BCCC /* camera.cpp */,
+				6667E00024621D0500A1DDE1 /* Data structures */,
+				6667E00124621D2000A1DDE1 /* Objects */,
+				6667DFFF24621CF900A1DDE1 /* Rendering */,
 			);
 			path = "Ray Tracing";
 			sourceTree = "<group>";
@@ -105,9 +95,41 @@
 			isa = PBXGroup;
 			children = (
 				6630E3F024475B670066BCCC /* libX11.6.dylib */,
-				6630E3DF2443CF020066BCCC /* libncurses.tbd */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		6667DFFF24621CF900A1DDE1 /* Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				6630E3EE2445E4AB0066BCCC /* ray.hpp */,
+				6630E3ED2445E4AB0066BCCC /* ray.cpp */,
+				6630E3EB2445E2E10066BCCC /* camera.hpp */,
+				6630E3EA2445E2E10066BCCC /* camera.cpp */,
+			);
+			name = Rendering;
+			sourceTree = "<group>";
+		};
+		6667E00024621D0500A1DDE1 /* Data structures */ = {
+			isa = PBXGroup;
+			children = (
+				6630E3E22445E2B20066BCCC /* data_types.hpp */,
+				6630E3E12445E2B20066BCCC /* data_types.cpp */,
+				6667DFFA24604DFC00A1DDE1 /* shaders.hpp */,
+				6667DFF924604DFC00A1DDE1 /* shaders.cpp */,
+			);
+			name = "Data structures";
+			sourceTree = "<group>";
+		};
+		6667E00124621D2000A1DDE1 /* Objects */ = {
+			isa = PBXGroup;
+			children = (
+				6630E3E52445E2C70066BCCC /* shapes.hpp */,
+				6630E3E42445E2C70066BCCC /* shapes.cpp */,
+				6630E3E82445E2D70066BCCC /* light_sources.hpp */,
+				6630E3E72445E2D70066BCCC /* light_sources.cpp */,
+			);
+			name = Objects;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

@@ -18,6 +18,8 @@
 #include "ray.hpp"
 #include "camera.hpp"
 
+#define Col(col) [](float, float) { return col; }
+
 using namespace std;
 
 Settings settings;
@@ -28,14 +30,13 @@ int main(int argc, const char * argv[]) {
     Camera camera({0, 0, 0});
     
     vector<Shape *> objects;
-    objects.push_back(new Sphere({15, 0, -1}, 1, {0, -30, 0}, {[c = Checkerboard(20), n = Noise(16, 0)](float u, float v) { return colorRamp(c(u, v), Purple / 2, Green / 2) - White / 6 * n(u, v); }, false, false, 1, false}));
-    objects.push_back(new Cube({15, 0, -7}, 5, {0, -30, 20}, {[c = Checkerboard(8), b = Brick(8, 2, 0.1), n = Noise(32, 0)](float u, float v) { return colorRamp(b(u, v), Red, Yellow) - White / 4 * n(u, v); }, 100, 0.5, 1, false}));
-    objects.push_back(new Sphere({19, -4, 3}, 2, Zero, {[](float, float) { return Gray; }, 250, 0.8, 1, false}));
-    objects.push_back(new Sphere({12, -0.9, -0.3}, 1, Zero, {[](float, float) { return Red; }, false, true, 1.3, true}));
+    objects.push_back(new Plane({50, -4, -4}, 40, 12, Zero, {[c = Checkerboard(32)](float u, float v) { return colorRamp(c(u, v), Red, Yellow); }}));
+    objects.push_back(new Sphere({20, -5, -0.5}, 2.5, Zero, {Col(White), 250, 0.7}));
+    objects.push_back(new Sphere({15, 0, 1}, 3, Zero, {Col(White), 0, 0, 0.95, true}));
     
     vector<Light *> lights;
-    lights.push_back(new Light{{10, 5, 5}, White, 1000});  // FIXME: High brightness messes up hue
-//    lights.push_back(Light{{10, -2, 6}, Cyan, 500});
+    lights.push_back(new GlobalLight(White, 0.5));
+    lights.push_back(new LinearLight({20, -4, 25}, White, 300));
     
     camera.render(objects, lights);
     
