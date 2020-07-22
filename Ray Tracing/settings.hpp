@@ -36,6 +36,8 @@ struct Settings {
     
     bool show_debug = true;
     
+    bool preprocess = false;
+    
     short field_of_view = 120;
     
     short resolution_decrese = 1;

@@ -69,7 +69,7 @@ public:
     Camera(Vector3);
     ~Camera();
 
-    void drawBox(int, int, Input);
+    void drawDebugBox(int, int, Input);
     vector<vector<Intersection>> preRender(const vector<Shape *> &, const vector<Light *> &);
     vector<vector<Input>> processPreRender(const vector<vector<Intersection>> &);
     void renderInfo();

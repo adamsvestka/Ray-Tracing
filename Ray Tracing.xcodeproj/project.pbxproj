@@ -13,7 +13,7 @@
 		6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E72445E2D70066BCCC /* light_sources.cpp */; };
 		6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3EA2445E2E10066BCCC /* camera.cpp */; };
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
-		6630E3F7244760C70066BCCC /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6630E3F024475B670066BCCC /* libX11.6.dylib */; settings = {ATTRIBUTES = (Weak, ); }; };
+		665B9C9B24C8EF71000C4E1E /* libX11.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9C9A24C8EF71000C4E1E /* libX11.dylib */; };
 		6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6667DFF924604DFC00A1DDE1 /* shaders.cpp */; };
 /* End PBXBuildFile section */
 
@@ -45,6 +45,7 @@
 		6630E3F024475B670066BCCC /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
 		665B9C9524C8D2C4000C4E1E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+		665B9C9A24C8EF71000C4E1E /* libX11.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.dylib; path = ../../../../../opt/X11/lib/libX11.dylib; sourceTree = "<group>"; };
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
 		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
@@ -55,7 +56,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6630E3F7244760C70066BCCC /* libX11.6.dylib in Frameworks */,
+				665B9C9B24C8EF71000C4E1E /* libX11.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -95,6 +96,7 @@
 		6630E3DE2443CF020066BCCC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				665B9C9A24C8EF71000C4E1E /* libX11.dylib */,
 				6630E3F024475B670066BCCC /* libX11.6.dylib */,
 			);
 			name = Frameworks;

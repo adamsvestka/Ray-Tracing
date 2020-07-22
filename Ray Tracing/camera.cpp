@@ -28,8 +28,7 @@ Camera::Camera(Vector3 position) {
     this->height = screenHeight / settings.resolution_decrese;
     this->position = position;
     fovFactor = 1 / tan(settings.field_of_view / 2);
-    region_count = 0;
-    region_current = -1;
+    region_current = 0;
     
     resetPosition();
 }
@@ -72,8 +71,8 @@ Color getPixel(int x, int y, Intersection data) {
     }
 }
 
-// MARK: Draw box
-void Camera::drawBox(int x, int y, Input mask) {
+// MARK: Draw debug box
+void Camera::drawDebugBox(int x, int y, Input mask) {
     const auto size = 0.3;
     
     XPoint points[4][3] = {{
@@ -127,9 +126,10 @@ vector<vector<Intersection>> Camera::preRender(const vector<Shape *> &objects, c
     const int regions_x = ceil((float)width / settings.render_region_size);
     const int regions_y = ceil((float)height / settings.render_region_size);
     
-    vector<vector<Intersection>> buffer(regions_x);
+    vector<vector<Intersection>> buffer(regions_x, vector<Intersection>(regions_y));
+    if (!settings.preprocess) return buffer;
+    
     for (int x = 0; x < regions_x; x++) {
-        buffer[x].resize(regions_y);
         for (int y = 0; y < regions_y; y++) {
             auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, {true, 0, true, true, true, true, vector<bool>(objects.size(), true)});
             
@@ -153,6 +153,8 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
     
     vector<const Shape *> ids;
     
+    region_current = -1; // FIXME: This shouldn't be necessary
+    region_count = 0;
     for (int x = 0; x < regions_x; x++) {
         for (int y = 0; y < regions_y; y++) {
             vector<float> depth_matrix(9);
@@ -212,7 +214,7 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                 
                 if (processed[x][y].render) {
                     region_count++;
-                    if (settings.show_debug) drawBox(x, y, processed[x][y]);
+                    if (settings.show_debug) drawDebugBox(x, y, processed[x][y]);
                 }
             }
         }
@@ -221,29 +223,37 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
     return processed;
 }
 
+#define draw(x, y) XDrawString(display, window, gc, x * 6, y * 15, ss.str().c_str(), (int)ss.str().length()); ss.str("")
 // MARK: - Rendering
 void Camera::renderInfo() {
     XSetForeground(display, gc, Color::Black);
-    XFillRectangle(display, window, gc, 2, 2, 158, 62);
+    XFillRectangle(display, window, gc, 2, 2, 169, 64);
     
     XSetForeground(display, gc, Color::Green);
     
     const float elapsed = chrono::duration<float, milli>(chrono::high_resolution_clock::now() - time).count();
     stringstream ss;
-    ss << "Render time: " << formatTime(elapsed);
-    XDrawString(display, window, gc, 5, 15, ss.str().c_str(), (int)ss.str().length());
+    ss << "Render time: ";
+    draw(1, 1);
     
-    ss.str("");
+    XSetForeground(display, gc, Color::Yellow);
+    ss << formatTime(elapsed);
+    draw(14, 1);
+    XSetForeground(display, gc, Color::Green);
+    
     ss << "Region: " << region_current << "/" << region_count << " @ " << settings.render_region_size << " px";
-    XDrawString(display, window, gc, 5, 30, ss.str().c_str(), (int)ss.str().length());
+    draw(1, 2);
     
-    ss.str("");
-    ss << "ETC: " << formatTime(fmax(elapsed / (region_current ? region_current : 1) * region_count - elapsed, 0.0)) << " - " << fixed << setprecision(region_current >= region_count ? 0 : 1) << 100.f * region_current / region_count << defaultfloat << "%";
-    XDrawString(display, window, gc, 5, 45, ss.str().c_str(), (int)ss.str().length());
+    ss << "ETC: " << formatTime(fmax(elapsed / (region_current ? region_current : 1) * region_count - elapsed, 0.0)) << " - ";
+    draw(1, 3);
     
-    ss.str("");
-    ss << width << "x" << height << " px @ " << settings.max_render_distance;
-    XDrawString(display, window, gc, 5, 60, ss.str().c_str(), (int)ss.str().length());
+    XSetForeground(display, gc, Color::Orange);
+    ss << fixed << setprecision(region_current >= region_count ? 0 : 1) << 100.f * region_current / region_count << defaultfloat << "%";
+    draw(21, 3);
+    XSetForeground(display, gc, Color::Green);
+    
+    ss << "Quality: " << width << "x" << height << " (0," << settings.max_render_distance << "]";
+    draw(1, 4);
 }
 
 RenderRegion Camera::renderRegion(const vector<Shape *> &objects, const vector<Light *> &lights, RenderRegion region, Input mask, const Intersection &estimate) {
@@ -269,25 +279,25 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
         if (event.type == Expose && event.xexpose.count == 0) {
             time = chrono::high_resolution_clock::now();
             
-            // Aproximate regions
+            // Render at lower resolution
             const auto buffer = preRender(objects, lights);
             XFlush(display);
             
             // Process what to render
-            const auto mask = processPreRender(buffer);
+            region_count = (int)buffer.size() * (int)buffer[0].size();
+            const auto mask = settings.preprocess ? processPreRender(buffer) : vector<vector<Input>>(buffer.size(), vector<Input>(buffer[0].size(), Input{true, 0, true, true, true, true, vector<bool>(lights.size(), true)}));
             XFlush(display);
             
+            // Create job queue
             ConcurrentQueue<RenderRegion> task_queue;
             do {
                 task_queue.push(RenderRegion(minX, maxX, minY, maxY));
-//                drawBox(minX / settings.render_region_size, minY / settings.render_region_size, {false, -1});
+//                drawDebugBox(minX / settings.render_region_size, minY / settings.render_region_size, {false, -1});
             } while (next(mask));
             renderInfo();
             XFlush(display);
             
-            // Render
             ConcurrentQueue<RenderRegion> result_queue;
-            
             auto func = [&]() {
                 while (true) {
                     RenderRegion task;
@@ -296,8 +306,12 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
                     result_queue.push(renderRegion(objects, lights, task, mask[x][y], buffer[x][y]));
                 }
             };
+            
+            // Startup sibling threads
             vector<thread> threads(settings.rendering_threads);
             for (auto& it : threads) it = thread(func);
+            
+            // Use main thread to render results
             do {
                 RenderRegion region;
                 result_queue.pop(region);
@@ -313,6 +327,7 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
                 XFlush(display);
             } while (region_current < region_count);
             
+            // Terminate sibling threads
             task_queue.stop();
             for (auto &it : threads) it.join();
             
