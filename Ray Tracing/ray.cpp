@@ -9,10 +9,10 @@
 #include "ray.hpp"
 
 // MARK: Intersection
-Color Intersection::shaded() {
+Color Intersection::shaded() const {
     if (!hit) return settings.background_color;
     else {
-        Color lighting = Black;
+        Color lighting = Color::Black;
         for (int i = 0; i < shadows.size(); i++) if (!shadows[i]) lighting += texture * diffuse[i] * (1 - object->material.Ks) + specular[i] * object->material.Ks;
         return (ambient * (1 - object->material.Ks) + lighting) * !object->material.transparent + reflection * object->material.Ks * kr + transmission * object->material.transparent * (1 - kr);
     }
@@ -64,7 +64,7 @@ Vector3 refract(Vector3 direction, Vector3 normal, float ior) {
     }
     float eta = etai / etat;
     float k = 1 - eta * eta * (1 - cosi * cosi);
-    return (k < 0 ? Zero : direction * eta + normal * (eta * cosi - sqrt(k))).normal();
+    return (k < 0 ? Vector3::Zero : direction * eta + normal * (eta * cosi - sqrt(k))).normal();
 }
 
 // MARK: castRay
@@ -75,65 +75,41 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     info.position = origin;
     info.distance = settings.max_render_distance;
     info.object = nullptr;
-    info.normal = Zero;
+    info.normal = Vector3::Zero;
     info.light = 0;
     info.kr = 1;
     info.shadows = vector<bool>(lights.size(), false);
-    info.diffuse = info.specular = valarray<Color>(Black, objects.size());
+    info.diffuse = info.specular = valarray<Color>(Color::Black, objects.size());
     info.ambient = settings.ambient_lighting;
-    info.texture = info.reflection = info.transmission = Black;
+    info.texture = info.reflection = info.transmission = Color::Black;
     
     if (++mask.bounce_count > settings.max_light_bounces) return info;
     
-    Vector3 increment = direction * mask.step_size;
-    const int repetitions = settings.max_render_distance / mask.step_size;
-    
-    vector<pair<Vector3, Vector3>> pos(objects.size());
-    vector<bool> inter(objects.size());
-    for (int j = 0; j < objects.size(); j++) {
-        pos[j] = {objects[j]->toObjectSpace(origin), objects[j]->getInverseRotation() * increment};
-        inter[j] = objects[j]->intersects(pos[j].first + pos[j].second.normal() * 0.001, pos[j].second);
-    }
-    
-    for (int i = 0; i < repetitions && !info.hit; i++) {
-        for (int j = 0; j < objects.size(); j++) {
-            pos[j].first += pos[j].second;
-            if (objects[j]->intersects(pos[j].first, pos[j].second) != inter[j] && !(!mask.lighting && objects[j]->material.transparent)) {
-                info.hit = true;
-                info.object = objects[j];
-                // Don't waste time calculating light if not necessary
-                if (!mask.lighting) {
-                    info.position = origin + increment * i;
-                    info.distance = (info.position - origin).length();
-                    return info;
-                }
-                // Smooth surfaces
-                Vector3 a = pos[j].first - pos[j].second, b = pos[j].first, c;
-                for (int k = 0; k < settings.surface_smoothing; k++) {
-                    c = (a + b) / 2;
-                    if (info.object->intersects(c, c - a) != inter[j]) b = c;
-                    else a = c;
-                }
-                info.position = info.object->getSurface(a, b - a);
-                info.texture = info.object->getTexture(info.object->toObjectSpace(info.position));
-                info.distance = (info.position - origin).length();
-                
-                break;
-            }
+    float distance = -2;
+    for (const auto &object : objects) {
+        distance = object->intersect(origin, direction);
+        if (distance < info.distance && distance > 0 && distance <= settings.max_render_distance && (mask.lighting || !object->material.transparent)) {
+            info.object = object;
+            info.distance = distance;
         }
     }
     
-    if (!info.hit) {
-        info.position = origin + increment * repetitions;
-        return info;
-    }
-    
-    info.normal = info.object->getNormal(info.object->toObjectSpace(info.position), info.object->getInverseRotation() * increment);
+    info.position = origin + direction * info.distance;
+    if ((info.hit = info.object != nullptr)) {
+        info.normal = info.object->getNormal(info.position, direction);
+        info.texture = info.object->getTexture(info.position);
+        
+        // Offset to avoid self-intersection
+        if (info.normal * direction < 0 && info.object->material.transparent) info.position -= info.normal * settings.surface_bias;
+        else info.position += info.normal * settings.surface_bias;
+        
+        // Return if only testing for clear line of sight
+        if (!mask.lighting) return info;
+    } else return info;
     
     // MARK: Diffuse, Specular
     if (mask.diffuse && !info.object->material.transparent) {
         auto shadow_mask = mask;
-        shadow_mask.step_size = settings.quick_step_size;
         shadow_mask.lighting = false;
         for (int i = 0; i < lights.size(); i++) {
             const auto &light = lights[i];
@@ -141,6 +117,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
             if (info.object->material.Ks < 1) info.diffuse[i] = light->getDiffuseValue(info.position, info.normal);
             if (info.object->material.Ks > 0) info.specular[i] = light->getSpecularValue(info.position, info.normal, direction, info.object->material.n);
             
+            // Check clear line of sight to light
             if (mask.shadows[i] && light->shadow && castRay(info.position, light->getVector(info.position).normal(), objects, lights, shadow_mask).hit) {
                 info.shadows[i] = true;
                 continue;
@@ -156,18 +133,14 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     reflect_mask.shadows = vector<bool>(lights.size(), true);
     
     if (mask.reflections && (info.object->material.Ks > 0 || info.object->material.transparent)) {
-        reflect_mask.step_size = settings.quick_step_size;
-        
-        auto ray = castRay(info.position, reflect(direction, info.normal), objects, lights, reflect_mask);
+        const auto ray = castRay(info.position, reflect(direction, info.normal), objects, lights, reflect_mask);
         info.reflection = ray.shaded();
     }
     
     // MARK: Transmission
-    if (info.object->material.transparent) {
+    if (info.object->material.transparent) {    // Nested ifs to fill info.kr but not waste computation
         if ((info.kr = fresnel(direction, info.normal, info.object->material.ior)) < 1 && mask.transmission) {
-            reflect_mask.step_size = settings.precise_step_size;
-            
-            auto ray = castRay(info.position, refract(direction, info.normal, info.object->material.ior), objects, lights, reflect_mask);
+            const auto ray = castRay(info.position, refract(direction, info.normal, info.object->material.ior), objects, lights, reflect_mask);
             info.transmission = ray.shaded();
         }
     }

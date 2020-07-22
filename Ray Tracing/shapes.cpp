@@ -8,6 +8,11 @@
 
 #include "shapes.hpp"
 
+Shape::Shape(Vector3 position, Vector3 angles, Material material) : center(position), material(material) {
+    rotation = Matrix3x3::RotationMatrix(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
+    Irotation = rotation.inverse();
+    if (this->material.transparent) this->material.Ks = 1;
+}
 Vector3 Shape::getCenter() const { return center; };
 Matrix3x3 Shape::getRotation() const { return rotation; }
 Matrix3x3 Shape::getInverseRotation() const { return Irotation; }
@@ -20,28 +25,41 @@ Vector3 Shape::toWorldSpace(Vector3 _point) const { return rotation * _point + c
 /// @param radius float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Sphere::Sphere(Vector3 position, float radius, Vector3 angles, Material material) : radius(radius) {
-    this->center = position;
-    this->material = material;
+Sphere::Sphere(Vector3 position, float radius, Vector3 angles, Material material) : Shape(position, angles, material) {
+    this->radius = radius;
+    this->radius2 = pow(radius, 2);
+}
+
+float Sphere::intersect(Vector3 origin, Vector3 direction) const {
+    float t0, t1;
     
-    rotation = rot_mat(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
-    Irotation = rotation.inverse();
-    if (this->material.transparent) this->material.Ks = 1;
+    Vector3 path = center - origin;
+    float tca = path * direction;
+    if (tca < 0) return -1;
+    
+    float d2 = path * path - tca * tca;
+    if (d2 > radius2) return -1;
+    
+    float thc = sqrt(radius2 - d2);
+    t0 = tca - thc;
+    t1 = tca + thc;
+    if (t0 > t1) swap(t0, t1);
+    
+    if (t0 < 0) {
+        if (t1 < 0) return -1;
+        return t1;
+    }
+    
+    return t0;
 }
 
-bool Sphere::intersects(Vector3 _point, Vector3 _direction) const {
-    return abs(_point.length()) < radius;
+Vector3 Sphere::getNormal(Vector3 point, Vector3 direction) const {
+    return rotation * toObjectSpace(point).normal();
 }
 
-Vector3 Sphere::getNormal(Vector3 _point, Vector3 _direction) const {
-    return rotation * _point.normal();
-}
-
-Vector3 Sphere::getSurface(Vector3 _point, Vector3 _direction) const {
-    return toWorldSpace(_point.normal() * radius);
-}
-
-Color Sphere::getTexture(Vector3 _point) const {
+Color Sphere::getTexture(Vector3 point) const {
+    const Vector3 _point = toObjectSpace(point);
+    
     float u = asin(min(max(_point.z / radius, -1.f), 1.f)) / (2 * M_PI) + 0.25;
     float v = atan2(min(max(_point.x / radius, -1.f), 1.f), min(max(_point.y / radius, -1.f), 1.f)) / (2 * M_PI) + 0.5;
     
@@ -49,66 +67,78 @@ Color Sphere::getTexture(Vector3 _point) const {
 }
 
 
-// MARK: - Cube
+// MARK: - Cuboid
+/// @param position Vector3{x, y, z}
+/// @param size float
+/// @param angles Vector3{x, y, z}
+/// @param material Material{texture, n, Ks, ior, transparent}
+Cuboid::Cuboid(Vector3 position, float size, Vector3 angles, Material material) : Cuboid(position, size, size, size, angles, material) {};
+
 /// @param position Vector3{x, y, z}
 /// @param size_x float
 /// @param size_y float
 /// @param size_z float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Cuboid::Cuboid(Vector3 position, float size_x, float size_y, float size_z, Vector3 angles, Material material) : size_x(size_x), size_y(size_y), size_z(size_z) {
-    this->center = position;
-    this->material = material;
+Cuboid::Cuboid(Vector3 position, float size_x, float size_y, float size_z, Vector3 angles, Material material) : Shape(position, angles, material) {
+    this->size = Vector3{size_x, size_y, size_z};
+    this->vmin = position - size / 2;
+    this->vmax = position + size / 2;
+}
+
+/// @param corner_min Vector3{x, y, z}
+/// @param corner_max Vector3{x, y, z}
+/// @param angles Vector3{x, y, z}
+/// @param material Material{texture, n, Ks, ior, transparent}
+Cuboid::Cuboid(Vector3 corner_min, Vector3 corner_max, Vector3 angles, Material material) : Shape((corner_min + corner_max) / 2, angles, material) {
+    this->size = corner_max - corner_min;
+    this->vmin = corner_min;
+    this->vmax = corner_max;
+}
+
+float Cuboid::intersect(Vector3 origin, Vector3 direction) const {
+    Vector3 _origin = toObjectSpace(origin) + center;
+    Vector3 _direction = Irotation * direction;
     
-    rotation = rot_mat(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
-    Irotation = rotation.inverse();
-    if (this->material.transparent) this->material.Ks = 1;
+    Vector3 tmin = (vmin - _origin) / _direction;
+    Vector3 tmax = (vmax - _origin) / _direction;
+    
+    if (tmin.x > tmax.x) swap(tmin.x, tmax.x);
+    if (tmin.y > tmax.y) swap(tmin.y, tmax.y);
+    if (tmin.z > tmax.z) swap(tmin.z, tmax.z);
+    
+    if (tmin.x > tmax.y || tmin.y > tmax.x) return -1;
+    if (tmin.y > tmin.x) tmin.x = tmin.y;
+    if (tmax.y < tmax.x) tmax.x = tmax.y;
+    
+    if (tmin.x > tmax.z || tmin.z > tmax.x) return -1;
+    if (tmin.z > tmin.x) tmin.x = tmin.z;
+    if (tmax.z < tmax.x) tmax.x = tmax.z;
+    
+    return tmin.x;
 }
 
-bool Cuboid::intersects(Vector3 _point, Vector3 _direction) const {
-    return abs(_point.x) < size_x && abs(_point.y) < size_y && abs(_point.z) < size_z;
-}
-
-Vector3 Cuboid::getNormal(Vector3 _point, Vector3 _direction) const {
+Vector3 Cuboid::getNormal(Vector3 point, Vector3 direction) const {
+    const Vector3 _point = toObjectSpace(point);
+    
     if (abs(_point.x) > abs(_point.y) && abs(_point.x) > abs(_point.z)) return rotation * Vector3{_point.x > 0 ? 1.f : -1.f, 0, 0};
     else if (abs(_point.y) > abs(_point.z)) return rotation * Vector3{0, _point.y > 0 ? 1.f : -1.f, 0};
     else return rotation * Vector3{0, 0, _point.z > 0 ? 1.f : -1.f};
 }
 
-Vector3 Cuboid::getSurface(Vector3 _point, Vector3 _direction) const {
-    float x = (size_x - abs(_point.x)) / abs(_direction.x);
-    float y = (size_y - abs(_point.y)) / abs(_direction.y);
-    float z = (size_z - abs(_point.z)) / abs(_direction.z);
+Color Cuboid::getTexture(Vector3 point) const {
+    const Vector3 _point = toObjectSpace(point);
     
-    if (x < y && x < z) {
-        _point.y -= _direction.y * x;
-        _point.z -= _direction.z * x;
-        _point.x = _point.x > 0 ? size_x : -size_x;
-    } else if (y < z) {
-        _point.x -= _direction.x * y;
-        _point.z -= _direction.z * y;
-        _point.y = _point.y > 0 ? size_y : -size_y;
-    } else {
-        _point.x -= _direction.x * z;
-        _point.y -= _direction.y * z;
-        _point.z = _point.z > 0 ? size_z : -size_z;
-    }
-    
-    return toWorldSpace(_point);
-}
-
-Color Cuboid::getTexture(Vector3 _point) const {
     float u, v;
-    
     if (abs(_point.x) > abs(_point.y) && abs(_point.x) > abs(_point.z)) {
-        v = _point.y / (2 * size_y) + 0.5;
-        u = _point.z / (2 * size_z) + 0.5;
+        v = _point.y / (2 * size.y) + 0.5;
+        u = _point.z / (2 * size.z) + 0.5;
     } else if (abs(_point.y) > abs(_point.z)) {
-        v = _point.x / (2 * size_x) + 0.5;
-        u = _point.z / (2 * size_z) + 0.5;
+        v = _point.x / (2 * size.x) + 0.5;
+        u = _point.z / (2 * size.z) + 0.5;
     } else {
-        u = _point.x / (2 * size_x) + 0.5;
-        v = _point.y / (2 * size_y) + 0.5;
+        u = _point.x / (2 * size.x) + 0.5;
+        v = _point.y / (2 * size.y) + 0.5;
     }
     
     return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
@@ -121,39 +151,30 @@ Color Cuboid::getTexture(Vector3 _point) const {
 /// @param height float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Cylinder::Cylinder(Vector3 position, float radius, float height, Vector3 angles, Material material) : radius(radius), height(height) {
-    this->center = position;
-    this->material = material;
-    
-    rotation = rot_mat(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
-    Irotation = rotation.inverse();
-    if (this->material.transparent) this->material.Ks = 1;
-}
-
-bool Cylinder::intersects(Vector3 _point, Vector3 _direction) const {
-    return sqrt(pow(_point.x, 2) + pow(_point.y, 2)) < radius && abs(_point.z) < height;
-}
-
-Vector3 Cylinder::getNormal(Vector3 _point, Vector3 _direction) const {
-    if (abs(_point.z) / height > sqrt(pow(_point.x, 2) + pow(_point.y, 2)) / radius) return rotation * Vector3{0, 0, _point.z > 0 ? 1.f : -1.f};
-    else return rotation * Vector3{_point.x, _point.z, 0}.normal();
-}
-
-Vector3 Cylinder::getSurface(Vector3 _point, Vector3 _direction) const {
-    if (abs(_point.z) / height > sqrt(pow(_point.x, 2) + pow(_point.y, 2)) / radius) _point.z = _point.z > 0 ? height : -height;
-    else {
-        auto temp = Vector3{_point.x, _point.y}.normal() * radius;
-        _point = {temp.x, temp.y, _point.z};
-    }
-    return toWorldSpace(_point);
-}
-
-Color Cylinder::getTexture(Vector3 _point) const {
-    float u = _point.z / (2 * height) + 0.5;
-    float v = atan2(min(max(_point.x / radius, -1.f), 1.f), min(max(_point.y / radius, -1.f), 1.f)) / (2 * M_PI) + 0.5;
-    
-    return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
-}
+//Cylinder::Cylinder(Vector3 position, float radius, float height, Vector3 angles, Material material) : Shape(position, angles, material) {
+//    this->radius = radius;
+//    this->height = height;
+//}
+//
+//float Cylinder::intersect(Vector3 origin, Vector3 direction) const {
+//    return -1;
+//}
+//
+//Vector3 Cylinder::getNormal(Vector3 point, Vector3 direction) const {
+//    Vector3 _point = toObjectSpace(point);
+//
+//    if (abs(_point.z) / height > sqrt(pow(_point.x, 2) + pow(_point.y, 2)) / radius) return rotation * Vector3{0, 0, _point.z > 0 ? 1.f : -1.f};
+//    else return rotation * Vector3{_point.x, _point.z, 0}.normal();
+//}
+//
+//Color Cylinder::getTexture(Vector3 point) const {
+//    Vector3 _point = toObjectSpace(point);
+//
+//    float u = _point.z / (2 * height) + 0.5;
+//    float v = atan2(min(max(_point.x / radius, -1.f), 1.f), min(max(_point.y / radius, -1.f), 1.f)) / (2 * M_PI) + 0.5;
+//
+//    return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
+//}
 
 
 // MARK: - Plane
@@ -162,36 +183,34 @@ Color Cylinder::getTexture(Vector3 _point) const {
 /// @param size_y float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Plane::Plane(Vector3 position, float size_x, float size_y, Vector3 angles, Material material) : size_x(size_x), size_y(size_y) {
-    this->center = position;
-    this->material = material;
+Plane::Plane(Vector3 position, float size_x, float size_y, Vector3 angles, Material material) : Shape(position, angles, material) {
+    this->size_x = size_x;
+    this->size_y = size_y;
+}
+
+float Plane::intersect(Vector3 origin, Vector3 direction) const {
+    Vector3 normal = getNormal(Vector3::Zero, direction);
+    float denom = normal * direction;
     
-    rotation = rot_mat(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
-    Irotation = rotation.inverse();
-    if (this->material.transparent) this->material.Ks = 1;
-}
-
-bool Plane::intersects(Vector3 _point, Vector3 _direction) const {
-    float dx = _direction.x / _direction.z * _point.z;
-    float dy = _direction.y / _direction.z * _point.z;
+    if (denom < 0) {
+        Vector3 path = center - origin;
+        float t = path * normal / denom;
+        
+        Vector3 _point = origin + direction * t;
+        if (abs(_point.x - center.x) > size_x || abs(_point.y - center.y) > size_y) return -1;
+        return t;
+    }
     
-    if (_point.z > 0) return abs(_point.x + dx) < size_x && abs(_point.y + dy) < size_y && _point.z < -_direction.z;
-    else return abs(_point.x - dx) < size_x && abs(_point.y - dy) < size_y && _point.z > -_direction.z;
+    return -1;
 }
 
-Vector3 Plane::getNormal(Vector3 _point, Vector3 _direction) const {
-    return rotation * Vector3{0, 0, _direction.z < 0 ? 1.f : -1.f};
+Vector3 Plane::getNormal(Vector3 point, Vector3 direction) const {
+    return rotation * Vector3{0, 0, (Irotation * direction).z < 0 ? 1.f : -1.f};
 }
 
-Vector3 Plane::getSurface(Vector3 _point, Vector3 _direction) const {
-    _point.x -= _direction.x / _direction.z * _point.z;
-    _point.y -= _direction.y / _direction.z * _point.z;
-    _point.z = 0;
+Color Plane::getTexture(Vector3 point) const {
+    const Vector3 _point = toObjectSpace(point);
     
-    return toWorldSpace(_point);
-}
-
-Color Plane::getTexture(Vector3 _point) const {
     float u = _point.x / (2 * size_x) + 0.5;
     float v = _point.y / (2 * size_y) + 0.5;
     

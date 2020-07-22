@@ -22,7 +22,7 @@ class Ray;
 using namespace std;
 
 struct Input {
-    float step_size;
+    bool render;
     short bounce_count;
     
     bool lighting, diffuse, reflections, transmission;
@@ -41,7 +41,7 @@ struct Intersection {
     valarray<Color> diffuse, specular;
     Color ambient, texture, reflection, transmission;
     
-    Color shaded();
+    Color shaded() const;
 };
 
 Intersection castRay(Vector3, Vector3, const vector<Shape *> &, const vector<Light *> &, Input mask);

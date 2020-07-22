@@ -21,13 +21,9 @@ enum RenderPattern {
 struct Settings {
     
     // MARK: Ray
-    short max_render_distance = 100;
+    short max_render_distance = 1e2;
     
-    float probe_step_size = 0.1;
-    
-    float quick_step_size = 0.1;
-    
-    float precise_step_size = 0.01;
+    float surface_bias = 1e-3;
     
     short max_light_bounces = 5;
     
@@ -36,7 +32,7 @@ struct Settings {
     // MARK: Camera
     short render_mode = RENDER_SHADED;
     
-    short render_pattern = PATTERN_SPIRAL;
+    short render_pattern = PATTERN_VERTICAL;
     
     bool show_debug = true;
     
@@ -48,9 +44,9 @@ struct Settings {
     
     short rendering_threads = 25;
     
-    Color ambient_lighting = Gray / 2;
+    Color ambient_lighting = Color::Gray / 2;
     
-    Color background_color = Azure;
+    Color background_color = Color::Gray;
     
 };
 

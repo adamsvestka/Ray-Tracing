@@ -66,10 +66,14 @@ public:
 };
 
 
-//class BeamLight : public Light {
-//public:
-//    BeamLight(Vector3, Vector3, Color, int);
-//    Vector3 getVector(Vector3);
-//    Color getDiffuseValue();
-//    Color getSpecularValue();
-//};
+class DirectionalLight : public Light {
+private:
+    Vector3 direction;
+    float intensity;
+    
+public:
+    DirectionalLight(Vector3, Color, float);
+    Vector3 getVector(Vector3);
+    Color getDiffuseValue(Vector3, Vector3);
+    Color getSpecularValue(Vector3, Vector3, Vector3, int);
+};

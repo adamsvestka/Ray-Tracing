@@ -14,14 +14,26 @@ float Vector3::length() const {
     return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 }
 
-Color Vector3::toColor() const {
-    const float len = length();
-    return Color(x > 0 ? x / len : -x / len, y > 0 ? y / len : -y / len, z > 0 ? z / len : -z / len);
-}
-
 Vector3 Vector3::normal() const {
     return this->operator/(length());
 }
+
+Color Vector3::toColor() const {
+    const float len = length();
+    return Color(x / len, y / len, z / len);
+//    return Color(x > 0 ? x / len : -x / len, y > 0 ? y / len : -y / len, z > 0 ? z / len : -z / len);
+}
+
+// MARK: Defined Vectors
+Vector3 Vector3::Zero{0, 0, 0};
+Vector3 Vector3::One{1, 1, 1};
+
+Vector3 Vector3::North{1, 0, 0};
+Vector3 Vector3::South{-1, 0, 0};
+Vector3 Vector3::East{0, 1, 0};
+Vector3 Vector3::West{0, -1, 0};
+Vector3 Vector3::Down{0, 0, -1};
+Vector3 Vector3::Up{0, 0, 1};
 
 Vector3 Vector3::operator+(const Vector3 v) const {
     return Vector3{this->x + v.x, this->y + v.y, this->z + v.z};
@@ -59,6 +71,10 @@ Vector3 Vector3::operator/(const int n) const {
     return Vector3{this->x / n, this->y / n, this->z / n};
 }
 
+Vector3 Vector3::operator/(const Vector3 v) const {
+    return Vector3{this->x / v.x, this->y / v.y, this->z / v.z};
+}
+
 float Vector3::operator*(const Vector3 v) const {
     return this->x * v.x + this->y * v.y + this->z * v.z;
 }
@@ -69,6 +85,14 @@ void Vector3::operator+=(const Vector3 v) {
 
 void Vector3::operator-=(const Vector3 v) {
     x = x - v.x; y = y - v.y; z = z - v.z;
+}
+
+bool Vector3::operator==(const Vector3 v) const {
+    return x == v.x && y == v.y && z == v.z;
+}
+
+bool Vector3::operator!=(const Vector3 v) const {
+    return x != v.x || y != v.y || z != v.z;
 }
 
 
@@ -93,6 +117,24 @@ Matrix3x3 Matrix3x3::inverse() {
     
     return minors * (1.f / det);
 }
+
+Matrix3x3 Matrix3x3::Identity{1, 0, 0, 0, 1, 0, 0, 0, 1};
+
+Matrix3x3 Matrix3x3::RotationMatrixX(float a) {
+    return Matrix3x3{1, 0, 0, 0, cos(a), -sin(a), 0, sin(a), cos(a)};
+};
+
+Matrix3x3 Matrix3x3::RotationMatrixY(float b) {
+    return Matrix3x3{cos(b), 0, sin(b), 0, 1, 0, -sin(b), 0, cos(b)};
+};
+
+Matrix3x3 Matrix3x3::RotationMatrixZ(float c) {
+    return Matrix3x3{cos(c), -sin(c), 0, sin(c), cos(c), 0, 0, 0, 1};
+};
+
+Matrix3x3 Matrix3x3::RotationMatrix(float yaw, float pitch, float roll) {
+    return RotationMatrixX(roll) * RotationMatrixY(pitch) * RotationMatrixZ(yaw);
+};
 
 float Matrix3x3::operator()(const int i, const int j) const {
     return n[i][j];
@@ -147,6 +189,32 @@ Color::Color(float r, float g, float b) : r(r), g(g), b(b) {}
 float Color::value() const {
     return (r + g + b) / 3.f;
 }
+
+// MARK: Defined Colors
+Color Color::White{1.0, 1.0, 1.0};
+Color Color::LightGray{0.3, 0.3, 0.3};
+Color Color::Gray{0.1, 0.1, 0.1};
+Color Color::DarkGray{0.05, 0.05, 0.05};
+Color Color::Black{0.0, 0.0, 0.0};
+
+Color Color::DarkRed{0.3, 0.03, 0.03};
+Color Color::Red{1.0, 0.1, 0.1};
+Color Color::Orange{1.0, 0.5, 0.1};
+Color Color::DarkYellow{0.3, 0.3, 0.03};
+Color Color::Yellow{1.0, 1.0, 0.1};
+Color Color::Lime{0.5, 1.0, 0.1};
+
+Color Color::DarkGreen{0.03, 0.3, 0.03};
+Color Color::Green{0.1, 1.0, 0.1};
+Color Color::Turquoise{0.1, 0.7, 0.7};
+Color Color::Cyan{0.1, 1.0, 1.0};
+
+Color Color::DarkBlue{0.03, 0.03, 0.3};
+Color Color::Blue{0.1, 0.1, 1.0};
+Color Color::Azure{0.28, 0.7, 0.86};
+Color Color::Purple{0.6, 0.1, 1.0};
+Color Color::Magenta{1.0, 0.1, 1.0};
+Color Color::Pink{1.0, 0.4, 0.7};
 
 Color::operator int() const {
     return ((int)(fmin(fmax(r, 0.0), 1.0) * 255) << 16) + ((int)(fmin(fmax(g, 0.0), 1.0) * 255) << 8) + (int)(fmin(fmax(b, 0.0), 1.0) * 255);

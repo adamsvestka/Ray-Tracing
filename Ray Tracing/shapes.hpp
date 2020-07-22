@@ -26,65 +26,65 @@ protected:
 public:
     Material material;
     
+    Shape(Vector3, Vector3, Material);
     /***/ Vector3 getCenter() const;
     /***/ Matrix3x3 getRotation() const;
     /***/ Matrix3x3 getInverseRotation() const;
     /***/ Vector3 toObjectSpace(Vector3 point) const;
     /***/ Vector3 toWorldSpace(Vector3 _point) const;
-    /***/ virtual bool intersects(Vector3 _point, Vector3 _direction) const = 0;
-    /***/ virtual Vector3 getNormal(Vector3 _point, Vector3 _direction) const = 0;
-    /***/ virtual Vector3 getSurface(Vector3 _point, Vector3 _direction) const = 0;
-    /***/ virtual Color getTexture(Vector3 _point) const = 0;
+    /***/ virtual float intersect(Vector3 origin, Vector3 direction) const = 0;
+    /***/ virtual Vector3 getNormal(Vector3 point, Vector3 direction) const = 0;
+    /***/ virtual Color getTexture(Vector3 point) const = 0;
 };
 
 
 class Sphere : public Shape {
 private:
     float radius;
+    float radius2;
     
 public:
     Sphere(Vector3, float, Vector3, Material);
-    virtual bool intersects(Vector3, Vector3) const;
+    virtual float intersect(Vector3, Vector3) const;
     virtual Vector3 getNormal(Vector3, Vector3) const;
-    virtual Vector3 getSurface(Vector3, Vector3) const;
     virtual Color getTexture(Vector3) const;
 };
 
 
 class Cuboid : public Shape {
 private:
-    float size_x, size_y, size_z;
+    Vector3 size;
+    Vector3 vmin, vmax;
     
 public:
+    Cuboid(Vector3, float, Vector3, Material);
     Cuboid(Vector3, float, float, float, Vector3, Material);
-    virtual bool intersects(Vector3, Vector3) const;
+    Cuboid(Vector3, Vector3, Vector3, Material);
+    virtual float intersect(Vector3, Vector3) const;
     virtual Vector3 getNormal(Vector3, Vector3) const;
-    virtual Vector3 getSurface(Vector3, Vector3) const;
     virtual Color getTexture(Vector3) const;
 };
 
 
-class Cylinder : public Shape {
-private:
-    float radius, height;
-    
-public:
-    Cylinder(Vector3, float, float, Vector3, Material);
-    virtual bool intersects(Vector3, Vector3) const;
-    virtual Vector3 getNormal(Vector3, Vector3) const;
-    virtual Vector3 getSurface(Vector3, Vector3) const;
-    virtual Color getTexture(Vector3) const;
-};
+//class Cylinder : public Shape {
+//private:
+//    float radius, height;
+//
+//public:
+//    Cylinder(Vector3, float, float, Vector3, Material);
+//    virtual float intersect(Vector3, Vector3) const;
+//    virtual Vector3 getNormal(Vector3, Vector3) const;
+//    virtual Color getTexture(Vector3) const;
+//};
 
 
 class Plane : public Shape {
 private:
     float size_x, size_y;
-    
+
 public:
     Plane(Vector3, float, float, Vector3, Material);
-    virtual bool intersects(Vector3, Vector3) const;
+    virtual float intersect(Vector3, Vector3) const;
     virtual Vector3 getNormal(Vector3, Vector3) const;
-    virtual Vector3 getSurface(Vector3, Vector3) const;
     virtual Color getTexture(Vector3) const;
 };

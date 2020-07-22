@@ -44,7 +44,7 @@ struct RenderRegion {
         y = minY;
         w = maxX - minX;
         h = maxY - minY;
-        buffer.resize(w, vector<Color>(h, Black));
+        buffer.resize(w, vector<Color>(h, Color::Black));
     }
 };
 

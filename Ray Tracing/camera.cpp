@@ -29,7 +29,7 @@ Camera::Camera(Vector3 position) {
     this->position = position;
     fovFactor = 1 / tan(settings.field_of_view / 2);
     region_count = 0;
-    region_current = 0;
+    region_current = -1;
     
     resetPosition();
 }
@@ -63,10 +63,10 @@ Color getPixel(int x, int y, Intersection data) {
         case RENDER_COLOR: return data.texture; break;
         case RENDER_REFLECTION: return data.reflection; break;
         case RENDER_TRANSMISSION: return data.transmission; break;
-        case RENDER_LIGHT: return data.hit ? White * data.light : Black; break;
-        case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Red : White * data.light) : Black; break;
-        case RENDER_NORMALS: return data.hit ? data.normal.toColor() : Black; break;
-        case RENDER_DEPTH: return White * (1 - data.distance / settings.max_render_distance); break;
+        case RENDER_LIGHT: return data.hit ? Color::White * data.light : Color::Black; break;
+        case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Color::Red : Color::White * data.light) : Color::Black; break;
+        case RENDER_NORMALS: return data.hit ? data.normal.toColor() : Color::Black; break;
+        case RENDER_DEPTH: return Color::White * (1 - data.distance / settings.max_render_distance); break;
         case RENDER_SHADED:
         default: return data.shaded(); break;
     }
@@ -96,30 +96,28 @@ void Camera::drawBox(int x, int y, Input mask) {
     
     int npoints = sizeof(points[0]) / sizeof(XPoint);
     
-    if (!mask.step_size) {
-        XSetForeground(display, gc, Orange);
+    if (mask.bounce_count < 0) {
+        XSetForeground(display, gc, Color::Orange);
         for (int i = 0; i < 4; i++) XDrawLines(display, window, gc, points[i], npoints, CoordModeOrigin);
         return;
     }
     
-    if (mask.step_size == settings.precise_step_size) XSetForeground(display, gc, DarkRed);
-    else if (mask.transmission) XSetForeground(display, gc, DarkGreen);
-    else XSetForeground(display, gc, Gray);
+    if (mask.transmission) XSetForeground(display, gc, Color::DarkGreen);
+    else XSetForeground(display, gc, Color::Gray);
     XDrawLines(display, window, gc, points[0], npoints, CoordModeOrigin);
     
-    if (mask.reflections) XSetForeground(display, gc, DarkBlue);
-    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, DarkYellow);
-    else XSetForeground(display, gc, Gray);
+    if (mask.reflections) XSetForeground(display, gc, Color::DarkBlue);
+    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::DarkYellow);
+    else XSetForeground(display, gc, Color::Gray);
     XDrawLines(display, window, gc, points[1], npoints, CoordModeOrigin);
     
-    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, DarkYellow);
-    else if (mask.reflections) XSetForeground(display, gc, DarkBlue);
-    else XSetForeground(display, gc, Gray);
+    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::DarkYellow);
+    else if (mask.reflections) XSetForeground(display, gc, Color::DarkBlue);
+    else XSetForeground(display, gc, Color::Gray);
     XDrawLines(display, window, gc, points[2], npoints, CoordModeOrigin);
     
-    if (mask.transmission) XSetForeground(display, gc, DarkGreen);
-    else if (mask.step_size == settings.precise_step_size) XSetForeground(display, gc, DarkRed);
-    else XSetForeground(display, gc, Gray);
+    if (mask.transmission) XSetForeground(display, gc, Color::DarkGreen);
+    else XSetForeground(display, gc, Color::Gray);
     XDrawLines(display, window, gc, points[3], npoints, CoordModeOrigin);
 }
 
@@ -133,7 +131,7 @@ vector<vector<Intersection>> Camera::preRender(const vector<Shape *> &objects, c
     for (int x = 0; x < regions_x; x++) {
         buffer[x].resize(regions_y);
         for (int y = 0; y < regions_y; y++) {
-            auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, {settings.probe_step_size, 0, true, true, true, true, vector<bool>(objects.size(), true)});
+            auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, {true, 0, true, true, true, true, vector<bool>(objects.size(), true)});
             
             XSetForeground(display, gc, getPixel(x, y, (buffer[x][y] = ray)));
             XFillRectangle(display, window, gc, x * settings.resolution_decrese * settings.render_region_size, y * settings.resolution_decrese * settings.render_region_size, settings.resolution_decrese * settings.render_region_size, settings.resolution_decrese * settings.render_region_size);
@@ -189,11 +187,10 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
             }
             
             // MARK: Filters
-            if (depth_filter.eval(depth_matrix)[0] == 0) processed[x][y].step_size = false;
+            if (depth_filter.eval(depth_matrix)[0] == 0) processed[x][y].render = false;
             else {
                 processed[x][y] = {
-                    edge_filter.eval(object_matrix)[0] ? settings.precise_step_size : settings.quick_step_size,
-                    0, true, true,
+                    true, 0, true, true,
                     processed[x][y].reflections = edge_filter.eval(reflect_matrix)[0],
                     processed[x][y].transmission = edge_filter.eval(refract_matrix)[0],
                     vector<bool>(buffer[0][0].shadows.size(), true)
@@ -202,8 +199,8 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                 for (int i = 0; i < processed[x][y].shadows.size(); i++) processed[x][y].shadows[i] = edge_filter.eval(shadow_matrix[i])[0];
                 
                 switch (settings.render_mode) {
-                    case RENDER_REFLECTION: if (!processed[x][y].reflections) processed[x][y].step_size = false; processed[x][y].diffuse = processed[x][y].transmission = false; break;
-                    case RENDER_TRANSMISSION: if (!processed[x][y].transmission) processed[x][y].step_size = false; processed[x][y].diffuse = processed[x][y].reflections = false; break;
+                    case RENDER_REFLECTION: if (!processed[x][y].reflections) processed[x][y].render = false; processed[x][y].diffuse = processed[x][y].transmission = false; break;
+                    case RENDER_TRANSMISSION: if (!processed[x][y].transmission) processed[x][y].render = false; processed[x][y].diffuse = processed[x][y].reflections = false; break;
                     case RENDER_LIGHT:
                     case RENDER_SHADOWS: processed[x][y].reflections = processed[x][y].transmission = false; break;
                     case RENDER_COLOR:
@@ -213,7 +210,7 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                     default: break;
                 }
                 
-                if (processed[x][y].step_size) {
+                if (processed[x][y].render) {
                     region_count++;
                     if (settings.show_debug) drawBox(x, y, processed[x][y]);
                 }
@@ -226,10 +223,10 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
 
 // MARK: - Rendering
 void Camera::renderInfo() {
-    XSetForeground(display, gc, Black);
+    XSetForeground(display, gc, Color::Black);
     XFillRectangle(display, window, gc, 2, 2, 158, 62);
     
-    XSetForeground(display, gc, Green);
+    XSetForeground(display, gc, Color::Green);
     
     const float elapsed = chrono::duration<float, milli>(chrono::high_resolution_clock::now() - time).count();
     stringstream ss;
@@ -245,7 +242,7 @@ void Camera::renderInfo() {
     XDrawString(display, window, gc, 5, 45, ss.str().c_str(), (int)ss.str().length());
     
     ss.str("");
-    ss << width << "x" << height << " px @ " << settings.precise_step_size << " / " << settings.max_render_distance;
+    ss << width << "x" << height << " px @ " << settings.max_render_distance;
     XDrawString(display, window, gc, 5, 60, ss.str().c_str(), (int)ss.str().length());
 }
 
@@ -254,13 +251,14 @@ RenderRegion Camera::renderRegion(const vector<Shape *> &objects, const vector<L
         for (int y = 0; y < region.h; y++) {
             auto ray = castRay(position, getCameraRay(region.x + x, region.y + y), objects, lights, mask);
             
-            if (!mask.reflections && ray.hit && ray.object->material.Ks) ray.reflection = estimate.reflection == Black ? settings.background_color : estimate.reflection;
-            if (!mask.transmission && ray.hit && ray.object->material.transparent) ray.transmission = estimate.transmission == Black ? settings.background_color : estimate.transmission;
+            if (!mask.reflections && ray.hit && ray.object->material.Ks) ray.reflection = estimate.reflection == Color::Black ? settings.background_color : estimate.reflection;
+            if (!mask.transmission && ray.hit && ray.object->material.transparent) ray.transmission = estimate.transmission == Color::Black ? settings.background_color : estimate.transmission;
             for (int i = 0; i < mask.shadows.size(); i++) if (!mask.shadows[i] && ray.hit) ray.shadows[i] = estimate.shadows[i];
             
             region.buffer[x][y] = getPixel(x, y, ray);
         }
     }
+    
     return region;
 }
 
@@ -282,8 +280,7 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
             ConcurrentQueue<RenderRegion> task_queue;
             do {
                 task_queue.push(RenderRegion(minX, maxX, minY, maxY));
-//                XSetForeground(display, gc, Orange);
-//                drawBox(minX / settings.render_region_size, minY / settings.render_region_size, {0});
+//                drawBox(minX / settings.render_region_size, minY / settings.render_region_size, {false, -1});
             } while (next(mask));
             renderInfo();
             XFlush(display);
@@ -317,7 +314,7 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
             } while (region_current < region_count);
             
             task_queue.stop();
-            for (auto& it : threads) it.join();
+            for (auto &it : threads) it.join();
             
             break;
         }
@@ -370,7 +367,7 @@ bool Camera::next(const vector<vector<Input>> &mask) {
                     y = 0;
                     x += settings.render_region_size;
                 }
-            } while (x < width && !mask[x/settings.render_region_size][y/settings.render_region_size].step_size);
+            } while (x < width && !mask[x/settings.render_region_size][y/settings.render_region_size].render);
 
             generateRange();
 
@@ -391,7 +388,7 @@ bool Camera::next(const vector<vector<Input>> &mask) {
                 }
 
                 if (x >= width && y >= height) return false;
-            } while (x >= width || x + settings.render_region_size <= 0 || y >= height || y + settings.render_region_size <= 0 || !mask[x/settings.render_region_size][y/settings.render_region_size].step_size);
+            } while (x >= width || x + settings.render_region_size <= 0 || y >= height || y + settings.render_region_size <= 0 || !mask[x/settings.render_region_size][y/settings.render_region_size].render);
 
             generateRange();
 
@@ -405,7 +402,7 @@ bool Camera::next(const vector<vector<Input>> &mask) {
                     x = 0;
                     y += settings.render_region_size;
                 }
-            } while (y < height && !mask[x/settings.render_region_size][y/settings.render_region_size].step_size);
+            } while (y < height && !mask[x/settings.render_region_size][y/settings.render_region_size].render);
             
             generateRange();
             

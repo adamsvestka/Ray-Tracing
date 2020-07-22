@@ -73,14 +73,13 @@ Color LinearLight::getSpecularValue(Vector3 point, Vector3 normal, Vector3 direc
 // MARK: - Global
 /// @param color Color{r, g, b} ~ (0 - 1)
 /// @param intensity int ~ (0 - 1)
-GlobalLight::GlobalLight(Color color, float intensity) {
+GlobalLight::GlobalLight(Color color, float intensity) : intensity(intensity) {
     this->color = color;
-    this->intensity = intensity;
     shadow = false;
 }
 
 Vector3 GlobalLight::getVector(Vector3) {
-    return Unit;
+    return Vector3::Zero;
 }
 
 Color GlobalLight::getDiffuseValue(Vector3, Vector3) {
@@ -88,28 +87,27 @@ Color GlobalLight::getDiffuseValue(Vector3, Vector3) {
 }
 
 Color GlobalLight::getSpecularValue(Vector3, Vector3, Vector3, int) {
-    return Black;
+    return Color::Black;
 }
 
 
-// MARK: - Beam
-/// @param position Vector3{x, y, z}
+// MARK: - Directional
+/// @param direction Vector3{x, y, z}
 /// @param color Color{r, g, b} ~ (0 - 1)
-/// @param intensity int ~ 1000
-//BeamLight::BeamLight(Vector3 position, Vector3 orientation, Color color, int intensity) {
-//    this->position = position;
-//    this->color = color;
-//    this->intensity = intensity;
-//}
+/// @param intensity int ~ (0 - 1)
+DirectionalLight::DirectionalLight(Vector3 direction, Color color, float intensity) : direction(direction.normal()), intensity(intensity) {
+    this->color = color;
+    shadow = true;
+}
 
-//Vector3 BeamLight::getVector(Vector3) { 
-//    <#code#>;
-//}
-//
-//Color BeamLight::getDiffuseValue() { 
-//    <#code#>;
-//}
-//
-//Color BeamLight::getSpecularValue() { 
-//    <#code#>;
-//}
+Vector3 DirectionalLight::getVector(Vector3 point) {
+    return -direction;
+}
+
+Color DirectionalLight::getDiffuseValue(Vector3, Vector3) {
+    return color * intensity;
+}
+
+Color DirectionalLight::getSpecularValue(Vector3, Vector3, Vector3, int) {
+    return Color::Black;
+}
