@@ -44,7 +44,7 @@
 		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
 		6630E3F024475B670066BCCC /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
-		665B9C9324C8D1DF000C4E1E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		665B9C9524C8D2C4000C4E1E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
 		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
@@ -103,7 +103,7 @@
 		665B9C9424C8D1F0000C4E1E /* Other */ = {
 			isa = PBXGroup;
 			children = (
-				665B9C9324C8D1DF000C4E1E /* README.md */,
+				665B9C9524C8D2C4000C4E1E /* README.md */,
 				6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */,
 			);
 			name = Other;
