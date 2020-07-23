@@ -20,8 +20,8 @@ Vector3 Vector3::normal() const {
 
 Color Vector3::toColor() const {
     const float len = length();
-    return Color(x / len, y / len, z / len);
-//    return Color(x > 0 ? x / len : -x / len, y > 0 ? y / len : -y / len, z > 0 ? z / len : -z / len);
+//    return Color(x / len, y / len, z / len);
+    return Color(x > 0 ? x / len : -x / len, y > 0 ? y / len : -y / len, z > 0 ? z / len : -z / len);
 }
 
 // MARK: Defined Vectors

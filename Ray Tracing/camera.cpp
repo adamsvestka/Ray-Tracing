@@ -37,10 +37,25 @@ Camera::~Camera() {
     XEvent event;
     KeySym key;
     char text[255];
-
+    
     while(true) {
         XNextEvent(display, &event);
-        if (event.type == KeyPress && XLookupString(&event.xkey, text, 255, &key, 0) == 1) if (text[0] == 'q') break;
+        if (event.type == KeyPress && XLookupString(&event.xkey, text, 255, &key, 0) == 1) {
+            if (text[0] == 'q') break;
+            
+            if (!settings.save_render) continue;
+            int n = text[0] - '0';
+            if (n >= 0 && n < RenderTypes) settings.render_mode = n;
+            else continue;
+            
+            for (int x = 0; x < result[settings.render_mode].size(); x++) {
+                for (int y = 0; y < result[settings.render_mode][x].size(); y++) {
+                    XSetForeground(display, gc, result[settings.render_mode][x][y]);
+                    XFillRectangle(display, window, gc, x * settings.resolution_decrese, y * settings.resolution_decrese, settings.resolution_decrese, settings.resolution_decrese);
+                }
+            }
+            renderInfo();
+        }
     }
     
     XDestroyWindow(display, window);
@@ -57,8 +72,8 @@ string formatTime(int milliseconds) {
     return ss.str();
 }
 
-Color getPixel(int x, int y, Intersection data) {
-    switch (settings.render_mode) {
+Color getPixel(Intersection data, int mode) {
+    switch (mode) {
         case RENDER_COLOR: return data.texture; break;
         case RENDER_REFLECTION: return data.reflection; break;
         case RENDER_TRANSMISSION: return data.transmission; break;
@@ -133,8 +148,13 @@ vector<vector<Intersection>> Camera::preRender(const vector<Shape *> &objects, c
         for (int y = 0; y < regions_y; y++) {
             auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, {true, 0, true, true, true, true, vector<bool>(objects.size(), true)});
             
-            XSetForeground(display, gc, getPixel(x, y, (buffer[x][y] = ray)));
+            XSetForeground(display, gc, getPixel((buffer[x][y] = ray), settings.render_mode));
             XFillRectangle(display, window, gc, x * settings.resolution_decrese * settings.render_region_size, y * settings.resolution_decrese * settings.render_region_size, settings.resolution_decrese * settings.render_region_size, settings.resolution_decrese * settings.render_region_size);
+            
+            if (!settings.save_render) continue;
+            for (auto mode = 0; mode < RenderTypes; mode++)
+                for (int dx = 0; dx < settings.render_region_size; dx++)
+                    fill(&result[mode][x * settings.render_region_size + dx][y * settings.render_region_size], &result[mode][x * settings.render_region_size + dx][(y + 1) * settings.render_region_size], getPixel(ray, mode));
         }
     }
     
@@ -223,16 +243,19 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
     return processed;
 }
 
-#define draw(x, y) XDrawString(display, window, gc, x * 6, y * 15, ss.str().c_str(), (int)ss.str().length()); ss.str("")
 // MARK: - Rendering
+#define draw(x, y) XDrawString(display, window, gc, x * 6, y * 15, ss.str().c_str(), (int)ss.str().length()); ss.str("")
 void Camera::renderInfo() {
     XSetForeground(display, gc, Color::Black);
-    XFillRectangle(display, window, gc, 2, 2, 169, 64);
+    XFillRectangle(display, window, gc, 2, 2, 169, 79);
     
     XSetForeground(display, gc, Color::Green);
     
-    const float elapsed = chrono::duration<float, milli>(chrono::high_resolution_clock::now() - time).count();
+    static vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Depth"};
+    if (region_current < region_count) end = chrono::high_resolution_clock::now();
+    const float elapsed = chrono::duration<float, milli>(end - start).count();
     stringstream ss;
+    
     ss << "Render time: ";
     draw(1, 1);
     
@@ -246,7 +269,6 @@ void Camera::renderInfo() {
     
     ss << "ETC: " << formatTime(fmax(elapsed / (region_current ? region_current : 1) * region_count - elapsed, 0.0)) << " - ";
     draw(1, 3);
-    
     XSetForeground(display, gc, Color::Orange);
     ss << fixed << setprecision(region_current >= region_count ? 0 : 1) << 100.f * region_current / region_count << defaultfloat << "%";
     draw(21, 3);
@@ -254,6 +276,15 @@ void Camera::renderInfo() {
     
     ss << "Quality: " << width << "x" << height << " (0," << settings.max_render_distance << "]";
     draw(1, 4);
+    
+    ss << "Mode: " << settings.render_mode << "/" << RenderTypes - 1 << " ";
+    draw(1, 5);
+    XSetForeground(display, gc, Color::Red);
+    ss << " (" << render_type_names[settings.render_mode] << ")";
+    draw(10, 5);
+    XSetForeground(display, gc, Color::Green);
+    
+    XFlush(display);
 }
 
 RenderRegion Camera::renderRegion(const vector<Shape *> &objects, const vector<Light *> &lights, RenderRegion region, Input mask, const Intersection &estimate) {
@@ -265,7 +296,10 @@ RenderRegion Camera::renderRegion(const vector<Shape *> &objects, const vector<L
             if (!mask.transmission && ray.hit && ray.object->material.transparent) ray.transmission = estimate.transmission == Color::Black ? settings.background_color : estimate.transmission;
             for (int i = 0; i < mask.shadows.size(); i++) if (!mask.shadows[i] && ray.hit) ray.shadows[i] = estimate.shadows[i];
             
-            region.buffer[x][y] = getPixel(x, y, ray);
+            region.buffer[x][y] = getPixel(ray, settings.render_mode);
+            
+            if (!settings.save_render) continue;
+            for (auto mode = 0; mode < RenderTypes; mode++) result[mode][region.x + x][region.y + y] = getPixel(ray, mode);
         }
     }
     
@@ -273,18 +307,19 @@ RenderRegion Camera::renderRegion(const vector<Shape *> &objects, const vector<L
 }
 
 void Camera::render(const vector<Shape *> &objects, const vector<Light *> &lights) {
+    XEvent event;
     while (true) {
-        XEvent event;
         XNextEvent(display, &event);
         if (event.type == Expose && event.xexpose.count == 0) {
-            time = chrono::high_resolution_clock::now();
+            start = chrono::high_resolution_clock::now();
+            if (settings.save_render) result.resize(RenderTypes, vector<vector<Color>>(width, vector<Color>(height, Color::Black)));
             
             // Render at lower resolution
             const auto buffer = preRender(objects, lights);
             XFlush(display);
             
             // Process what to render
-            region_count = (int)buffer.size() * (int)buffer[0].size();
+            region_count = (int)buffer.size() * (int)buffer[0].size(); 
             const auto mask = settings.preprocess ? processPreRender(buffer) : vector<vector<Input>>(buffer.size(), vector<Input>(buffer[0].size(), Input{true, 0, true, true, true, true, vector<bool>(lights.size(), true)}));
             XFlush(display);
             
@@ -295,7 +330,6 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
 //                drawDebugBox(minX / settings.render_region_size, minY / settings.render_region_size, {false, -1});
             } while (next(mask));
             renderInfo();
-            XFlush(display);
             
             ConcurrentQueue<RenderRegion> result_queue;
             auto func = [&]() {
@@ -303,7 +337,7 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
                     RenderRegion task;
                     if (!task_queue.pop(task)) return;
                     int x = task.x / settings.render_region_size, y = task.y / settings.render_region_size;
-                    result_queue.push(renderRegion(objects, lights, task, mask[x][y], buffer[x][y]));
+                    result_queue.push(this->renderRegion(objects, lights, task, mask[x][y], buffer[x][y]));
                 }
             };
             
@@ -316,6 +350,7 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
                 RenderRegion region;
                 result_queue.pop(region);
                 for (int x = 0; x < region.w; x++) {
+//                    copy(region.buffer[x].begin(), region.buffer[x].end(), &result[region.x + x][region.y]);
                     for (int y = 0; y < region.h; y++) {
                         XSetForeground(display, gc, region.buffer[x][y]);
                         XFillRectangle(display, window, gc, (region.x + x) * settings.resolution_decrese, (region.y + y) * settings.resolution_decrese, settings.resolution_decrese, settings.resolution_decrese);
@@ -324,7 +359,6 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
                 
                 region_current++;
                 renderInfo();
-                XFlush(display);
             } while (region_current < region_count);
             
             // Terminate sibling threads

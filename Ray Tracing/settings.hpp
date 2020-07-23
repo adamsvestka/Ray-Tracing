@@ -11,11 +11,11 @@
 #include "data_types.hpp"
 
 enum RenderType {
-    RENDER_SHADED, RENDER_COLOR, RENDER_REFLECTION, RENDER_TRANSMISSION, RENDER_LIGHT, RENDER_SHADOWS, RENDER_NORMALS, RENDER_DEPTH
+    RENDER_SHADED, RENDER_COLOR, RENDER_REFLECTION, RENDER_TRANSMISSION, RENDER_LIGHT, RENDER_SHADOWS, RENDER_NORMALS, RENDER_DEPTH, RenderTypes
 };
 
 enum RenderPattern {
-    PATTERN_HORIZONTAL, PATTERN_VERTICAL, PATTERN_SPIRAL
+    PATTERN_HORIZONTAL, PATTERN_VERTICAL, PATTERN_SPIRAL, RenderPatterns
 };
 
 struct Settings {
@@ -37,6 +37,8 @@ struct Settings {
     bool show_debug = true;
     
     bool preprocess = false;
+    
+    bool save_render = true;
     
     short field_of_view = 120;
     

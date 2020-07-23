@@ -54,10 +54,11 @@ private:
     float fovFactor;
     int width, height, x, y;
     int region_count, region_current;
-    chrono::steady_clock::time_point time;
+    chrono::steady_clock::time_point start, end;
     
     int r, l, i;
     int minX, maxX, minY, maxY;
+    vector<vector<vector<Color>>> result;
     
     Display *display;
     Screen *screen;
