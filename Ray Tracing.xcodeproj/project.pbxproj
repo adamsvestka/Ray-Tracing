@@ -46,14 +46,12 @@
 		6630E3EB2445E2E10066BCCC /* camera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = camera.hpp; sourceTree = "<group>"; };
 		6630E3ED2445E4AB0066BCCC /* ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ray.cpp; sourceTree = "<group>"; };
 		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
-		6630E3F024475B670066BCCC /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
 		665B9C9524C8D2C4000C4E1E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		665B9C9A24C8EF71000C4E1E /* libX11.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.dylib; path = ../../../../../opt/X11/lib/libX11.dylib; sourceTree = "<group>"; };
 		665B9CA024CA3824000C4E1E /* file_managers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_managers.cpp; sourceTree = "<group>"; };
 		665B9CA124CA3824000C4E1E /* file_managers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = file_managers.hpp; sourceTree = "<group>"; };
 		665B9CA524CB6528000C4E1E /* CImg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CImg.h; sourceTree = "<group>"; };
-		665B9CA724CB7127000C4E1E /* libjpeg.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.9.dylib; path = ../../../../../usr/local/lib/libjpeg.9.dylib; sourceTree = "<group>"; };
 		665B9CAB24CB712E000C4E1E /* libjpeg.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.dylib; path = ../../../../../usr/local/lib/libjpeg.dylib; sourceTree = "<group>"; };
 		665B9CB224CB7728000C4E1E /* libpng.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng.dylib; path = ../../../../../usr/local/lib/libpng.dylib; sourceTree = "<group>"; };
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
@@ -111,9 +109,7 @@
 			children = (
 				665B9CB224CB7728000C4E1E /* libpng.dylib */,
 				665B9CAB24CB712E000C4E1E /* libjpeg.dylib */,
-				665B9CA724CB7127000C4E1E /* libjpeg.9.dylib */,
 				665B9C9A24C8EF71000C4E1E /* libX11.dylib */,
-				6630E3F024475B670066BCCC /* libX11.6.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
