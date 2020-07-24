@@ -22,11 +22,11 @@ Vector3 Shape::toWorldSpace(Vector3 _point) const { return rotation * _point + c
 
 // MARK: - Sphere
 /// @param position Vector3{x, y, z}
-/// @param radius float
+/// @param diameter float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Sphere::Sphere(Vector3 position, float radius, Vector3 angles, Material material) : Shape(position, angles, material) {
-    this->radius = radius;
+Sphere::Sphere(Vector3 position, float diameter, Vector3 angles, Material material) : Shape(position, angles, material) {
+    this->radius = diameter / 2;
     this->radius2 = pow(radius, 2);
 }
 
@@ -131,14 +131,14 @@ Color Cuboid::getTexture(Vector3 point) const {
     
     float u, v;
     if (abs(_point.x) > abs(_point.y) && abs(_point.x) > abs(_point.z)) {
-        v = _point.y / (2 * size.y) + 0.5;
-        u = _point.z / (2 * size.z) + 0.5;
+        v = 0.5 - _point.y / size.y;
+        u = _point.z / size.z + 0.5;
     } else if (abs(_point.y) > abs(_point.z)) {
-        v = _point.x / (2 * size.x) + 0.5;
-        u = _point.z / (2 * size.z) + 0.5;
+        v = _point.x / size.x + 0.5;
+        u = _point.z / size.z + 0.5;
     } else {
-        u = _point.x / (2 * size.x) + 0.5;
-        v = _point.y / (2 * size.y) + 0.5;
+        u = _point.x / size.x + 0.5;
+        v = _point.y / size.y + 0.5;
     }
     
     return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
@@ -196,8 +196,8 @@ float Plane::intersect(Vector3 origin, Vector3 direction) const {
         Vector3 path = center - origin;
         float t = path * normal / denom;
         
-        Vector3 _point = origin + direction * t;
-        if (abs(_point.x - center.x) > size_x || abs(_point.y - center.y) > size_y) return -1;
+        Vector3 _point = toObjectSpace(origin + direction * t);
+        if (abs(_point.x) > size_x / 2 || abs(_point.y) > size_y / 2) return -1;
         return t;
     }
     
@@ -211,8 +211,8 @@ Vector3 Plane::getNormal(Vector3 point, Vector3 direction) const {
 Color Plane::getTexture(Vector3 point) const {
     const Vector3 _point = toObjectSpace(point);
     
-    float u = _point.x / (2 * size_x) + 0.5;
-    float v = _point.y / (2 * size_y) + 0.5;
+    float u = _point.x / size_x + 0.5;
+    float v = _point.y / size_y + 0.5;
     
     return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
 }

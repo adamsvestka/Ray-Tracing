@@ -20,6 +20,23 @@ Color colorRamp(float n, Color a, Color b) {
 
 // MARK: - Textures
 ///
+Image::Image(string path) {
+    cout << "Opening " << path << endl;
+    try {
+        image.load(path.c_str());
+    } catch(...) {
+        cout << "Couldn't open file" << endl;
+    }
+}
+
+Color Image::operator()(float u, float v) const {
+    return Color{image(v * image.width(), (1 - u) * image.height(), 0, 0) / 255.f,
+                 image(v * image.width(), (1 - u) * image.height(), 0, 1) / 255.f,
+                 image(v * image.width(), (1 - u) * image.height(), 0, 2) / 255.f
+    };
+}
+
+///
 Checkerboard::Checkerboard(int scale) : scale(scale) {}
 
 float Checkerboard::operator()(float x, float y) const {

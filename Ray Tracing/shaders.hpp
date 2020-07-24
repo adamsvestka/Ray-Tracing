@@ -8,14 +8,22 @@
 
 #pragma once
 
+#include <iostream>
 #include <vector>
 #include <random>
 #include <algorithm>
 #include <functional>
 
+#include <png.h>
+#include <jpeglib.h>
+#define cimg_use_png
+#define cimg_use_jpeg
+#include "CImg.h"
+
 #include "data_types.hpp"
 
 using namespace std;
+using namespace cimg_library;
 
 // MARK: - Material
 struct Material {
@@ -31,6 +39,16 @@ Color colorRamp(float, Color, Color);
 
 
 // MARK: - Textures
+class Image {
+private:
+    CImg<unsigned char> image;
+    
+public:
+    Image(string);
+    
+    Color operator()(float, float) const;
+};
+
 class Checkerboard {
 private:
     int scale;

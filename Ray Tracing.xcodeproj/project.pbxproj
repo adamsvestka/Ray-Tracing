@@ -15,6 +15,9 @@
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
 		665B9C9B24C8EF71000C4E1E /* libX11.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9C9A24C8EF71000C4E1E /* libX11.dylib */; };
 		665B9CA224CA3824000C4E1E /* file_managers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 665B9CA024CA3824000C4E1E /* file_managers.cpp */; };
+		665B9CAC24CB712E000C4E1E /* libjpeg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CAB24CB712E000C4E1E /* libjpeg.dylib */; };
+		665B9CAF24CB71D0000C4E1E /* libjpeg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CAB24CB712E000C4E1E /* libjpeg.dylib */; };
+		665B9CB324CB7728000C4E1E /* libpng.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CB224CB7728000C4E1E /* libpng.dylib */; };
 		6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6667DFF924604DFC00A1DDE1 /* shaders.cpp */; };
 /* End PBXBuildFile section */
 
@@ -49,6 +52,10 @@
 		665B9C9A24C8EF71000C4E1E /* libX11.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.dylib; path = ../../../../../opt/X11/lib/libX11.dylib; sourceTree = "<group>"; };
 		665B9CA024CA3824000C4E1E /* file_managers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_managers.cpp; sourceTree = "<group>"; };
 		665B9CA124CA3824000C4E1E /* file_managers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = file_managers.hpp; sourceTree = "<group>"; };
+		665B9CA524CB6528000C4E1E /* CImg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CImg.h; sourceTree = "<group>"; };
+		665B9CA724CB7127000C4E1E /* libjpeg.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.9.dylib; path = ../../../../../usr/local/lib/libjpeg.9.dylib; sourceTree = "<group>"; };
+		665B9CAB24CB712E000C4E1E /* libjpeg.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.dylib; path = ../../../../../usr/local/lib/libjpeg.dylib; sourceTree = "<group>"; };
+		665B9CB224CB7728000C4E1E /* libpng.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng.dylib; path = ../../../../../usr/local/lib/libpng.dylib; sourceTree = "<group>"; };
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
 		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
@@ -60,6 +67,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				665B9C9B24C8EF71000C4E1E /* libX11.dylib in Frameworks */,
+				665B9CAF24CB71D0000C4E1E /* libjpeg.dylib in Frameworks */,
+				665B9CB324CB7728000C4E1E /* libpng.dylib in Frameworks */,
+				665B9CAC24CB712E000C4E1E /* libjpeg.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -99,6 +109,9 @@
 		6630E3DE2443CF020066BCCC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				665B9CB224CB7728000C4E1E /* libpng.dylib */,
+				665B9CAB24CB712E000C4E1E /* libjpeg.dylib */,
+				665B9CA724CB7127000C4E1E /* libjpeg.9.dylib */,
 				665B9C9A24C8EF71000C4E1E /* libX11.dylib */,
 				6630E3F024475B670066BCCC /* libX11.6.dylib */,
 			);
@@ -108,6 +121,7 @@
 		665B9C9424C8D1F0000C4E1E /* Other */ = {
 			isa = PBXGroup;
 			children = (
+				665B9CA524CB6528000C4E1E /* CImg.h */,
 				665B9C9524C8D2C4000C4E1E /* README.md */,
 				6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */,
 			);
@@ -332,9 +346,11 @@
 		6630E3DC2443CD690066BCCC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++2a";
 				CODE_SIGN_ENTITLEMENTS = "Ray Tracing/Ray Tracing.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = RTA4PXE74H;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
@@ -342,6 +358,7 @@
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				LIBRARY_SEARCH_PATHS = (
 					/opt/X11/lib,
+					/usr/local/lib,
 					/usr/local/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
@@ -355,15 +372,18 @@
 		6630E3DD2443CD690066BCCC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++2a";
 				CODE_SIGN_ENTITLEMENTS = "Ray Tracing/Ray Tracing.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "";
 				DEVELOPMENT_TEAM = RTA4PXE74H;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				LIBRARY_SEARCH_PATHS = (
 					/opt/X11/lib,
+					/usr/local/lib,
 					/usr/local/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
