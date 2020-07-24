@@ -25,15 +25,15 @@ Color Vector3::toColor() const {
 }
 
 // MARK: Defined Vectors
-Vector3 Vector3::Zero{0, 0, 0};
-Vector3 Vector3::One{1, 1, 1};
+const Vector3 Vector3::Zero{0, 0, 0};
+const Vector3 Vector3::One{1, 1, 1};
 
-Vector3 Vector3::North{1, 0, 0};
-Vector3 Vector3::South{-1, 0, 0};
-Vector3 Vector3::East{0, 1, 0};
-Vector3 Vector3::West{0, -1, 0};
-Vector3 Vector3::Down{0, 0, -1};
-Vector3 Vector3::Up{0, 0, 1};
+const Vector3 Vector3::North{1, 0, 0};
+const Vector3 Vector3::South{-1, 0, 0};
+const Vector3 Vector3::East{0, 1, 0};
+const Vector3 Vector3::West{0, -1, 0};
+const Vector3 Vector3::Down{0, 0, -1};
+const Vector3 Vector3::Up{0, 0, 1};
 
 Vector3 Vector3::operator+(const Vector3 v) const {
     return Vector3{this->x + v.x, this->y + v.y, this->z + v.z};
@@ -118,7 +118,7 @@ Matrix3x3 Matrix3x3::inverse() {
     return minors * (1.f / det);
 }
 
-Matrix3x3 Matrix3x3::Identity{1, 0, 0, 0, 1, 0, 0, 0, 1};
+const Matrix3x3 Matrix3x3::Identity{1, 0, 0, 0, 1, 0, 0, 0, 1};
 
 Matrix3x3 Matrix3x3::RotationMatrixX(float a) {
     return Matrix3x3{1, 0, 0, 0, cos(a), -sin(a), 0, sin(a), cos(a)};
@@ -190,31 +190,33 @@ float Color::value() const {
     return (r + g + b) / 3.f;
 }
 
+Color Color::light() const {
+    return *this * 3.f;
+}
+
+Color Color::dark() const {
+    return *this / 3.f;
+}
+
 // MARK: Defined Colors
-Color Color::White{1.0, 1.0, 1.0};
-Color Color::LightGray{0.3, 0.3, 0.3};
-Color Color::Gray{0.1, 0.1, 0.1};
-Color Color::DarkGray{0.05, 0.05, 0.05};
-Color Color::Black{0.0, 0.0, 0.0};
+const Color Color::White{1.0, 1.0, 1.0};
+const Color Color::Gray{0.1, 0.1, 0.1};
+const Color Color::Black{0.0, 0.0, 0.0};
 
-Color Color::DarkRed{0.3, 0.03, 0.03};
-Color Color::Red{1.0, 0.1, 0.1};
-Color Color::Orange{1.0, 0.5, 0.1};
-Color Color::DarkYellow{0.3, 0.3, 0.03};
-Color Color::Yellow{1.0, 1.0, 0.1};
-Color Color::Lime{0.5, 1.0, 0.1};
+const Color Color::Red{1.0, 0.1, 0.1};
+const Color Color::Orange{1.0, 0.5, 0.1};
+const Color Color::Yellow{1.0, 1.0, 0.1};
+const Color Color::Lime{0.5, 1.0, 0.1};
 
-Color Color::DarkGreen{0.03, 0.3, 0.03};
-Color Color::Green{0.1, 1.0, 0.1};
-Color Color::Turquoise{0.1, 0.7, 0.7};
-Color Color::Cyan{0.1, 1.0, 1.0};
+const Color Color::Green{0.1, 1.0, 0.1};
+const Color Color::Turquoise{0.1, 0.7, 0.7};
+const Color Color::Cyan{0.1, 1.0, 1.0};
 
-Color Color::DarkBlue{0.03, 0.03, 0.3};
-Color Color::Blue{0.1, 0.1, 1.0};
-Color Color::Azure{0.28, 0.7, 0.86};
-Color Color::Purple{0.6, 0.1, 1.0};
-Color Color::Magenta{1.0, 0.1, 1.0};
-Color Color::Pink{1.0, 0.4, 0.7};
+const Color Color::Blue{0.1, 0.1, 1.0};
+const Color Color::Azure{0.28, 0.7, 0.86};
+const Color Color::Purple{0.6, 0.1, 1.0};
+const Color Color::Magenta{1.0, 0.1, 1.0};
+const Color Color::Pink{1.0, 0.4, 0.7};
 
 Color::operator int() const {
     return ((int)(fmin(fmax(r, 0.0), 1.0) * 255) << 16) + ((int)(fmin(fmax(g, 0.0), 1.0) * 255) << 8) + (int)(fmin(fmax(b, 0.0), 1.0) * 255);

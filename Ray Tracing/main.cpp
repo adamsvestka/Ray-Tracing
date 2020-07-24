@@ -13,6 +13,7 @@
 #include "settings.hpp"
 #include "data_types.hpp"
 #include "shaders.hpp"
+#include "file_managers.hpp"
 #include "shapes.hpp"
 #include "light_sources.hpp"
 #include "ray.hpp"
@@ -27,6 +28,11 @@ Settings settings;
 // Material: {texture, n, Ks, ior, transparent}
 
 int main(int argc, const char *argv[]) {
+    settings.ambient_lighting = Color::Gray.dark();
+    settings.background_color = Color::Gray.light();
+    
+    SettingsParser("settings.ini");
+    
     Camera camera({0, 0, 0});
     
     vector<Shape *> objects;
@@ -46,10 +52,6 @@ int main(int argc, const char *argv[]) {
     lights.push_back(new GlobalLight(Color::Lime, 0.05));
     lights.push_back(new LinearLight({10, -10, 25}, Color::White, 600));
 //    lights.push_back(new DirectionalLight(Vector3::Down, Color::White, 0.5));
-    
-    
-    settings.ambient_lighting = Color::DarkGray;
-    settings.background_color = Color::Gray;
     
     camera.render(objects, lights);
     

@@ -24,8 +24,8 @@ Camera::Camera(Vector3 position) {
     XClearWindow(display, window);
     XMapRaised(display, window);
     
-    this->width = screenWidth / settings.resolution_decrese;
-    this->height = screenHeight / settings.resolution_decrese;
+    this->width = screenWidth / settings.resolution_decrease;
+    this->height = screenHeight / settings.resolution_decrease;
     this->position = position;
     fovFactor = 1 / tan(settings.field_of_view / 2);
     region_current = 0;
@@ -51,7 +51,7 @@ Camera::~Camera() {
             for (int x = 0; x < result[settings.render_mode].size(); x++) {
                 for (int y = 0; y < result[settings.render_mode][x].size(); y++) {
                     XSetForeground(display, gc, result[settings.render_mode][x][y]);
-                    XFillRectangle(display, window, gc, x * settings.resolution_decrese, y * settings.resolution_decrese, settings.resolution_decrese, settings.resolution_decrese);
+                    XFillRectangle(display, window, gc, x * settings.resolution_decrease, y * settings.resolution_decrease, settings.resolution_decrease, settings.resolution_decrease);
                 }
             }
             renderInfo();
@@ -91,21 +91,21 @@ void Camera::drawDebugBox(int x, int y, Input mask) {
     const auto size = 0.3;
     
     XPoint points[4][3] = {{
-        {(short)((x * settings.resolution_decrese + size) * settings.render_region_size), (short)(y * settings.resolution_decrese * settings.render_region_size)},
-        {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)(y * settings.resolution_decrese * settings.render_region_size)},
-        {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)((y * settings.resolution_decrese + size) * settings.render_region_size)}
+        {(short)((x * settings.resolution_decrease + size) * settings.render_region_size), (short)(y * settings.resolution_decrease * settings.render_region_size)},
+        {(short)(x * settings.resolution_decrease * settings.render_region_size), (short)(y * settings.resolution_decrease * settings.render_region_size)},
+        {(short)(x * settings.resolution_decrease * settings.render_region_size), (short)((y * settings.resolution_decrease + size) * settings.render_region_size)}
     }, {
-        {(short)(((x + 1) * settings.resolution_decrese - size) * settings.render_region_size - 2), (short)(y * settings.resolution_decrese * settings.render_region_size)},
-        {(short)((x + 1) * settings.resolution_decrese * settings.render_region_size - 2), (short)(y * settings.resolution_decrese * settings.render_region_size)},
-        {(short)((x + 1) * settings.resolution_decrese * settings.render_region_size - 2), (short)((y * settings.resolution_decrese + size) * settings.render_region_size)}
+        {(short)(((x + 1) * settings.resolution_decrease - size) * settings.render_region_size - 2), (short)(y * settings.resolution_decrease * settings.render_region_size)},
+        {(short)((x + 1) * settings.resolution_decrease * settings.render_region_size - 2), (short)(y * settings.resolution_decrease * settings.render_region_size)},
+        {(short)((x + 1) * settings.resolution_decrease * settings.render_region_size - 2), (short)((y * settings.resolution_decrease + size) * settings.render_region_size)}
     }, {
-        {(short)((x * settings.resolution_decrese + size) * settings.render_region_size), (short)((y + 1) * settings.resolution_decrese * settings.render_region_size - 2)},
-        {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)((y + 1) * settings.resolution_decrese * settings.render_region_size - 2)},
-        {(short)(x * settings.resolution_decrese * settings.render_region_size), (short)(((y + 1) * settings.resolution_decrese - size) * settings.render_region_size - 2)}
+        {(short)((x * settings.resolution_decrease + size) * settings.render_region_size), (short)((y + 1) * settings.resolution_decrease * settings.render_region_size - 2)},
+        {(short)(x * settings.resolution_decrease * settings.render_region_size), (short)((y + 1) * settings.resolution_decrease * settings.render_region_size - 2)},
+        {(short)(x * settings.resolution_decrease * settings.render_region_size), (short)(((y + 1) * settings.resolution_decrease - size) * settings.render_region_size - 2)}
     }, {
-        {(short)(((x + 1) * settings.resolution_decrese - size) * settings.render_region_size - 2), (short)((y + 1) * settings.resolution_decrese * settings.render_region_size - 2)},
-        {(short)((x + 1) * settings.resolution_decrese * settings.render_region_size - 2), (short)((y + 1) * settings.resolution_decrese * settings.render_region_size - 2)},
-        {(short)((x + 1) * settings.resolution_decrese * settings.render_region_size - 2), (short)(((y + 1) * settings.resolution_decrese - size) * settings.render_region_size - 2)}
+        {(short)(((x + 1) * settings.resolution_decrease - size) * settings.render_region_size - 2), (short)((y + 1) * settings.resolution_decrease * settings.render_region_size - 2)},
+        {(short)((x + 1) * settings.resolution_decrease * settings.render_region_size - 2), (short)((y + 1) * settings.resolution_decrease * settings.render_region_size - 2)},
+        {(short)((x + 1) * settings.resolution_decrease * settings.render_region_size - 2), (short)(((y + 1) * settings.resolution_decrease - size) * settings.render_region_size - 2)}
     }};
     
     int npoints = sizeof(points[0]) / sizeof(XPoint);
@@ -116,21 +116,21 @@ void Camera::drawDebugBox(int x, int y, Input mask) {
         return;
     }
     
-    if (mask.transmission) XSetForeground(display, gc, Color::DarkGreen);
+    if (mask.transmission) XSetForeground(display, gc, Color::Green.dark());
     else XSetForeground(display, gc, Color::Gray);
     XDrawLines(display, window, gc, points[0], npoints, CoordModeOrigin);
     
-    if (mask.reflections) XSetForeground(display, gc, Color::DarkBlue);
-    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::DarkYellow);
+    if (mask.reflections) XSetForeground(display, gc, Color::Blue.dark());
+    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::Yellow.dark());
     else XSetForeground(display, gc, Color::Gray);
     XDrawLines(display, window, gc, points[1], npoints, CoordModeOrigin);
     
-    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::DarkYellow);
-    else if (mask.reflections) XSetForeground(display, gc, Color::DarkBlue);
+    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::Yellow.dark());
+    else if (mask.reflections) XSetForeground(display, gc, Color::Blue.dark());
     else XSetForeground(display, gc, Color::Gray);
     XDrawLines(display, window, gc, points[2], npoints, CoordModeOrigin);
     
-    if (mask.transmission) XSetForeground(display, gc, Color::DarkGreen);
+    if (mask.transmission) XSetForeground(display, gc, Color::Green.dark());
     else XSetForeground(display, gc, Color::Gray);
     XDrawLines(display, window, gc, points[3], npoints, CoordModeOrigin);
 }
@@ -149,7 +149,7 @@ vector<vector<Intersection>> Camera::preRender(const vector<Shape *> &objects, c
             auto ray = castRay(position, getCameraRay((x + 0.5) * settings.render_region_size, (y + 0.5) * settings.render_region_size), objects, lights, {true, 0, true, true, true, true, vector<bool>(objects.size(), true)});
             
             XSetForeground(display, gc, getPixel((buffer[x][y] = ray), settings.render_mode));
-            XFillRectangle(display, window, gc, x * settings.resolution_decrese * settings.render_region_size, y * settings.resolution_decrese * settings.render_region_size, settings.resolution_decrese * settings.render_region_size, settings.resolution_decrese * settings.render_region_size);
+            XFillRectangle(display, window, gc, x * settings.resolution_decrease * settings.render_region_size, y * settings.resolution_decrease * settings.render_region_size, settings.resolution_decrease * settings.render_region_size, settings.resolution_decrease * settings.render_region_size);
             
             if (!settings.save_render) continue;
             for (auto mode = 0; mode < RenderTypes; mode++)
@@ -353,7 +353,7 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
 //                    copy(region.buffer[x].begin(), region.buffer[x].end(), &result[region.x + x][region.y]);
                     for (int y = 0; y < region.h; y++) {
                         XSetForeground(display, gc, region.buffer[x][y]);
-                        XFillRectangle(display, window, gc, (region.x + x) * settings.resolution_decrese, (region.y + y) * settings.resolution_decrese, settings.resolution_decrese, settings.resolution_decrese);
+                        XFillRectangle(display, window, gc, (region.x + x) * settings.resolution_decrease, (region.y + y) * settings.resolution_decrease, settings.resolution_decrease, settings.resolution_decrease);
                     }
                 }
                 

@@ -28,7 +28,7 @@ struct Vector3 {
     Vector3 normal() const;
     Color toColor() const;
     
-    static Vector3 Zero, One, North, South, East, West, Up, Down;
+    const static Vector3 Zero, One, North, South, East, West, Up, Down;
     
     Vector3 operator+(const Vector3) const;
     Vector3 operator-(const Vector3) const;
@@ -53,7 +53,7 @@ struct Matrix3x3 {
     
     Matrix3x3 inverse();
     
-    static Matrix3x3 Identity;
+    const static Matrix3x3 Identity;
     static Matrix3x3 RotationMatrixX(float);
     static Matrix3x3 RotationMatrixY(float);
     static Matrix3x3 RotationMatrixZ(float);
@@ -75,11 +75,13 @@ struct Color {
     Color(float, float, float);
     
     float value() const;
+    Color light() const;
+    Color dark() const;
     
-    static Color White, LightGray, Gray, DarkGray, Black,
-        DarkRed, Red, Orange, DarkYellow, Yellow, Lime,
-        DarkGreen, Green, Turquoise, Cyan,
-        DarkBlue, Blue, Azure, Purple, Magenta, Pink;
+    const static Color White, Gray, Black,
+        Red, Orange, Yellow, Lime,
+        Green, Turquoise, Cyan,
+        Blue, Azure, Purple, Magenta, Pink;
     
     operator int() const;
     bool operator==(const Color) const;

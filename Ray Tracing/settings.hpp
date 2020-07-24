@@ -27,8 +27,6 @@ struct Settings {
     
     short max_light_bounces = 5;
     
-    short surface_smoothing = 4;
-    
     // MARK: Camera
     short render_mode = RENDER_SHADED;
     
@@ -42,15 +40,15 @@ struct Settings {
     
     short field_of_view = 120;
     
-    short resolution_decrese = 1;
+    short resolution_decrease = 1;
     
     short render_region_size = 10;
     
     short rendering_threads = 25;
     
-    Color ambient_lighting = Color::Gray / 2;
+    Color ambient_lighting;
     
-    Color background_color = Color::Gray;
+    Color background_color;
     
 };
 

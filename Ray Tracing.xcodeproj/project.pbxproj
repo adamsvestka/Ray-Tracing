@@ -14,6 +14,7 @@
 		6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3EA2445E2E10066BCCC /* camera.cpp */; };
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
 		665B9C9B24C8EF71000C4E1E /* libX11.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9C9A24C8EF71000C4E1E /* libX11.dylib */; };
+		665B9CA224CA3824000C4E1E /* file_managers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 665B9CA024CA3824000C4E1E /* file_managers.cpp */; };
 		6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6667DFF924604DFC00A1DDE1 /* shaders.cpp */; };
 /* End PBXBuildFile section */
 
@@ -46,6 +47,8 @@
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
 		665B9C9524C8D2C4000C4E1E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		665B9C9A24C8EF71000C4E1E /* libX11.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.dylib; path = ../../../../../opt/X11/lib/libX11.dylib; sourceTree = "<group>"; };
+		665B9CA024CA3824000C4E1E /* file_managers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_managers.cpp; sourceTree = "<group>"; };
+		665B9CA124CA3824000C4E1E /* file_managers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = file_managers.hpp; sourceTree = "<group>"; };
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
 		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
@@ -129,6 +132,8 @@
 				6630E3E12445E2B20066BCCC /* data_types.cpp */,
 				6667DFFA24604DFC00A1DDE1 /* shaders.hpp */,
 				6667DFF924604DFC00A1DDE1 /* shaders.cpp */,
+				665B9CA124CA3824000C4E1E /* file_managers.hpp */,
+				665B9CA024CA3824000C4E1E /* file_managers.cpp */,
 			);
 			name = "Data structures";
 			sourceTree = "<group>";
@@ -208,6 +213,7 @@
 				6630E3E62445E2C70066BCCC /* shapes.cpp in Sources */,
 				6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */,
 				6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */,
+				665B9CA224CA3824000C4E1E /* file_managers.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
