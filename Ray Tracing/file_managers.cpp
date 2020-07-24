@@ -8,20 +8,22 @@
 
 #include "file_managers.hpp"
 
-SettingsParser::SettingsParser(string filename) {
+SettingsParser::SettingsParser(string filename) : filename(filename) {};
+
+void SettingsParser::parse() {
     cout << "Reading settings.ini" << endl;
     initBindings();
     
     regex pair("\\s*(.+?)\\s*=\\s*(.+)");
-    regex hex("0x([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
+    regex hex("([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
     regex ignore("\\[.*\\]|#.*");
     
     smatch matches;
     string line;
     
-    file.open(filename, ios::in | ios::out);
-    if (file.is_open()) {
-        while (getline(file, line)) {
+    ifstream ifile(filename, ios::in | ios::out);
+    if (ifile.is_open()) {
+        while (getline(ifile, line)) {
             line = regex_replace(line, ignore, "");
             if (all_of(line.begin(), line.end(), ::isspace)) continue;
             
@@ -52,28 +54,28 @@ SettingsParser::SettingsParser(string filename) {
             } else cout << "Invalid entry: " << line << endl;
         }
         
-        file.close();
+        ifile.close();
     } else cout << "File doesn't exist" << endl;
     
-    file.open(filename, ios::out | ios::app);
-    if (file.is_open()) {
+    ofstream ofile(filename, ios::out | ios::app);
+    if (ofile.is_open()) {
         for (auto it : bindings) {
             cout << "Missing entry: " << it.first << endl;
             
-            file << it.first << "=";
+            ofile << it.first << "=";
             switch (it.second.type) {
-                case 0: file << (*(bool *)(it.second.data) ? "true" : "false"); break;
-                case 1: file << *(short *)(it.second.data); break;
-                case 2: file << *(float *)(it.second.data); break;
+                case 0: ofile << (*(bool *)(it.second.data) ? "true" : "false"); break;
+                case 1: ofile << *(short *)(it.second.data); break;
+                case 2: ofile << *(float *)(it.second.data); break;
                 case 3: {
                     Color c = *(Color *)(it.second.data);
-                    ios_base::fmtflags f(file.flags());
-                    file << "0x" << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
-                    file.flags(f);
+                    ios_base::fmtflags f(ofile.flags());
+                    ofile << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
+                    ofile.flags(f);
                 } break;
                 default: break;
             }
-            file << endl;
+            ofile << endl;
         }
     } else cout << "Unable to create file" << endl;
 }

@@ -28,14 +28,16 @@ Settings settings;
 // Material: {texture, n, Ks, ior, transparent}
 
 int main(int argc, const char *argv[]) {
+    SettingsParser parser("settings.ini");
+    Camera camera({0, 0, 0});
+    vector<Shape *> objects;
+    vector<Light *> lights;
+    
     settings.ambient_lighting = Color::Gray.dark();
     settings.background_color = Color::Gray.light();
     
-    SettingsParser("settings.ini");
+    parser.parse();
     
-    Camera camera({0, 0, 0});
-    
-    vector<Shape *> objects;
     objects.push_back(new Cuboid({20, -6, -2}, 3, {45, 0, 0}, {[c = Checkerboard(16)](float u, float v) { return colorRamp(c(u, v), Color::Purple, Color::Turquoise); }}));
     objects.push_back(new Plane({50, -4, -4}, 40, 12, Vector3::Zero, {[c = Checkerboard(32), n = Noise(16, 0)](float u, float v) { return colorRamp(c(u, v), Color::Red, Color::Yellow) - Color::White / 2 * n(u, v); }}));
     objects.push_back(new Sphere({15, 0, 1}, 3, Vector3::Zero, {Col(Color::White), 0, 0, 0.95, true}));
@@ -48,7 +50,6 @@ int main(int argc, const char *argv[]) {
 //    objects.push_back(new Cylinder({20, 0.5, 0}, 0.2, 5, {40, 25, 0}, {Col(Color::Gray / 2)}));
     objects.push_back(new Plane({25, 5, -3}, 5, 5, {25, 25, 0}, {Col(Color::Blue)}));
     
-    vector<Light *> lights;
     lights.push_back(new GlobalLight(Color::Lime, 0.05));
     lights.push_back(new LinearLight({10, -10, 25}, Color::White, 600));
 //    lights.push_back(new DirectionalLight(Vector3::Down, Color::White, 0.5));

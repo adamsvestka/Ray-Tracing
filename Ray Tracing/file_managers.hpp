@@ -26,11 +26,12 @@ struct SettingValue {
 
 class SettingsParser {
 private:
-    fstream file;
+    string filename;
     map<string, SettingValue> bindings;
     
 public:
     SettingsParser(string);
+    void parse();
     void initBindings();
     void bindOption(SettingValue, string);
 };
