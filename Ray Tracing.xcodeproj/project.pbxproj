@@ -13,11 +13,13 @@
 		6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E72445E2D70066BCCC /* light_sources.cpp */; };
 		6630E3EC2445E2E10066BCCC /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3EA2445E2E10066BCCC /* camera.cpp */; };
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
-		665B9C9B24C8EF71000C4E1E /* libX11.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9C9A24C8EF71000C4E1E /* libX11.dylib */; };
 		665B9CA224CA3824000C4E1E /* file_managers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 665B9CA024CA3824000C4E1E /* file_managers.cpp */; };
-		665B9CAC24CB712E000C4E1E /* libjpeg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CAB24CB712E000C4E1E /* libjpeg.dylib */; };
-		665B9CAF24CB71D0000C4E1E /* libjpeg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CAB24CB712E000C4E1E /* libjpeg.dylib */; };
-		665B9CB324CB7728000C4E1E /* libpng.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CB224CB7728000C4E1E /* libpng.dylib */; };
+		665B9CC424CBAC80000C4E1E /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC324CBAC80000C4E1E /* libX11.6.dylib */; };
+		665B9CC524CBAC80000C4E1E /* libX11.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 665B9CC324CBAC80000C4E1E /* libX11.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		665B9CC724CBAC8F000C4E1E /* libpng16.16.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */; };
+		665B9CC824CBAC8F000C4E1E /* libpng16.16.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
+		665B9CCA24CBAC9D000C4E1E /* libjpeg.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */; };
+		665B9CCB24CBAC9D000C4E1E /* libjpeg.9.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6667DFF924604DFC00A1DDE1 /* shaders.cpp */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +32,19 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
+		};
+		665B9CB724CBAC03000C4E1E /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				665B9CC524CBAC80000C4E1E /* libX11.6.dylib in Embed Libraries */,
+				665B9CCB24CBAC9D000C4E1E /* libjpeg.9.dylib in Embed Libraries */,
+				665B9CC824CBAC8F000C4E1E /* libpng16.16.dylib in Embed Libraries */,
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -48,12 +63,12 @@
 		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
 		665B9C9524C8D2C4000C4E1E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
-		665B9C9A24C8EF71000C4E1E /* libX11.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.dylib; path = ../../../../../opt/X11/lib/libX11.dylib; sourceTree = "<group>"; };
 		665B9CA024CA3824000C4E1E /* file_managers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_managers.cpp; sourceTree = "<group>"; };
 		665B9CA124CA3824000C4E1E /* file_managers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = file_managers.hpp; sourceTree = "<group>"; };
 		665B9CA524CB6528000C4E1E /* CImg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CImg.h; sourceTree = "<group>"; };
-		665B9CAB24CB712E000C4E1E /* libjpeg.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.dylib; path = ../../../../../usr/local/lib/libjpeg.dylib; sourceTree = "<group>"; };
-		665B9CB224CB7728000C4E1E /* libpng.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng.dylib; path = ../../../../../usr/local/lib/libpng.dylib; sourceTree = "<group>"; };
+		665B9CC324CBAC80000C4E1E /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
+		665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = ../../../../../usr/local/Cellar/libpng/1.6.36/lib/libpng16.16.dylib; sourceTree = "<group>"; };
+		665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.9.dylib; path = ../../../../../usr/local/Cellar/jpeg/9c/lib/libjpeg.9.dylib; sourceTree = "<group>"; };
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
 		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
@@ -64,10 +79,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				665B9C9B24C8EF71000C4E1E /* libX11.dylib in Frameworks */,
-				665B9CAF24CB71D0000C4E1E /* libjpeg.dylib in Frameworks */,
-				665B9CB324CB7728000C4E1E /* libpng.dylib in Frameworks */,
-				665B9CAC24CB712E000C4E1E /* libjpeg.dylib in Frameworks */,
+				665B9CC424CBAC80000C4E1E /* libX11.6.dylib in Frameworks */,
+				665B9CCA24CBAC9D000C4E1E /* libjpeg.9.dylib in Frameworks */,
+				665B9CC724CBAC8F000C4E1E /* libpng16.16.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -107,9 +121,9 @@
 		6630E3DE2443CF020066BCCC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				665B9CB224CB7728000C4E1E /* libpng.dylib */,
-				665B9CAB24CB712E000C4E1E /* libjpeg.dylib */,
-				665B9C9A24C8EF71000C4E1E /* libX11.dylib */,
+				665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */,
+				665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */,
+				665B9CC324CBAC80000C4E1E /* libX11.6.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -169,6 +183,7 @@
 				6630E3D02443CD680066BCCC /* Sources */,
 				6630E3D12443CD680066BCCC /* Frameworks */,
 				6630E3D22443CD680066BCCC /* CopyFiles */,
+				665B9CB724CBAC03000C4E1E /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -356,6 +371,8 @@
 					/opt/X11/lib,
 					/usr/local/lib,
 					/usr/local/lib,
+					/usr/local/Cellar/jpeg/9c/lib,
+					/usr/local/Cellar/libpng/1.6.36/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "-lX11";
@@ -381,6 +398,8 @@
 					/opt/X11/lib,
 					/usr/local/lib,
 					/usr/local/lib,
+					/usr/local/Cellar/jpeg/9c/lib,
+					/usr/local/Cellar/libpng/1.6.36/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "-lX11";

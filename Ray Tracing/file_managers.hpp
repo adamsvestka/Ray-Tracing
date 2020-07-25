@@ -9,6 +9,7 @@
 #pragma once
 
 #include <iostream>
+#include <variant>
 #include <fstream>
 #include <iomanip>
 #include <regex>
@@ -19,10 +20,7 @@
 
 using namespace std;
 
-struct SettingValue {
-    short type;
-    void *data;
-};
+typedef variant<bool *, short *, float *, Color *> SettingValue;
 
 class SettingsParser {
 private:

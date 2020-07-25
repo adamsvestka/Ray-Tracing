@@ -131,10 +131,10 @@ Color Cuboid::getTexture(Vector3 point) const {
     
     float u, v;
     if (abs(_point.x) > abs(_point.y) && abs(_point.x) > abs(_point.z)) {
-        v = 0.5 - _point.y / size.y;
+        v = _point.y / size.y + 0.5;
         u = _point.z / size.z + 0.5;
     } else if (abs(_point.y) > abs(_point.z)) {
-        v = _point.x / size.x + 0.5;
+        v = 0.5 - _point.x / size.x;
         u = _point.z / size.z + 0.5;
     } else {
         u = _point.x / size.x + 0.5;

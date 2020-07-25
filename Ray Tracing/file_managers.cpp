@@ -36,13 +36,13 @@ void SettingsParser::parse() {
                     }
                     
                     auto &value = bindings[matches[1].str()];
-                    switch (value.type) {
-                        case 0: *(bool *)(value.data) = matches[2].str() == "true"; break;
-                        case 1: *(short *)(value.data) = stoi(matches[2].str()); break;
-                        case 2: *(float *)(value.data) = stof(matches[2].str()); break;
+                    switch (value.index()) {
+                        case 0: *get<bool *>(value) = matches[2].str() == "true"; break;
+                        case 1: *get<short *>(value) = (short)stoi(matches[2].str()); break;
+                        case 2: *get<float *>(value) = stof(matches[2].str()); break;
                         case 3:
                             regex_search(line, matches, hex);
-                            *(Color *)(value.data) = Color(stoi(matches[1].str(), 0, 16) / 255.f, stoi(matches[2].str(), 0, 16) / 255.f, stoi(matches[3].str(), 0, 16) / 255.f);
+                            *get<Color *>(value) = Color(stoi(matches[1].str(), 0, 16) / 255.f, stoi(matches[2].str(), 0, 16) / 255.f, stoi(matches[3].str(), 0, 16) / 255.f);
                             break;
                         default: break;
                     }
@@ -59,16 +59,17 @@ void SettingsParser::parse() {
     
     ofstream ofile(filename, ios::out | ios::app);
     if (ofile.is_open()) {
+        ofile.setf(ios_base::boolalpha);
         for (auto it : bindings) {
             cout << "Missing entry: " << it.first << endl;
             
             ofile << it.first << "=";
-            switch (it.second.type) {
-                case 0: ofile << (*(bool *)(it.second.data) ? "true" : "false"); break;
-                case 1: ofile << *(short *)(it.second.data); break;
-                case 2: ofile << *(float *)(it.second.data); break;
+            switch (it.second.index()) {
+                case 0: ofile << *get<bool *>(it.second); break;
+                case 1: ofile << *get<short *>(it.second); break;
+                case 2: ofile << *get<float *>(it.second); break;
                 case 3: {
-                    Color c = *(Color *)(it.second.data);
+                    Color c = *get<Color *>(it.second);
                     ios_base::fmtflags f(ofile.flags());
                     ofile << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
                     ofile.flags(f);
@@ -82,22 +83,22 @@ void SettingsParser::parse() {
 
 void SettingsParser::initBindings() {
     // Ray
-    bindOption({1, &settings.max_render_distance}, "max_render_distance");
-    bindOption({2, &settings.surface_bias}, "surface_bias");
-    bindOption({1, &settings.max_light_bounces}, "max_light_bounces");
+    bindOption(&settings.max_render_distance, "max_render_distance");
+    bindOption(&settings.surface_bias, "surface_bias");
+    bindOption(&settings.max_light_bounces, "max_light_bounces");
     
     // Camera
-    bindOption({1, &settings.render_mode}, "render_mode");
-    bindOption({1, &settings.render_pattern}, "render_pattern");
-    bindOption({0, &settings.show_debug}, "show_debug");
-    bindOption({0, &settings.preprocess}, "preprocess");
-    bindOption({0, &settings.save_render}, "save_render");
-    bindOption({1, &settings.field_of_view}, "field_of_view");
-    bindOption({1, &settings.resolution_decrease}, "resolution_decrease");
-    bindOption({1, &settings.render_region_size}, "render_region_size");
-    bindOption({1, &settings.rendering_threads}, "rendering_threads");
-    bindOption({3, &settings.ambient_lighting}, "ambient_lighting");
-    bindOption({3, &settings.background_color}, "background_color");
+    bindOption(&settings.render_mode, "render_mode");
+    bindOption(&settings.render_pattern, "render_pattern");
+    bindOption(&settings.show_debug, "show_debug");
+    bindOption(&settings.preprocess, "preprocess");
+    bindOption(&settings.save_render, "save_render");
+    bindOption(&settings.field_of_view, "field_of_view");
+    bindOption(&settings.resolution_decrease, "resolution_decrease");
+    bindOption(&settings.render_region_size, "render_region_size");
+    bindOption(&settings.rendering_threads, "rendering_threads");
+    bindOption(&settings.ambient_lighting, "ambient_lighting");
+    bindOption(&settings.background_color, "background_color");
 }
 
 void SettingsParser::bindOption(SettingValue value, string key) {

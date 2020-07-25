@@ -29,7 +29,7 @@ Settings settings;
 
 int main(int argc, const char *argv[]) {
     settings.ambient_lighting = Color::Gray.dark();
-    settings.background_color = Color::Gray.light();
+    settings.background_color = Color::Gray;
     
     SettingsParser parser("settings.ini");
     parser.parse();
