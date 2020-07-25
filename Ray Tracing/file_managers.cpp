@@ -8,11 +8,29 @@
 
 #include "file_managers.hpp"
 
-SettingsParser::SettingsParser(string filename) : filename(filename) {};
-
-void SettingsParser::parse() {
-    cout << "Reading settings.ini" << endl;
-    initBindings();
+void parseSettings(string filename, Settings &settings) {
+    cout << "Parsing settings.ini" << endl;
+    
+    // MARK: Bind options
+    map<string, SettingValue> bindings;
+    // Ray
+    bindings["max_render_distance"] = &settings.max_render_distance;
+    bindings["max_render_distance"] = &settings.max_render_distance;
+    bindings["surface_bias"] = &settings.surface_bias;
+    bindings["max_light_bounces"] = &settings.max_light_bounces;
+    
+    // Camera
+    bindings["render_mode"] = &settings.render_mode;
+    bindings["render_pattern"] = &settings.render_pattern;
+    bindings["show_debug"] = &settings.show_debug;
+    bindings["preprocess"] = &settings.preprocess;
+    bindings["save_render"] = &settings.save_render;
+    bindings["field_of_view"] = &settings.field_of_view;
+    bindings["resolution_decrease"] = &settings.resolution_decrease;
+    bindings["render_region_size"] = &settings.render_region_size;
+    bindings["rendering_threads"] = &settings.rendering_threads;
+    bindings["ambient_lighting"] = &settings.ambient_lighting;
+    bindings["background_color"] = &settings.background_color;
     
     regex pair("\\s*(.+?)\\s*=\\s*(.+)");
     regex hex("([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
@@ -21,6 +39,7 @@ void SettingsParser::parse() {
     smatch matches;
     string line;
     
+    // MARK: Parse file to structure
     ifstream ifile(filename, ios::in | ios::out);
     if (ifile.is_open()) {
         while (getline(ifile, line)) {
@@ -57,6 +76,7 @@ void SettingsParser::parse() {
         ifile.close();
     } else cout << "File doesn't exist" << endl;
     
+    // MARK: Add missing tags to file
     ofstream ofile(filename, ios::out | ios::app);
     if (ofile.is_open()) {
         ofile.setf(ios_base::boolalpha);
@@ -79,28 +99,4 @@ void SettingsParser::parse() {
             ofile << endl;
         }
     } else cout << "Unable to create file" << endl;
-}
-
-void SettingsParser::initBindings() {
-    // Ray
-    bindOption(&settings.max_render_distance, "max_render_distance");
-    bindOption(&settings.surface_bias, "surface_bias");
-    bindOption(&settings.max_light_bounces, "max_light_bounces");
-    
-    // Camera
-    bindOption(&settings.render_mode, "render_mode");
-    bindOption(&settings.render_pattern, "render_pattern");
-    bindOption(&settings.show_debug, "show_debug");
-    bindOption(&settings.preprocess, "preprocess");
-    bindOption(&settings.save_render, "save_render");
-    bindOption(&settings.field_of_view, "field_of_view");
-    bindOption(&settings.resolution_decrease, "resolution_decrease");
-    bindOption(&settings.render_region_size, "render_region_size");
-    bindOption(&settings.rendering_threads, "rendering_threads");
-    bindOption(&settings.ambient_lighting, "ambient_lighting");
-    bindOption(&settings.background_color, "background_color");
-}
-
-void SettingsParser::bindOption(SettingValue value, string key) {
-    bindings[key] = value;
 }

@@ -16,9 +16,12 @@
 
 #include <png.h>
 #include <jpeglib.h>
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
 #define cimg_use_png
 #define cimg_use_jpeg
-#include "CImg.h"
+#include <CImg.h>
+#pragma clang diagnostic pop
 
 #include "data_types.hpp"
 

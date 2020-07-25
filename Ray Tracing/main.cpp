@@ -31,8 +31,7 @@ int main(int argc, const char *argv[]) {
     settings.ambient_lighting = Color::Gray.dark();
     settings.background_color = Color::Gray;
     
-    SettingsParser parser("settings.ini");
-    parser.parse();
+    parseSettings("settings.ini", settings);
     
     Camera camera({0, 0, 0});
     
