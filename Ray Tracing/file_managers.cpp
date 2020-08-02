@@ -148,7 +148,7 @@ Color parseColor(string s) {
     
 }
 
-function<Color(float, float)> parseShader(json j) {
+function<Color (float, float)> parseShader(json j) {
     if (!j.is_null()) {
         switch (::hash(j.value("type", "").c_str())) {
             case "color"_h: return [color = parseColor(j.value("color", ""))](float u, float v) { return color; };
@@ -156,6 +156,32 @@ function<Color(float, float)> parseShader(json j) {
             case "checkerboard"_h: return [checkerboard = Checkerboard(j.value("scale", 2), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](float u, float v) { return checkerboard(u, v); };
             case "bricks"_h: return [bricks = Brick(j.value("scale", 2), j.value("ratio", 2.f), j.value("mortar", 0.1f), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](float u, float v) { return bricks(u, v); };
             case "noise"_h: return [noise = Noise(j.value("scale", 1), j.value("seed", 0), parseColor(j.value("primary", "")))](float u, float v) { return noise(u, v); };
+            
+            case "negate"_h: {
+                if (!j["value"].is_object()) break;
+                return [shader = parseShader(j["value"])](float u, float v) { return -shader(u, v); };
+            }
+            case "add"_h: {
+                if (!j["values"].is_array()) break;
+                vector<function<Color (float, float)>> shaders;
+                for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
+                return [=](float u, float v) { Color result = Color::Black; for (auto &shader : shaders) result += shader(u, v); return result; };
+            }
+            case "multiply"_h: {
+                if (!j["values"].is_array()) break;
+                vector<function<Color (float, float)>> shaders;
+                for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
+                return [=](float u, float v) { Color result = Color::White; for (auto &shader : shaders) result *= shader(u, v); return result; };
+            }
+            case "mix"_h: {
+                if (!j["values"].is_array() || !j["weights"].is_array()) break;
+                vector<function<Color (float, float)>> shaders;
+                vector<float> weights;
+                for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
+                for (auto &weight : j["weights"]) weights.push_back(weight);
+                if (shaders.size() != weights.size()) break;
+                return [=](float u, float v) { Color result = Color::Black; for (int i = 0; i < shaders.size(); i++) result += shaders[i](u, v) * weights[i]; return result; };
+            }
         }
     }
     

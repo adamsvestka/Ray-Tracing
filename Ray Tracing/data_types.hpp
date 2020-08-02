@@ -89,6 +89,7 @@ struct Color {
     bool operator==(const Color) const;
     Color operator+(const Color) const;
     Color operator-(const Color) const;
+    Color operator-() const;
     Color operator*(const double) const;
     Color operator*(const float) const;
     Color operator*(const int) const;
@@ -98,6 +99,8 @@ struct Color {
     Color operator*(const Color) const;
     void operator+=(const Color);
     void operator-=(const Color);
+    void operator*=(const Color);
+    void operator/=(const Color);
 };
 
 

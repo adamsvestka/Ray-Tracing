@@ -238,6 +238,10 @@ Color Color::operator-(const Color c) const {
     return Color(this->r - c.r, this->g - c.g, this->b - c.b);
 }
 
+Color Color::operator-() const {
+    return Color(-this->r, -this->g, -this->b);
+}
+
 Color Color::operator*(const double n) const {
     return Color(this->r * (float)n, this->g * (float)n, this->b * (float)n);
 }
@@ -272,6 +276,14 @@ void Color::operator+=(Color c) {
 
 void Color::operator-=(Color c) {
     *this = *this - c;
+}
+
+void Color::operator*=(Color c) {
+    *this = *this * c;
+}
+
+void Color::operator/=(Color c) {
+    *this = *this / c;
 }
 
 
