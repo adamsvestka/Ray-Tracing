@@ -9,7 +9,8 @@
 #pragma once
 
 #include <iostream>
-#include <vector>
+//#include <vector>
+#include <array>
 #include <random>
 #include <algorithm>
 #include <functional>
@@ -55,11 +56,12 @@ public:
 class Checkerboard {
 private:
     int scale;
+    Color primary, secondary;
     
 public:
-    Checkerboard(int);
+    Checkerboard(int, Color, Color);
     
-    float operator()(float, float) const;
+    Color operator()(float, float) const;
 };
 
 
@@ -67,11 +69,12 @@ class Brick {
 private:
     int scale;
     float ratio, mortar;
+    Color primary, secondary;
     
 public:
-    Brick(int, float, float);
+    Brick(int, float, float, Color, Color);
     
-    float operator()(float, float) const;
+    Color operator()(float, float) const;
 };
 
 
@@ -79,12 +82,13 @@ class Noise {
 private:
     vector<vector<pair<float, float>>> points;
     int scale;
+    Color primary;
     
 public:
-    Noise(int, int);
+    Noise(int, int, Color);
     
     float lerp(float, float, float) const;
     float dotGradient(int, int, float, float) const;
     
-    float operator()(float, float) const;
+    Color operator()(float, float) const;
 };

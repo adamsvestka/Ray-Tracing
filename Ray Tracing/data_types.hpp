@@ -15,6 +15,7 @@ struct Material;
 
 #include <cmath>
 #include <vector>
+#include <array>
 #include <thread>
 #include <queue>
 #include <atomic>
@@ -75,6 +76,7 @@ struct Color {
     Color(float, float, float);
     
     float value() const;
+    array<unsigned char, 3> array() const;
     Color light() const;
     Color dark() const;
     

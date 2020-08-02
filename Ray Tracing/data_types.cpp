@@ -190,6 +190,10 @@ float Color::value() const {
     return (r + g + b) / 3.f;
 }
 
+array<unsigned char, 3> Color::array() const {
+    return std::array<unsigned char, 3>{(unsigned char)(this->r * 255), (unsigned char)(this->g * 255), (unsigned char)(this->b * 255)};
+}
+
 Color Color::light() const {
     return *this * 3.f;
 }

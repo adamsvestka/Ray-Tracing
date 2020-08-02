@@ -69,7 +69,6 @@ Color LinearLight::getSpecularValue(Vector3 point, Vector3 normal, Vector3 direc
 }
 
 
-
 // MARK: - Global
 /// @param color Color{r, g, b} ~ (0 - 1)
 /// @param intensity int ~ (0 - 1)

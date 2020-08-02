@@ -28,3 +28,11 @@ using json = nlohmann::json;
 typedef variant<bool *, short *, float *, Color *> SettingValue;
 
 void parseSettings(string, Settings &);
+
+Vector3 parseVector(json);
+Color parseColor(string);
+function<Color(float, float)> parseShader(json);
+Material parseMaterial(json);
+Shape *parseShape(json j);
+Light *parseLight(json j);
+void parseScene(string, vector<Shape *> &, vector<Light *> &);
