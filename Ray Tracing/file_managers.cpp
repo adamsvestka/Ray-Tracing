@@ -189,9 +189,9 @@ function<Color (float, float)> parseShader(json j) {
 }
 
 Material parseMaterial(json j) {
-    if (!j.is_null()) return {parseShader(j["texture"]), j.value("n", 0.f), j.value("Ks", 0.f), j.value("ior", 1.f), j.value("transparent", false)};
+    if (!j.is_null()) return {parseShader(j["shader"]), j.value("n", 0.f), j.value("Ks", 0.f), j.value("ior", 1.f), j.value("transparent", false)};
     
-    return {parseShader(j["texture"]), 0.f, 0.f, 1.f, false};
+    return {parseShader(j["shader"]), 0.f, 0.f, 1.f, false};
 }
 
 Shape *parseShape(json j) {
