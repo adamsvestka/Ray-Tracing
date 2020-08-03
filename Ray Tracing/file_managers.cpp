@@ -148,7 +148,7 @@ Color parseColor(string s) {
     
 }
 
-function<Color (float, float)> parseShader(json j) {
+Shader parseShader(json j) {
     if (!j.is_null()) {
         switch (::hash(j.value("type", "").c_str())) {
             case "color"_h: return [color = parseColor(j.value("color", ""))](float u, float v) { return color; };
@@ -163,19 +163,19 @@ function<Color (float, float)> parseShader(json j) {
             }
             case "add"_h: {
                 if (!j["values"].is_array()) break;
-                vector<function<Color (float, float)>> shaders;
+                vector<Shader> shaders;
                 for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
                 return [=](float u, float v) { Color result = Color::Black; for (auto &shader : shaders) result += shader(u, v); return result; };
             }
             case "multiply"_h: {
                 if (!j["values"].is_array()) break;
-                vector<function<Color (float, float)>> shaders;
+                vector<Shader> shaders;
                 for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
                 return [=](float u, float v) { Color result = Color::White; for (auto &shader : shaders) result *= shader(u, v); return result; };
             }
             case "mix"_h: {
                 if (!j["values"].is_array() || !j["weights"].is_array()) break;
-                vector<function<Color (float, float)>> shaders;
+                vector<Shader> shaders;
                 vector<float> weights;
                 for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
                 for (auto &weight : j["weights"]) weights.push_back(weight);

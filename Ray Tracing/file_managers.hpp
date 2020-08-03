@@ -31,7 +31,7 @@ void parseSettings(string, Settings &);
 
 Vector3 parseVector(json);
 Color parseColor(string);
-function<Color(float, float)> parseShader(json);
+Shader parseShader(json);
 Material parseMaterial(json);
 Shape *parseShape(json j);
 Light *parseLight(json j);

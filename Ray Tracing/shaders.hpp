@@ -28,9 +28,11 @@
 using namespace std;
 using namespace cimg_library;
 
+typedef function<Color (float, float)> Shader;
+
 // MARK: - Material
 struct Material {
-    function<Color(float, float)> texture;
+    Shader texture;
     float n, Ks, ior;
     bool transparent;
 };
