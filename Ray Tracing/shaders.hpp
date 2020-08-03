@@ -52,6 +52,7 @@ public:
     Color operator()(float, float) const;
 };
 
+
 class Checkerboard {
 private:
     int scale;
@@ -66,12 +67,13 @@ public:
 
 class Brick {
 private:
+    vector<vector<Color>> colors;
     int scale;
     float ratio, mortar;
-    Color primary, secondary;
+    Color primary, secondary, tertiary;
     
 public:
-    Brick(int, float, float, Color, Color);
+    Brick(int, float, float, Color, Color, Color, int);
     
     Color operator()(float, float) const;
 };

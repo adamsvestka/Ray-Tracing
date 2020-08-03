@@ -36,12 +36,13 @@ Image::Image(string path) {
     }
 }
 
-Color Image::operator()(float u, float v) const {
-    return Color{image(v * image.width(), (1 - u) * image.height(), 0, 0) / 255.f,
-        image(v * image.width(), (1 - u) * image.height(), 0, 1) / 255.f,
-        image(v * image.width(), (1 - u) * image.height(), 0, 2) / 255.f
+Color Image::operator()(float x, float y) const {
+    return Color{image(y * image.width(), (1 - x) * image.height(), 0, 0) / 255.f,
+        image(y * image.width(), (1 - x) * image.height(), 0, 1) / 255.f,
+        image(y * image.width(), (1 - x) * image.height(), 0, 2) / 255.f
     };
 }
+
 
 ///
 Checkerboard::Checkerboard(int scale, Color primary, Color secondary) : scale(scale), primary(primary), secondary(secondary) {}
@@ -52,12 +53,26 @@ Color Checkerboard::operator()(float x, float y) const {
 
 
 ///
-Brick::Brick(int scale, float ratio, float mortar, Color primary, Color secondary) : scale(scale), ratio(ratio), mortar(mortar), primary(primary), secondary(secondary)  {}
+Brick::Brick(int scale, float ratio, float mortar, Color primary, Color secondary, Color tertiary, int seed) : scale(scale), ratio(ratio), mortar(mortar), primary(primary), secondary(secondary), tertiary(tertiary) {
+    colors.resize(scale, vector<Color>(ceil(scale / ratio) + 1));
+    
+    default_random_engine engine(seed);
+
+    uniform_real_distribution<float> dist(0, 1);
+    for (auto &i : colors) {
+        for (auto &j : i) {
+            auto a = dist(engine);
+            j = primary * a + secondary * (1.f - a);
+         }
+     }
+}
 
 Color Brick::operator()(float x, float y) const {
-    float ix = fmod(x * scale, 1);
-    float iy = fmod(y * scale / ratio + !((int)(x * scale) % 2) / 2.f, 1);
-    return iy < mortar / ratio || ix < mortar ? primary : secondary;
+    float dx = x * scale;
+    float dy = y * scale / ratio + !((int)(x * scale) % 2) / 2.f;
+    float ix = fmod(dx, 1);
+    float iy = fmod(dy, 1);
+    return iy * ratio < mortar || ix < mortar ? tertiary : colors[floor(dx)][floor(dy)];
 }
 
 
