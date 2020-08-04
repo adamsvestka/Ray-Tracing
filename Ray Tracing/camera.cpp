@@ -267,11 +267,13 @@ void Camera::renderInfo() {
     ss << "Region: " << region_current << "/" << region_count << " @ " << settings.render_region_size << " px";
     draw(1, 2);
     
-    ss << "ETC: " << formatTime(fmax(elapsed / (region_current ? region_current : 1) * region_count - elapsed, 0.0)) << " - ";
+    ss << "Prog:";
     draw(1, 3);
+    XFillRectangle(display, window, gc, 42, 35, 6 * 15.f * region_current / region_count, 12);
     XSetForeground(display, gc, Color::Orange);
-    ss << fixed << setprecision(region_current >= region_count ? 0 : 1) << 100.f * region_current / region_count << defaultfloat << "%";
-    draw(21, 3);
+    if (region_current >= region_count) ss << "100%";
+    else ss << fixed << setprecision(1) << min(100.f * region_current / region_count, 99.9f) << defaultfloat << "%";
+    draw(23, 3);
     XSetForeground(display, gc, Color::Green);
     
     ss << "Quality: " << width << "x" << height << " (0," << settings.max_render_distance << "]";

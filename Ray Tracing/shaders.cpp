@@ -37,9 +37,9 @@ Image::Image(string path) {
 }
 
 Color Image::operator()(float x, float y) const {
-    return Color{image(y * image.width(), (1 - x) * image.height(), 0, 0) / 255.f,
-        image(y * image.width(), (1 - x) * image.height(), 0, 1) / 255.f,
-        image(y * image.width(), (1 - x) * image.height(), 0, 2) / 255.f
+    return Color{image(y * image.width(), (1 - x) * image.height(), 0, 0),
+        image(y * image.width(), (1 - x) * image.height(), 0, 1),
+        image(y * image.width(), (1 - x) * image.height(), 0, 2)
     };
 }
 

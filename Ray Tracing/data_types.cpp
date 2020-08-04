@@ -186,6 +186,8 @@ Color::Color() {
 
 Color::Color(float r, float g, float b) : r(r), g(g), b(b) {}
 
+Color::Color(int r, int g, int b) : r(r / 255.f), g(g / 255.f), b(b / 255.f) {}
+
 float Color::value() const {
     return (r + g + b) / 3.f;
 }
@@ -203,24 +205,29 @@ Color Color::dark() const {
 }
 
 // MARK: Defined Colors
-const Color Color::White{1.0, 1.0, 1.0};
-const Color Color::Gray{0.1, 0.1, 0.1};
-const Color Color::Black{0.0, 0.0, 0.0};
+const Color Color::White{255, 255, 255};
+const Color Color::Gray{142, 142, 147};
+const Color Color::Black{0, 0, 0};
 
-const Color Color::Red{1.0, 0.1, 0.1};
-const Color Color::Orange{1.0, 0.5, 0.1};
-const Color Color::Yellow{1.0, 1.0, 0.1};
-const Color Color::Lime{0.5, 1.0, 0.1};
+const Color Color::Red{255, 59, 48};
+const Color Color::Orange{255, 149, 0};
+const Color Color::Yellow{255, 204, 0};
+const Color Color::Pink{255, 45, 85};
+const Color Color::Brown{162, 132, 94};
+const Color Color::Mocha{148, 82, 0};
+const Color Color::Asparagus{146, 144, 0};
 
-const Color Color::Green{0.1, 1.0, 0.1};
-const Color Color::Turquoise{0.1, 0.7, 0.7};
-const Color Color::Cyan{0.1, 1.0, 1.0};
+const Color Color::Lime{142, 250, 0};
+const Color Color::Green{40, 205, 65};
+const Color Color::Moss{0, 144, 81};
+const Color Color::Fern{79, 143, 0};
 
-const Color Color::Blue{0.1, 0.1, 1.0};
-const Color Color::Azure{0.28, 0.7, 0.86};
-const Color Color::Purple{0.6, 0.1, 1.0};
-const Color Color::Magenta{1.0, 0.1, 1.0};
-const Color Color::Pink{1.0, 0.4, 0.7};
+const Color Color::Blue{0, 122, 255};
+const Color Color::Cyan{0, 253, 255};
+const Color Color::Magenta{255, 64, 255};
+const Color Color::Teal{90, 200, 250};
+const Color Color::Indigo{88, 86, 214};
+const Color Color::Purple{175, 82, 222};
 
 Color::operator int() const {
     return ((int)(fmin(fmax(r, 0.0), 1.0) * 255) << 16) + ((int)(fmin(fmax(g, 0.0), 1.0) * 255) << 8) + (int)(fmin(fmax(b, 0.0), 1.0) * 255);

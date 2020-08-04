@@ -133,10 +133,11 @@ Vector3 parseVector(json j) {
 
 Color parseColor(string s) {
     static regex hex("x([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
-    static map<string, Color> colors{{"white", Color::White}, {"gray", Color::Gray}, {"black", Color::Black},
-            {"red", Color::Red}, {"orange", Color::Orange}, {"yellow", Color::Yellow}, {"lime", Color::Lime},
-            {"green", Color::Green}, {"turquoise", Color::Turquoise}, {"cyan", Color::Cyan},
-            {"blue", Color::Blue}, {"azure", Color::Azure}, {"purple", Color::Purple}, {"magenta", Color::Magenta}, {"pink", Color::Pink}};
+    static map<string, Color> colors{{"white", Color::White}, {"lightGray", Color::Gray.light()}, {"gray", Color::Gray}, {"darkGray", Color::Gray.dark()}, {"black", Color::Black},
+        {"red", Color::Red}, {"orange", Color::Orange}, {"yellow", Color::Yellow}, {"pink", Color::Pink}, {"brown", Color::Brown}, {"mocha", Color::Mocha}, {"asparagus", Color::Asparagus},
+        {"lime", Color::Lime}, {"green", Color::Green}, {"moss", Color::Moss}, {"fern", Color::Fern},
+        {"blue", Color::Blue}, {"cyan", Color::Cyan}, {"magenta", Color::Magenta}, {"teal", Color::Teal}, {"indigo", Color::Indigo}, {"purple", Color::Purple}};
+    
     smatch matches;
     map<string, Color>::iterator it;
     

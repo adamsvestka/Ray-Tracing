@@ -74,6 +74,7 @@ struct Color {
     
     Color();
     Color(float, float, float);
+    Color(int, int, int);
     
     float value() const;
     array<unsigned char, 3> array() const;
@@ -81,9 +82,9 @@ struct Color {
     Color dark() const;
     
     const static Color White, Gray, Black,
-        Red, Orange, Yellow, Lime,
-        Green, Turquoise, Cyan,
-        Blue, Azure, Purple, Magenta, Pink;
+        Red, Orange, Yellow, Pink, Brown, Mocha, Asparagus,
+        Lime, Green, Moss, Fern,
+        Blue, Cyan, Magenta, Teal, Indigo, Purple;
     
     operator int() const;
     bool operator==(const Color) const;
