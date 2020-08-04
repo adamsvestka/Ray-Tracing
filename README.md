@@ -1,4 +1,11 @@
-# Ray Tracing [![platform](https://img.shields.io/badge/platform-macOS-lightgray)]() [![](https://img.shields.io/badge/dependencies-X11-brightgreen)]()
+# Ray Tracing [![platform](https://img.shields.io/badge/platform-macOS-lightgray)](https://www.apple.com/macos) [![](https://img.shields.io/badge/dependencies-X11-brightgreen)](https://www.xquartz.org)
+
+My very own ray tracing engine which I built to prove I could.
+
+## Dependencies
+- [XQuartz](https://www.xquartz.org)
+
+#
 
 Some data is loaded at runtime from configuration files:
 
