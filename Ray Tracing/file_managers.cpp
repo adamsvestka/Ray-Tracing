@@ -143,11 +143,11 @@ Color parseColor(string s) {
     if (regex_search(s, matches, hex)) return Color(stoi(matches[1].str(), 0, 16) / 255.f, stoi(matches[2].str(), 0, 16) / 255.f, stoi(matches[3].str(), 0, 16) / 255.f);
     if ((it = colors.find(s)) != colors.end()) return it->second;
     
-    cout << "Invalid Color" << endl;
     return Color::Black;
     
 }
 
+map<string, Shader> shaders;
 Shader parseShader(json j) {
     if (!j.is_null()) {
         switch (::hash(j.value("type", "").c_str())) {
@@ -157,30 +157,36 @@ Shader parseShader(json j) {
             case "bricks"_h: return [bricks = Brick(j.value("scale", 4), j.value("ratio", 2.f), j.value("mortar", 0.1f), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")), parseColor(j.value("tertiary", "")), j.value("seed", 0))](float u, float v) { return bricks(u, v); };
             case "noise"_h: return [noise = Noise(j.value("scale", 1), j.value("seed", 0), parseColor(j.value("primary", "")))](float u, float v) { return noise(u, v); };
             
-            case "negate"_h: {
+            case "named"_h: {
+                if (!j["name"].is_string()) break;
+                string name = j["name"];
+                if (shaders.find(name) == shaders.end()) break;
+                return shaders[name];
+            }
+            
+            case "negate"_h:
                 if (!j["value"].is_object()) break;
                 return [shader = parseShader(j["value"])](float u, float v) { return -shader(u, v); };
-            }
             case "add"_h: {
                 if (!j["values"].is_array()) break;
-                vector<Shader> shaders;
-                for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
-                return [=](float u, float v) { Color result = Color::Black; for (auto &shader : shaders) result += shader(u, v); return result; };
+                vector<Shader> operands;
+                for (auto &shader : j["values"]) operands.push_back(parseShader(shader));
+                return [=](float u, float v) { Color result = Color::Black; for (auto &shader : operands) result += shader(u, v); return result; };
             }
             case "multiply"_h: {
                 if (!j["values"].is_array()) break;
-                vector<Shader> shaders;
-                for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
-                return [=](float u, float v) { Color result = Color::White; for (auto &shader : shaders) result *= shader(u, v); return result; };
+                vector<Shader> operands;
+                for (auto &shader : j["values"]) operands.push_back(parseShader(shader));
+                return [=](float u, float v) { Color result = Color::White; for (auto &shader : operands) result *= shader(u, v); return result; };
             }
             case "mix"_h: {
                 if (!j["values"].is_array() || !j["weights"].is_array()) break;
-                vector<Shader> shaders;
+                vector<Shader> operands;
                 vector<float> weights;
-                for (auto &shader : j["values"]) shaders.push_back(parseShader(shader));
+                for (auto &shader : j["values"]) operands.push_back(parseShader(shader));
                 for (auto &weight : j["weights"]) weights.push_back(weight);
-                if (shaders.size() != weights.size()) break;
-                return [=](float u, float v) { Color result = Color::Black; for (int i = 0; i < shaders.size(); i++) result += shaders[i](u, v) * weights[i]; return result; };
+                if (operands.size() != weights.size()) break;
+                return [=](float u, float v) { Color result = Color::Black; for (int i = 0; i < operands.size(); i++) result += operands[i](u, v) * weights[i]; return result; };
             }
         }
     }
@@ -222,30 +228,31 @@ void parseScene(string filename, vector<Shape *> &objects, vector<Light *> &ligh
     if (ifile.is_open()) {
         json jfile;
         
-        const string objects_key = "objects", lights_key = "lights";
+        const string shaders_key = "shaders", objects_key = "objects", lights_key = "lights";
         
         ifile >> jfile;
         
+        // MARK: Parse shaders from file
+        if (jfile[shaders_key].is_object()) {
+            for (const auto &[name, jshader] : jfile[shaders_key].items()) {
+                shaders[name] = parseShader(jshader);
+            }
+        } else cout << "Missing entry: " << shaders_key << endl;
+        
         // MARK: Parse objects from file
-        if (jfile.contains(objects_key)) {
-            if (jfile[objects_key].is_array()) {
-                for (const auto &jobject : jfile[objects_key]) {
-                    cout << jobject << endl;
-                    auto object = parseShape(jobject);
-                    if (object != nullptr) objects.push_back(object);
-                }
-            } else cout << "Invalid type for " << objects_key << ": " << jfile[objects_key].type_name() << endl;
+        if (jfile[objects_key].is_array()) {
+            for (const auto &jobject : jfile[objects_key]) {
+                auto object = parseShape(jobject);
+                if (object != nullptr) objects.push_back(object);
+            }
         } else cout << "Missing entry: " << objects_key << endl;
         
         // MARK: Parse lights from file
-        if (jfile.contains(lights_key)) {
-            if (jfile[lights_key].is_array()) {
-                for (const auto &jlight : jfile[lights_key]) {
-                    cout << jlight << endl;
-                    auto light = parseLight(jlight);
-                    if (light != nullptr) lights.push_back(light);
-                }
-            } else cout << "Invalid type for " << lights_key << ": " << jfile[lights_key].type_name() << endl;
+        if (jfile[lights_key].is_array()) {
+            for (const auto &jlight : jfile[lights_key]) {
+                auto light = parseLight(jlight);
+                if (light != nullptr) lights.push_back(light);
+            }
         } else cout << "Missing entry: " << lights_key << endl;
     } else cout << "Unable to open file" << endl;
 }

@@ -8,6 +8,8 @@
 
 #include "shapes.hpp"
 
+inline float guard(float f) { return clamp(f, 0.f, nextafter(1.f, 0.f)); }
+
 Shape::Shape(Vector3 position, Vector3 angles, Material material) : center(position), material(material) {
     rotation = Matrix3x3::RotationMatrix(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
     Irotation = rotation.inverse();
@@ -60,10 +62,10 @@ Vector3 Sphere::getNormal(Vector3 point, Vector3 direction) const {
 Color Sphere::getTexture(Vector3 point) const {
     const Vector3 _point = toObjectSpace(point);
     
-    float u = asin(min(max(_point.z / radius, -1.f), 1.f)) / (2 * M_PI) + 0.25;
-    float v = atan2(min(max(_point.x / radius, -1.f), 1.f), min(max(_point.y / radius, -1.f), 1.f)) / (2 * M_PI) + 0.5;
+    float u = asin(clamp(_point.z / radius, -1.f, 1.f)) / (2 * M_PI) + 0.25;
+    float v = atan2(clamp(_point.x / radius, -1.f, 1.f), clamp(_point.y / radius, -1.f, 1.f)) / (2 * M_PI) + 0.5;
     
-    return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
+    return material.texture(guard(u), guard(v));
 }
 
 
@@ -141,7 +143,7 @@ Color Cuboid::getTexture(Vector3 point) const {
         v = _point.y / size.y + 0.5;
     }
     
-    return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
+    return material.texture(guard(u), guard(v));
 }
 
 
@@ -214,5 +216,5 @@ Color Plane::getTexture(Vector3 point) const {
     float u = _point.x / size_x + 0.5;
     float v = _point.y / size_y + 0.5;
     
-    return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
+    return material.texture(guard(u), guard(v));
 }

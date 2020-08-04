@@ -350,7 +350,6 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
                 RenderRegion region;
                 result_queue.pop(region);
                 for (int x = 0; x < region.w; x++) {
-//                    copy(region.buffer[x].begin(), region.buffer[x].end(), &result[region.x + x][region.y]);
                     for (int y = 0; y < region.h; y++) {
                         XSetForeground(display, gc, region.buffer[x][y]);
                         XFillRectangle(display, window, gc, (region.x + x) * settings.resolution_decrease, (region.y + y) * settings.resolution_decrease, settings.resolution_decrease, settings.resolution_decrease);
