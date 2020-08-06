@@ -35,7 +35,7 @@ key=value
 | max_render_distance | Far camera cutoff                                                                         | `int`                                 | `100`     |
 | surface_bias        | Collided ray offset to prevent shadow acne                                                | `float`                               | `0.001`   |
 | max_light_bounces   | Prevent infinite loops                                                                    | `int`                                 | `5`       |
-| render_mode         | What layers to collect from collisions                                                    | `enum (0-7)`.                         | `0`       |
+| render_mode         | What layers to collect from collisions                                                    | `enum (0-7)`                          | `0`       |
 | render_pattern      | What pattern to render region in                                                          | `enum (0-2)`                          | `1`       |
 | show_debug          | Show tiles over regions specifying what to render; preprocess must be true to take effect | `bool`                                | `true`    |
 | preprocess          | Only render what is necessary; !! may result in render issues                             | `bool`                                | `false`   |

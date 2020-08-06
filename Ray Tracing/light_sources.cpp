@@ -65,7 +65,7 @@ Color LinearLight::getSpecularValue(Vector3 point, Vector3 normal, Vector3 direc
     
     const float cosine_term = vector_to_light.normal() * normal;
     
-    return color * pow(intensity, 0.3) * (pow(fmax(-(normal * (cosine_term * 2) - vector_to_light.normal()) * direction, 0.f), n));
+    return color * pow(intensity, 0.4) * (pow(fmax(-(normal * (cosine_term * 2) - vector_to_light.normal()) * direction, 0.f), n));
 }
 
 

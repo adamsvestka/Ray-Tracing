@@ -277,11 +277,11 @@ void Color::operator/=(Color c) {
 
 
 // MARK: - NeuralNetwork
-NeuralNetwork::NeuralNetwork(vector<vector<vector<float>>> nodes) {
+NeuralNetwork::NeuralNetwork(vector<vector<vector<float>>> &nodes) {
     this->nodes = nodes;
 }
 
-vector<float> NeuralNetwork::eval(vector<float> input) {
+vector<float> NeuralNetwork::eval(vector<float> &input) {
     vector<vector<float>> layers(nodes.size() + 1);
     layers[0] = input;
     
