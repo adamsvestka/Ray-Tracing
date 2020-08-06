@@ -76,12 +76,11 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     info.distance = settings.max_render_distance;
     info.object = nullptr;
     info.normal = Vector3::Zero;
-    info.light = 0;
     info.kr = 1;
     info.shadows = vector<bool>(lights.size(), false);
     info.diffuse = info.specular = valarray<Color>(Color::Black, objects.size());
     info.ambient = settings.ambient_lighting;
-    info.texture = info.reflection = info.transmission = Color::Black;
+    info.light = info.texture = info.reflection = info.transmission = Color::Black;
     
     if (++mask.bounce_count > settings.max_light_bounces) return info;
     
@@ -122,7 +121,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
                 continue;
             }
             
-            info.light += info.diffuse[i].value() * (1 - info.object->material.Ks) + info.specular[i].value() * info.object->material.Ks;
+            info.light += info.diffuse[i] * (1 - info.object->material.Ks) + info.specular[i] * info.object->material.Ks;
         }
     }
     

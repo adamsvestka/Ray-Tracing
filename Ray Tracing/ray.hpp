@@ -36,10 +36,10 @@ struct Intersection {
     const Shape *object;
     
     Vector3 normal;
-    float light, kr;
+    float kr;
     vector<bool> shadows;
     valarray<Color> diffuse, specular;
-    Color ambient, texture, reflection, transmission;
+    Color light, ambient, texture, reflection, transmission;
     
     Color shaded() const;
 };

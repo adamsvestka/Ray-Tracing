@@ -60,7 +60,6 @@ void parseSettings(string filename, Settings &settings) {
                         case 1: *get<short *>(value) = (short)stoi(matches[2].str()); break;
                         case 2: *get<float *>(value) = stof(matches[2].str()); break;
                         case 3: *get<Color *>(value) = parseColor(matches[2].str()); break;
-                        default: break;
                     }
                     
                     bindings.erase(it);
@@ -92,7 +91,6 @@ void parseSettings(string filename, Settings &settings) {
                     ofile << 'x' << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
                     ofile.flags(f);
                 } break;
-                default: break;
             }
             ofile << endl;
         }

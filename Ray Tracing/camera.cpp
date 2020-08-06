@@ -80,12 +80,12 @@ Color getPixel(Intersection data, int mode) {
         case RENDER_COLOR: return data.texture; break;
         case RENDER_REFLECTION: return data.reflection; break;
         case RENDER_TRANSMISSION: return data.transmission; break;
-        case RENDER_LIGHT: return data.hit ? Color::White * data.light : Color::Black; break;
-        case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Color::Red : Color::White * data.light) : Color::Black; break;
+        case RENDER_LIGHT: return data.hit ? data.light : Color::Black; break;
+        case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Color{255, 0, 0} : data.light) : Color::Black; break;
         case RENDER_NORMALS: return data.hit ? data.normal.toColor() : Color::Black; break;
         case RENDER_DEPTH: return Color::White * (1 - data.distance / settings.max_render_distance); break;
         case RENDER_SHADED:
-        default: return data.shaded(); break;
+        default: return data.shaded();
     }
 }
 
@@ -231,8 +231,7 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                     case RENDER_COLOR:
                     case RENDER_NORMALS:
                     case RENDER_DEPTH: processed[x][y].diffuse = processed[x][y].reflections = processed[x][y].transmission = false;
-                    case RENDER_SHADED:
-                    default: break;
+                    case RENDER_SHADED: break;
                 }
                 
                 if (processed[x][y].render) {
@@ -254,7 +253,6 @@ inline void Camera::drawInfoString(int x, int y, stringstream &ss, Color color) 
 }
 
 void Camera::renderInfo() {
-    
     XSetForeground(display, gc, Color::Black);
     XFillRectangle(display, window, gc, 2, 2, 169, 79);
     
