@@ -49,7 +49,7 @@ private:
     CImg<unsigned char> image;
     
 public:
-    Image(string);
+    explicit Image(string);
     
     Color operator()(float, float) const;
 };

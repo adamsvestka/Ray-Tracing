@@ -108,7 +108,7 @@ struct Color {
 struct NeuralNetwork {
     vector<vector<vector<float>>> nodes;
     
-    NeuralNetwork(vector<vector<vector<float>>>);
+    explicit NeuralNetwork(vector<vector<vector<float>>>);
     
     vector<float> eval(vector<float>);
 };

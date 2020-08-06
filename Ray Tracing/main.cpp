@@ -19,7 +19,7 @@
 #include "ray.hpp"
 #include "camera.hpp"
 
-#define Col(col) [](float, float) { return col; }
+//#define Col(col) [](float, float) { return col; }
 
 using namespace std;
 

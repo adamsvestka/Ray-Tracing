@@ -55,7 +55,6 @@ public:
 
 class GlobalLight : public Light {
 private:
-    Vector3 position;
     float intensity;
     
 public:

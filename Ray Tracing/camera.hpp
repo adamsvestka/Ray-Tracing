@@ -67,12 +67,13 @@ private:
     GC gc;
     
 public:
-    Camera(Vector3);
+    explicit Camera(Vector3);
     ~Camera();
 
     void drawDebugBox(int, int, Input);
     vector<vector<Intersection>> preRender(const vector<Shape *> &, const vector<Light *> &);
     vector<vector<Input>> processPreRender(const vector<vector<Intersection>> &);
+    inline void drawInfoString(int, int, stringstream &, Color);
     void renderInfo();
     RenderRegion renderRegion(const vector<Shape *> &, const vector<Light *> &, RenderRegion, Input, const Intersection &);
     void render(const vector<Shape *> &, const vector<Light *> &);

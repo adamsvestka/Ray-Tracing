@@ -85,9 +85,8 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     
     if (++mask.bounce_count > settings.max_light_bounces) return info;
     
-    float distance = -2;
     for (const auto &object : objects) {
-        distance = object->intersect(origin, direction);
+        float distance = object->intersect(origin, direction);
         if (distance < info.distance && distance > 0 && distance <= settings.max_render_distance && (mask.lighting || !object->material.transparent)) {
             info.object = object;
             info.distance = distance;

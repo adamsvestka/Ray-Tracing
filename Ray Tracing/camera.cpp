@@ -247,12 +247,16 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
 }
 
 // MARK: - Rendering
-#define draw(x, y) XDrawString(display, window, gc, x * 6, y * 15, ss.str().c_str(), (int)ss.str().length()); ss.str("")
+inline void Camera::drawInfoString(int x, int y, stringstream &ss, Color color) {
+    XSetForeground(display, gc, color);
+    XDrawString(display, window, gc, x * 6, y * 15, ss.str().c_str(), (int)ss.str().length());
+    ss.str("");
+}
+
 void Camera::renderInfo() {
+    
     XSetForeground(display, gc, Color::Black);
     XFillRectangle(display, window, gc, 2, 2, 169, 79);
-    
-    XSetForeground(display, gc, Color::Green);
     
     static vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Depth"};
     if (region_current < region_count) end = chrono::high_resolution_clock::now();
@@ -260,37 +264,30 @@ void Camera::renderInfo() {
     stringstream ss;
     
     ss << "Render time: ";
-    draw(1, 1);
-    
-    XSetForeground(display, gc, Color::Yellow);
+    drawInfoString(1, 1, ss, Color::Green);
     ss << formatTime(elapsed);
-    draw(14, 1);
-    XSetForeground(display, gc, Color::Green);
+    drawInfoString(14, 1, ss, Color::Yellow);
     
     ss << "Region: " << region_current << "/" << region_count << " @ " << settings.render_region_size << " px";
-    draw(1, 2);
+    drawInfoString(1, 2, ss, Color::Green);
     
     ss << "Prog:";
-    draw(1, 3);
+    drawInfoString(1, 3, ss, Color::Green);
     XSetForeground(display, gc, Color::Gray.dark());
     XFillRectangle(display, window, gc, 42, 35, 6 * 15, 12);
     XSetForeground(display, gc, Color::Green);
     XFillRectangle(display, window, gc, 42, 35, 6 * 15.f * region_current / region_count, 12);
-    XSetForeground(display, gc, Color::Orange);
     if (region_current >= region_count) ss << "100%";
     else ss << fixed << setprecision(1) << min(100.f * region_current / region_count, 99.9f) << defaultfloat << "%";
-    draw(23, 3);
-    XSetForeground(display, gc, Color::Green);
+    drawInfoString(23, 3, ss, Color::Orange);
     
     ss << "Quality: " << width << "x" << height << " (0," << settings.max_render_distance << "]";
-    draw(1, 4);
+    drawInfoString(1, 4, ss, Color::Green);
     
     ss << "Mode: " << settings.render_mode << "/" << RenderTypes - 1 << " ";
-    draw(1, 5);
-    XSetForeground(display, gc, Color::Red);
+    drawInfoString(1, 5, ss, Color::Green);
     ss << " (" << render_type_names[settings.render_mode] << ")";
-    draw(10, 5);
-    XSetForeground(display, gc, Color::Green);
+    drawInfoString(10, 5, ss, Color::Red);
     
     XFlush(display);
 }
