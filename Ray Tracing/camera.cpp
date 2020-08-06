@@ -67,8 +67,11 @@ string formatTime(int milliseconds) {
     time_t seconds = milliseconds / 1000;
     milliseconds -= seconds * 1000;
     
+    struct tm result;
+    gmtime_r(&seconds, &result);
+    
     stringstream ss;
-    ss << put_time(gmtime(&seconds), "%T") << '.' << setfill('0') << setw(3) << milliseconds;
+    ss << put_time(&result, "%T") << '.' << setfill('0') << setw(3) << milliseconds;
     return ss.str();
 }
 
@@ -269,6 +272,9 @@ void Camera::renderInfo() {
     
     ss << "Prog:";
     draw(1, 3);
+    XSetForeground(display, gc, Color::Gray.dark());
+    XFillRectangle(display, window, gc, 42, 35, 6 * 15, 12);
+    XSetForeground(display, gc, Color::Green);
     XFillRectangle(display, window, gc, 42, 35, 6 * 15.f * region_current / region_count, 12);
     XSetForeground(display, gc, Color::Orange);
     if (region_current >= region_count) ss << "100%";

@@ -19,7 +19,6 @@ enum RenderPattern {
 };
 
 struct Settings {
-    
     // MARK: Ray
     short max_render_distance = 1e2;
     
@@ -49,7 +48,6 @@ struct Settings {
     Color ambient_lighting;
     
     Color background_color;
-    
 };
 
 extern Settings settings;

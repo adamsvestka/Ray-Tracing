@@ -145,7 +145,6 @@ Color parseColor(string s) {
     if ((it = colors.find(s)) != colors.end()) return it->second;
     
     return Color::Black;
-    
 }
 
 map<string, Shader> shaders;
