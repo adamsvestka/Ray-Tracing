@@ -1,3 +1,4 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/6a4a0dde432840f0ac2056a817c374d5)](https://app.codacy.com/manual/svestka.adam1/Ray-Tracing?utm_source=github.com&utm_medium=referral&utm_content=adamsvestka/Ray-Tracing&utm_campaign=Badge_Grade_Dashboard)
 # Ray Tracing [![platform](https://img.shields.io/badge/platform-macOS-lightgray)](https://www.apple.com/macos) [![](https://img.shields.io/badge/dependencies-X11-brightgreen)](https://www.xquartz.org)
 
 My very own ray tracing engine which I built to prove I could.
