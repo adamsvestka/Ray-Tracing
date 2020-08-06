@@ -12,7 +12,7 @@ My very own ray tracing engine which I built to prove that I could.
 ## Dependencies
 - [XQuartz](https://www.xquartz.org)
 
-#
+---
 
 Some data is loaded at runtime from configuration files:
 
@@ -136,13 +136,14 @@ Material: {
 | checkerboard | scale: `int`, primary: `Color`, secondary: `Color`                                                                  | generate checkerboard pattern sized `scale`x`scale` of two colors                                                                                                                           |
 | bricks       | scale: `int`, ratio: `float`, mortar: `float`, primary: `Color`, secondary: `Color`, tertiary: `Color`, seed: `int` | generate brick pattern `scale`  high, `ratio`=width/height, `mortar`=\[0-1\], bricks interpolate between `primary` and `secondary` colors seeded by `seed`, `tertiary` defines mortar color |
 | noise        | scale: `int`, seed: `int`, primary: `Color`                                                                         | generate _Perlin_ noise of `primary` color                                                                                                                                                  |
-|              |                                            |                                                                                  |
-| negate       | value: `Shader`                            | negate shader `value`                                                            |
-| add          | values: `[ Shader ]`                       | add all shaders in `values`                                                      |
-| multiply     | values: `[ Shader ]`                       | multiply all shaders in `values`                                                 |
-| mix          | values: `[ Shader ]`, weights: `[ float ]` | add all shaders in `values` first multiplied by respectable numbers in `weights` |
+|              |                                                                                                                     |                                                                                                                                                                                             |
+| negate       | value: `Shader`                                                                                                     | negate shader `value`                                                                                                                                                                       |
+| add          | values: `[ Shader ]`                                                                                                | add all shaders in `values`                                                                                                                                                                 |
+| multiply     | values: `[ Shader ]`                                                                                                | multiply all shaders in `values`                                                                                                                                                            |
+| mix          | values: `[ Shader ]`, weights: `[ float ]`                                                                          | add all shaders in `values` first multiplied by respectable numbers in `weights`                                                                                                            |
 
-#
+---
+
 <a name="footnoteColor">1</a>: Accepted color formats:
 - `x47B3DB` 6-digit hex code prepended with 'x'
 - `azure` lowercase color name
