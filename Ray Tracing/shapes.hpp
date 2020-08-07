@@ -66,18 +66,6 @@ public:
 };
 
 
-//class Cylinder : public Shape {
-//private:
-//    float radius, height;
-//
-//public:
-//    Cylinder(Vector3, float, float, Vector3, Material);
-//    virtual float intersect(Vector3, Vector3) const;
-//    virtual Vector3 getNormal(Vector3, Vector3) const;
-//    virtual Color getTexture(Vector3) const;
-//};
-
-
 class Plane : public Shape {
 private:
     float size_x, size_y;

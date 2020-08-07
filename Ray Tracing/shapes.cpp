@@ -147,38 +147,6 @@ Color Cuboid::getTexture(Vector3 point) const {
 }
 
 
-// MARK: - Cylinder
-/// @param position Vector3{x, y, z}
-/// @param radius float
-/// @param height float
-/// @param angles Vector3{x, y, z}
-/// @param material Material{texture, n, Ks, ior, transparent}
-//Cylinder::Cylinder(Vector3 position, float radius, float height, Vector3 angles, Material material) : Shape(position, angles, material) {
-//    this->radius = radius;
-//    this->height = height;
-//}
-//
-//float Cylinder::intersect(Vector3 origin, Vector3 direction) const {
-//    return -1;
-//}
-//
-//Vector3 Cylinder::getNormal(Vector3 point, Vector3 direction) const {
-//    Vector3 _point = toObjectSpace(point);
-//
-//    if (abs(_point.z) / height > sqrt(pow(_point.x, 2) + pow(_point.y, 2)) / radius) return rotation * Vector3{0, 0, _point.z > 0 ? 1.f : -1.f};
-//    else return rotation * Vector3{_point.x, _point.z, 0}.normal();
-//}
-//
-//Color Cylinder::getTexture(Vector3 point) const {
-//    Vector3 _point = toObjectSpace(point);
-//
-//    float u = _point.z / (2 * height) + 0.5;
-//    float v = atan2(min(max(_point.x / radius, -1.f), 1.f), min(max(_point.y / radius, -1.f), 1.f)) / (2 * M_PI) + 0.5;
-//
-//    return material.texture(min(max(u, 0.f), nextafter(1.f, 0.f)), min(max(v, 0.f), nextafter(1.f, 0.f)));
-//}
-
-
 // MARK: - Plane
 /// @param position Vector3{x, y, z}
 /// @param size_x float

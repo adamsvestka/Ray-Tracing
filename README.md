@@ -148,7 +148,8 @@ Material: {
 - `x47B3DB` 6-digit hex code prepended with 'x'
 - `azure` lowercase color name
 
-Supported colors: `white`, `gray`, `black`,
-        `red`, `orange`, `yellow`, `lime`,
-        `green`, `turquoise`, `cyan`,
-        `blue`, `azure`, `purple`, `magenta`, `pink`
+Supported colors:
+        `white`, `lightGray`, `gray`, `darkGray`, `black`,
+        `red`, `orange`, `yellow`, `pink`, `brown`, `mocha`, `asparagus`,
+        `lime`, `green`, `moss`, `fern`,
+        `blue`, `cyan`, `magenta`, `teal`, `indigo`, `purple`

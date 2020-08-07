@@ -178,13 +178,10 @@ Shader parseShader(json j) {
                 return [=](float u, float v) { Color result = Color::White; for (auto &shader : operands) result *= shader(u, v); return result; };
             }
             case "mix"_h: {
-                if (!j["values"].is_array() || !j["weights"].is_array()) break;
-                vector<Shader> operands;
-                vector<float> weights;
-                for (auto &shader : j["values"]) operands.push_back(parseShader(shader));
-                for (auto &weight : j["weights"]) weights.push_back(weight);
-                if (operands.size() != weights.size()) break;
-                return [=](float u, float v) { Color result = Color::Black; for (int i = 0; i < operands.size(); i++) result += operands[i](u, v) * weights[i]; return result; };
+                if (!j["values"].is_array() || !j["weights"].is_array() || j["values"].size() != j["weights"].size()) break;
+                vector<pair<Shader, float>> operands;
+                for (int i = 0; i < j["values"].size(); i++) operands.push_back(pair<Shader, float>(parseShader(j["values"][i]), j["weights"][i]));
+                return [=](float u, float v) { Color result = Color::Black; for (auto &[shader, weight] : operands) result += shader(u, v) * weight; return result; };
             }
         }
     }
