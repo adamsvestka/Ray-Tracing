@@ -28,6 +28,7 @@ struct Vector3 {
     float length() const;
     Vector3 normal() const;
     Color toColor() const;
+    Vector3 cross(const Vector3) const;
     
     const static Vector3 Zero, One, North, South, East, West, Up, Down;
     

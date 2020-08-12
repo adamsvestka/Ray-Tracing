@@ -186,3 +186,52 @@ Color Plane::getTexture(Vector3 point) const {
     
     return material.texture(guard(u), guard(v));
 }
+
+
+// MARK: - Triangle
+/// @param vertices Vector3{x, y, z}[3]
+/// @param angles Vector3{x, y, z}
+/// @param material Material{texture, n, Ks, ior, transparent}
+Triangle::Triangle(array<Vector3, 3> vertices, Vector3 angles, Material material) : Shape((vertices[0] + vertices[1] + vertices[2]) / 3, angles, material) {
+    this->vertices = vertices;
+    v0v1 = vertices[1] - vertices[0];
+    v0v2 = vertices[2] - vertices[0];
+    normal = v0v2.cross(v0v1).normal();
+    height = (v0v1.length() * sin(acos((v0v1 * v0v2) / (v0v1.length() * v0v2.length()))));
+}
+
+float Triangle::intersect(Vector3 origin, Vector3 direction) const {
+    Vector3 pvec = direction.cross(v0v2);
+    float det = v0v1 * pvec;
+
+    if (det == 0) return -1;
+
+    float invDet = 1 / det;
+    
+    Vector3 tvec = origin - vertices[0];
+    float u = (tvec * pvec) * invDet;
+    if (u < 0 || u > 1) return -1;
+    
+    Vector3 qvec = tvec.cross(v0v1);
+    float v = (direction * qvec) * invDet;
+    if (v < 0 || u + v > 1) return -1;
+    
+    float t = (v0v2 * qvec) * invDet;
+    
+    return t;
+}
+
+Vector3 Triangle::getNormal(Vector3 point, Vector3 direction) const {
+    return normal;
+}
+
+Color Triangle::getTexture(Vector3 point) const {
+    Vector3 vec = point - vertices[0];
+    
+    float cangle = (v0v2 * vec) / (v0v2.length() * vec.length());
+    
+    float u = (vec.length() * cangle) / v0v2.length();
+    float v = (vec.length() * sin(acos(cangle))) / height;
+
+    return material.texture(guard(u), guard(v));;
+}

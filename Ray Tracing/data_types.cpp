@@ -24,6 +24,10 @@ Color Vector3::toColor() const {
     return Color(x > 0 ? x / len : -x / len, y > 0 ? y / len : -y / len, z > 0 ? z / len : -z / len);
 }
 
+Vector3 Vector3::cross(const Vector3 v) const {
+    return Vector3{this->y * v.z - this->z * v.y, this->z * v.x - this->x * v.z, this->x * v.y - this->y * v.x};
+}
+
 // MARK: Defined Vectors
 const Vector3 Vector3::Zero{0, 0, 0};
 const Vector3 Vector3::One{1, 1, 1};

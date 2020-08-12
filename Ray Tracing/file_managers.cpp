@@ -202,6 +202,7 @@ Shape *parseShape(json j) {
         case "cube-2"_h: return new Cuboid(parseVector(j["position"]), j.value("size_x", 1.f), j.value("size_y", 1.f), j.value("size_z", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
         case "cube-3"_h: return new Cuboid(parseVector(j["corner_min"]), parseVector(j["corner_max"]), parseVector(j["rotation"]), parseMaterial(j["material"]));
         case "plane"_h: return new Plane(parseVector(j["position"]), j.value("size_x", 1.f), j.value("size_y", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
+        case "triangle"_h: return new Triangle({parseVector(j["vertices"][0]), parseVector(j["vertices"][1]), parseVector(j["vertices"][2])}, parseVector(j["angles"]), parseMaterial(j["material"]));
     }
     return nullptr;
 }

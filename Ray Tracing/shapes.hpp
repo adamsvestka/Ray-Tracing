@@ -12,6 +12,8 @@ class Cuboid;
 
 #pragma once
 
+#include <array>
+
 #include "settings.hpp"
 
 #include "data_types.hpp"
@@ -72,6 +74,20 @@ private:
 
 public:
     Plane(Vector3, float, float, Vector3, Material);
+    virtual float intersect(Vector3, Vector3) const;
+    virtual Vector3 getNormal(Vector3, Vector3) const;
+    virtual Color getTexture(Vector3) const;
+};
+
+
+class Triangle : public Shape {
+private:
+    array<Vector3, 3> vertices;
+    Vector3 v0v1, v0v2, normal;
+    float height;
+
+public:
+    Triangle(array<Vector3, 3>, Vector3, Material);
     virtual float intersect(Vector3, Vector3) const;
     virtual Vector3 getNormal(Vector3, Vector3) const;
     virtual Color getTexture(Vector3) const;
