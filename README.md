@@ -118,6 +118,7 @@ Material: {
 | cube-2 | position: `Vector3`, size_x: `float`, size_y: `float`, size_z: `float`, rotation: `Vector3`, material: `Material` |
 | cube-3 | corner_min: `Vector3`, corner_max: `Vector3`, rotation: `Vector3`, material: `Material`                           |
 | plane  | position: `Vector3`, size_x: `float`, size_y: `float`, rotation: `Vector3`, material: `Material`                  |
+| object | name: `stiring`, position: `Vector3`, scale: `float`, rotation: `Vector3`, material: `Material`                   |
 
 ### List of light types
 
