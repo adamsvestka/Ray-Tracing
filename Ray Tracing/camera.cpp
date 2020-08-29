@@ -77,14 +77,33 @@ string formatTime(int milliseconds) {
 
 Color getPixel(Intersection data, int mode) {
     switch (mode) {
-        case RENDER_COLOR: return data.texture; break;
-        case RENDER_REFLECTION: return data.reflection; break;
-        case RENDER_TRANSMISSION: return data.transmission; break;
-        case RENDER_LIGHT: return data.hit ? data.light : Color::Black; break;
-        case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Color{255, 0, 0} : data.light) : Color::Black; break;
-        case RENDER_NORMALS: return data.hit ? data.normal.toColor() : Color::Black; break;
-        case RENDER_INORMALS: return data.hit ? -data.normal.toColor() : Color::Black; break;
-        case RENDER_DEPTH: return Color::White * (1 - data.distance / settings.max_render_distance); break;
+        case RENDER_COLOR: return data.texture;
+        case RENDER_REFLECTION: return data.reflection;
+        case RENDER_TRANSMISSION: return data.transmission;
+        case RENDER_LIGHT: return data.hit ? data.light : Color::Black;
+        case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Color{255, 0, 0} : data.light) : Color::Black;
+        case RENDER_NORMALS: return data.hit ? data.normal.toColor() : Color::Black;
+        case RENDER_INORMALS: return data.hit ? -data.normal.toColor() : Color::Black;
+        case RENDER_DEPTH: return Color::White * (1 - data.distance / settings.max_render_distance);
+        case RENDER_UNIQUE: { if (data.id < 0) return Color::Black;
+            float hh, ff, p, q, t, v = 0.7, s = 1;
+            
+            hh = data.id * 6;
+            ff = hh - floor(hh);
+            p = v * (1.0 - s);
+            q = v * (1.0 - (s * ff));
+            t = v * (1.0 - (s * (1.0 - ff)));
+            
+            switch ((int)hh) {
+                case 0: return {v, t, p};
+                case 1: return {q, v, p};
+                case 2: return {p, v, t};
+                case 3: return {p, q, v};
+                case 4: return {t, p, v};
+                case 5:
+                default: return {v, p, q};
+            }
+        }
         case RENDER_SHADED:
         default: return data.shaded();
     }
@@ -257,7 +276,7 @@ void Camera::renderInfo() {
     XSetForeground(display, gc, Color::Black);
     XFillRectangle(display, window, gc, 2, 2, 169, 79);
     
-    static vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Inverse Normals", "Depth"};
+    static vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Inverse Normals", "Depth", "Objects"};
     if (region_current < region_count) end = chrono::high_resolution_clock::now();
     const float elapsed = chrono::duration<float, milli>(end - start).count();
     stringstream ss;

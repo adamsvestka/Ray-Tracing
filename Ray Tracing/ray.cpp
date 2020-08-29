@@ -75,6 +75,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     info.position = origin;
     info.distance = settings.max_render_distance;
     info.object = nullptr;
+    info.id = -1;
     info.normal = Vector3::Zero;
     info.kr = 1;
     info.shadows = vector<bool>(lights.size(), false);
@@ -96,6 +97,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     
     info.position = origin + direction * info.distance;
     if ((info.hit = info.object != nullptr)) {
+        info.id = (float)distance(objects.begin(), find(objects.begin(), objects.end(), info.object)) / objects.size();
         info.normal = hit.getNormal();
         info.texture = hit.getTexture();
         

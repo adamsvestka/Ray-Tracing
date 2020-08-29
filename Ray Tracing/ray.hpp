@@ -35,6 +35,7 @@ struct Intersection {
     Vector3 position;
     float distance;
     const Shape *object;
+    float id;
     
     Vector3 normal;
     float kr;
