@@ -96,7 +96,7 @@ private:
     float height;
     
 public:
-    Triangle(array<Vector3, 3>);
+    explicit Triangle(array<Vector3, 3>);
     Vector3 getNormal() const;
     Color getTexture(const Material &, Vector3) const;
     float intersect(Vector3, Vector3) const;

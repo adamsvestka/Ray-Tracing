@@ -194,10 +194,7 @@ Color Plane::getTexture(Vector3 point) const {
 
 // MARK: - Triangle
 /// @param vertices Vector3{x, y, z}[3]
-Triangle::Triangle(array<Vector3, 3> vertices) {
-    v0 = vertices[0];
-    v0v1 = vertices[1] - vertices[0];
-    v0v2 = vertices[2] - vertices[0];
+Triangle::Triangle(array<Vector3, 3> vertices) : v0(vertices[0]), v0v1(vertices[1] - vertices[0]), v0v2(vertices[2] - vertices[0]) {
     normal = v0v1.cross(v0v2).normal();
     height = (v0v1.length() * sin(acos((v0v1 * v0v2) / (v0v1.length() * v0v2.length()))));
 }
