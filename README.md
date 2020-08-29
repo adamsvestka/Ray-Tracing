@@ -3,7 +3,7 @@
 [![dependencies](https://img.shields.io/badge/dependencies-X11-brightgreen)](https://www.xquartz.org)
 [![CodeFactor](https://www.codefactor.io/repository/github/adamsvestka/ray-tracing/badge)](https://www.codefactor.io/repository/github/adamsvestka/ray-tracing)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ce7c6be071ec40078c3f88480471cb47)](https://www.codacy.com/manual/svestka.adam1/Ray-Tracing?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adamsvestka/Ray-Tracing&amp;utm_campaign=Badge_Grade)
-[![GitHub milestones](https://img.shields.io/github/milestones/progress-percent/adamsvestka/Ray-Tracing/1)](https://github.com/adamsvestka/Ray-Tracing/milestone/1)
+[![GitHub milestones](https://img.shields.io/github/milestones/progress-percent/adamsvestka/Ray-Tracing/1)](https://github.com/adamsvestka/Ray-Tracing/milestone/2)
 [![GitHub issues](https://img.shields.io/github/issues/adamsvestka/Ray-Tracing)](https://github.com/adamsvestka/Ray-Tracing/issues)
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/adamsvestka/Ray-Tracing)](https://github.com/adamsvestka/Ray-Tracing)
 [![GitHub releases](https://img.shields.io/github/v/release/adamsvestka/Ray-Tracing?include_prereleases)](https://github.com/adamsvestka/Ray-Tracing/releases)
@@ -118,6 +118,7 @@ Material: {
 | cube-2 | position: `Vector3`, size_x: `float`, size_y: `float`, size_z: `float`, rotation: `Vector3`, material: `Material` |
 | cube-3 | corner_min: `Vector3`, corner_max: `Vector3`, rotation: `Vector3`, material: `Material`                           |
 | plane  | position: `Vector3`, size_x: `float`, size_y: `float`, rotation: `Vector3`, material: `Material`                  |
+| object | name: `stiring`, position: `Vector3`, scale: `float`, rotation: `Vector3`, material: `Material`                   |
 
 ### List of light types
 
