@@ -32,15 +32,15 @@ Sphere::Sphere(Vector3 position, float diameter, Vector3 angles, Material materi
     this->radius2 = pow(radius, 2);
 }
 
-float Sphere::intersect(Vector3 origin, Vector3 direction) const {
+Hit Sphere::intersect(Vector3 origin, Vector3 direction) const {
     float t0, t1;
     
     Vector3 path = center - origin;
     float tca = path * direction;
-    if (tca < 0) return -1;
+    if (tca < 0) return {-1};
     
     float d2 = path * path - tca * tca;
-    if (d2 > radius2) return -1;
+    if (d2 > radius2) return {-1};
     
     float thc = sqrt(radius2 - d2);
     t0 = tca - thc;
@@ -48,14 +48,15 @@ float Sphere::intersect(Vector3 origin, Vector3 direction) const {
     if (t0 > t1) swap(t0, t1);
     
     if (t0 < 0) {
-        if (t1 < 0) return -1;
-        return t1;
+        if (t1 < 0) return {-1};
+        t0 = t1;
     }
     
-    return t0;
+    Vector3 point = origin + direction * t0;
+    return {t0, [=] { return getNormal(point); }, [=] { return getTexture(point); }};
 }
 
-Vector3 Sphere::getNormal(Vector3 point, Vector3 direction) const {
+Vector3 Sphere::getNormal(Vector3 point) const {
     return rotation * toObjectSpace(point).normal();
 }
 
@@ -98,7 +99,7 @@ Cuboid::Cuboid(Vector3 corner_min, Vector3 corner_max, Vector3 angles, Material 
     this->vmax = corner_max;
 }
 
-float Cuboid::intersect(Vector3 origin, Vector3 direction) const {
+Hit Cuboid::intersect(Vector3 origin, Vector3 direction) const {
     Vector3 _origin = toObjectSpace(origin) + center;
     Vector3 _direction = Irotation * direction;
     
@@ -109,18 +110,19 @@ float Cuboid::intersect(Vector3 origin, Vector3 direction) const {
     if (tmin.y > tmax.y) swap(tmin.y, tmax.y);
     if (tmin.z > tmax.z) swap(tmin.z, tmax.z);
     
-    if (tmin.x > tmax.y || tmin.y > tmax.x) return -1;
+    if (tmin.x > tmax.y || tmin.y > tmax.x) return {-1};
     if (tmin.y > tmin.x) tmin.x = tmin.y;
     if (tmax.y < tmax.x) tmax.x = tmax.y;
     
-    if (tmin.x > tmax.z || tmin.z > tmax.x) return -1;
+    if (tmin.x > tmax.z || tmin.z > tmax.x) return {-1};
     if (tmin.z > tmin.x) tmin.x = tmin.z;
     if (tmax.z < tmax.x) tmax.x = tmax.z;
     
-    return tmin.x;
+    Vector3 point = origin + direction * tmin.x;
+    return {tmin.x, [=] { return getNormal(point); }, [=] { return getTexture(point); }};
 }
 
-Vector3 Cuboid::getNormal(Vector3 point, Vector3 direction) const {
+Vector3 Cuboid::getNormal(Vector3 point) const {
     const Vector3 _point = toObjectSpace(point);
     
     if (abs(_point.x) > abs(_point.y) && abs(_point.x) > abs(_point.z)) return rotation * Vector3{_point.x > 0 ? 1.f : -1.f, 0, 0};
@@ -158,8 +160,8 @@ Plane::Plane(Vector3 position, float size_x, float size_y, Vector3 angles, Mater
     this->size_y = size_y;
 }
 
-float Plane::intersect(Vector3 origin, Vector3 direction) const {
-    Vector3 normal = getNormal(Vector3::Zero, direction);
+Hit Plane::intersect(Vector3 origin, Vector3 direction) const {
+    Vector3 normal = getNormal(direction);
     float denom = normal * direction;
     
     if (denom < 0) {
@@ -167,14 +169,16 @@ float Plane::intersect(Vector3 origin, Vector3 direction) const {
         float t = path * normal / denom;
         
         Vector3 _point = toObjectSpace(origin + direction * t);
-        if (abs(_point.x) > size_x / 2 || abs(_point.y) > size_y / 2) return -1;
-        return t;
+        if (abs(_point.x) > size_x / 2 || abs(_point.y) > size_y / 2) return {-1};
+        
+        Vector3 point = origin + direction * t;
+        return {t, [=] { return normal; }, [=] { return getTexture(point); }};
     }
     
-    return -1;
+    return {-1};
 }
 
-Vector3 Plane::getNormal(Vector3 point, Vector3 direction) const {
+Vector3 Plane::getNormal(Vector3 direction) const {
     return rotation * Vector3{0, 0, (Irotation * direction).z < 0 ? 1.f : -1.f};
 }
 
@@ -190,13 +194,11 @@ Color Plane::getTexture(Vector3 point) const {
 
 // MARK: - Triangle
 /// @param vertices Vector3{x, y, z}[3]
-/// @param angles Vector3{x, y, z}
-/// @param material Material{texture, n, Ks, ior, transparent}
-Triangle::Triangle(array<Vector3, 3> vertices, Vector3 angles, Material material) : Shape((vertices[0] + vertices[1] + vertices[2]) / 3, angles, material) {
-    this->vertices = vertices;
+Triangle::Triangle(array<Vector3, 3> vertices) {
+    v0 = vertices[0];
     v0v1 = vertices[1] - vertices[0];
     v0v2 = vertices[2] - vertices[0];
-    normal = v0v2.cross(v0v1).normal();
+    normal = v0v1.cross(v0v2).normal();
     height = (v0v1.length() * sin(acos((v0v1 * v0v2) / (v0v1.length() * v0v2.length()))));
 }
 
@@ -208,7 +210,7 @@ float Triangle::intersect(Vector3 origin, Vector3 direction) const {
 
     float invDet = 1 / det;
     
-    Vector3 tvec = origin - vertices[0];
+    Vector3 tvec = origin - v0;
     float u = (tvec * pvec) * invDet;
     if (u < 0 || u > 1) return -1;
     
@@ -221,17 +223,62 @@ float Triangle::intersect(Vector3 origin, Vector3 direction) const {
     return t;
 }
 
-Vector3 Triangle::getNormal(Vector3 point, Vector3 direction) const {
+Vector3 Triangle::getNormal() const {
     return normal;
 }
 
-Color Triangle::getTexture(Vector3 point) const {
-    Vector3 vec = point - vertices[0];
+Color Triangle::getTexture(const Material &material, Vector3 point) const {
+    Vector3 vec = point - v0;
     
     float cangle = (v0v2 * vec) / (v0v2.length() * vec.length());
     
     float u = (vec.length() * cangle) / v0v2.length();
     float v = (vec.length() * sin(acos(cangle))) / height;
 
-    return material.texture(guard(u), guard(v));;
+    return material.texture(guard(u), guard(v));
+}
+
+
+// MARK: - Mesh
+/// @param triangles Vector3[3][]
+/// @param position Vector3{x, y, z}
+/// @param scale float
+/// @param angles Vector3{x, y, z}
+/// @param material Material{texture, n, Ks, ior, transparent}
+Object::Object(vector<array<Vector3, 3>> triangles, Vector3 position, float scale, Vector3 angles, Material material) : Shape(position, angles, material), bounds({}, {}, {}, {}) {
+    Vector3 vmin = Vector3::Zero;
+    Vector3 vmax = Vector3::Zero;
+    for (auto &triangle : triangles) {
+        for (auto &vertex : triangle) {
+            vertex = toWorldSpace(vertex * scale);
+            if (vertex.x < vmin.x) vmin.x = vertex.x;
+            else if (vertex.x > vmax.x) vmax.x = vertex.x;
+            if (vertex.y < vmin.y) vmin.y = vertex.y;
+            else if (vertex.y > vmax.y) vmax.y = vertex.y;
+            if (vertex.z < vmin.z) vmin.z = vertex.z;
+            else if (vertex.z > vmax.z) vmax.z = vertex.z;
+        }
+        this->triangles.push_back(Triangle(triangle));
+    }
+    bounds = Cuboid(vmin, vmax, Vector3::Zero, {});
+}
+
+Hit Object::intersect(Vector3 origin, Vector3 direction) const {
+    if (bounds.intersect(origin, direction).distance < 0) return {-1};
+    
+    const Triangle *object = nullptr;
+    float distance = settings.max_render_distance;
+    
+    for (const auto &triangle : triangles) {
+        float dist = triangle.intersect(origin, direction);
+        if (dist < distance && dist > 0) {
+            object = &triangle;
+            distance = dist;
+        }
+    }
+    
+    if (object == nullptr) return {-1};
+    
+    Vector3 point = origin + direction * distance;
+    return {distance, [=] { return object->getNormal(); }, [=] { return object->getTexture(material, point); }};
 }

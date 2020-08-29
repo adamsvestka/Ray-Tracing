@@ -84,18 +84,20 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     
     if (++mask.bounce_count > settings.max_light_bounces) return info;
     
+    Hit hit;
     for (const auto &object : objects) {
-        float distance = object->intersect(origin, direction);
-        if (distance < info.distance && distance > 0 && distance <= settings.max_render_distance && (mask.lighting || !object->material.transparent)) {
+        Hit temp = object->intersect(origin, direction);
+        if (temp.distance > 0 && temp.distance < info.distance && (mask.lighting || !object->material.transparent)) {
             info.object = object;
-            info.distance = distance;
+            info.distance = temp.distance;
+            hit = temp;
         }
     }
     
     info.position = origin + direction * info.distance;
     if ((info.hit = info.object != nullptr)) {
-        info.normal = info.object->getNormal(info.position, direction);
-        info.texture = info.object->getTexture(info.position);
+        info.normal = hit.getNormal();
+        info.texture = hit.getTexture();
         
         // Offset to avoid self-intersection
         if (info.normal * direction < 0 && info.object->material.transparent) info.position -= info.normal * settings.surface_bias;

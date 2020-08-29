@@ -6,6 +6,12 @@
 //  Copyright © 2020 Adam Svestka. All rights reserved.
 //
 
+struct Material;
+class Image;
+class Checkerboard;
+class Brick;
+class Noise;
+
 #pragma once
 
 #include <iostream>
@@ -28,7 +34,7 @@
 using namespace std;
 using namespace cimg_library;
 
-typedef function<Color (float, float)> Shader;
+typedef function<Color(float, float)> Shader;
 
 // MARK: - Material
 struct Material {

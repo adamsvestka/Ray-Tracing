@@ -28,7 +28,7 @@ int main(int argc, const char *argv[]) {
     settings.background_color = Color::Gray;
     
     parseSettings("settings.ini", settings);
-        
+    
     vector<Shape *> objects;
     vector<Light *> lights;
     parseScene("scene.json", objects, lights);

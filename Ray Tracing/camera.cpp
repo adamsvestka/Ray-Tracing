@@ -83,6 +83,7 @@ Color getPixel(Intersection data, int mode) {
         case RENDER_LIGHT: return data.hit ? data.light : Color::Black; break;
         case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Color{255, 0, 0} : data.light) : Color::Black; break;
         case RENDER_NORMALS: return data.hit ? data.normal.toColor() : Color::Black; break;
+        case RENDER_INORMALS: return data.hit ? -data.normal.toColor() : Color::Black; break;
         case RENDER_DEPTH: return Color::White * (1 - data.distance / settings.max_render_distance); break;
         case RENDER_SHADED:
         default: return data.shaded();
@@ -256,7 +257,7 @@ void Camera::renderInfo() {
     XSetForeground(display, gc, Color::Black);
     XFillRectangle(display, window, gc, 2, 2, 169, 79);
     
-    static vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Depth"};
+    static vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Inverse Normals", "Depth"};
     if (region_current < region_count) end = chrono::high_resolution_clock::now();
     const float elapsed = chrono::duration<float, milli>(end - start).count();
     stringstream ss;

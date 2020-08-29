@@ -11,6 +11,7 @@
 #include <iostream>
 #include <variant>
 #include <fstream>
+#include <sstream>
 #include <iomanip>
 #include <regex>
 #include <map>
@@ -36,3 +37,5 @@ Material parseMaterial(json);
 Shape *parseShape(json j);
 Light *parseLight(json j);
 void parseScene(string, vector<Shape *> &, vector<Light *> &);
+
+vector<array<Vector3, 3>> parseOBJ(string);

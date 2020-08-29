@@ -7,6 +7,10 @@
 //
 
 struct Light;
+struct PointLight;
+struct LinearLight;
+struct GlobalLight;
+struct DirectionalLight;
 
 #pragma once
 

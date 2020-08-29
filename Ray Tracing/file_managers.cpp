@@ -8,6 +8,31 @@
 
 #include "file_managers.hpp"
 
+// Hash functions to switch string
+typedef std::uint64_t hash_t;
+
+constexpr hash_t prime = 0x100000001B3ull;
+constexpr hash_t basis = 0xCBF29CE484222325ull;
+
+hash_t hash(char const *str) {
+    hash_t ret{basis};
+    while (*str) {
+        ret ^= *str;
+        ret *= prime;
+        str++;
+    }
+    return ret;
+}
+
+constexpr hash_t hash_compile_time(char const *str, hash_t last_value = basis) {
+    return *str ? hash_compile_time(str + 1, (*str ^ last_value) * prime) : last_value;
+}
+
+constexpr unsigned long long operator ""_h(char const *p, size_t) {
+    return hash_compile_time(p);
+}
+
+
 // MARK: - Settings
 void parseSettings(string filename, Settings &settings) {
     cout << "Parsing " << filename << endl;
@@ -94,33 +119,11 @@ void parseSettings(string filename, Settings &settings) {
             }
             ofile << endl;
         }
+        
+        ofile.close();
     } else cout << "Unable to create file" << endl;
 }
 
-
-// Hash functions to switch string
-typedef std::uint64_t hash_t;
-
-constexpr hash_t prime = 0x100000001B3ull;
-constexpr hash_t basis = 0xCBF29CE484222325ull;
-
-hash_t hash(char const *str) {
-    hash_t ret{basis};
-    while (*str) {
-        ret ^= *str;
-        ret *= prime;
-        str++;
-    }
-    return ret;
-}
-
-constexpr hash_t hash_compile_time(char const *str, hash_t last_value = basis) {
-    return *str ? hash_compile_time(str + 1, (*str ^ last_value) * prime) : last_value;
-}
-
-constexpr unsigned long long operator ""_h(char const *p, size_t) {
-    return hash_compile_time(p);
-}
 
 // MARK: - Scene
 Vector3 parseVector(json j) {
@@ -154,14 +157,14 @@ Shader parseShader(json j) {
             case "checkerboard"_h: return [checkerboard = Checkerboard(j.value("scale", 2), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](float u, float v) { return checkerboard(u, v); };
             case "bricks"_h: return [bricks = Brick(j.value("scale", 4), j.value("ratio", 2.f), j.value("mortar", 0.1f), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")), parseColor(j.value("tertiary", "")), j.value("seed", 0))](float u, float v) { return bricks(u, v); };
             case "noise"_h: return [noise = Noise(j.value("scale", 1), j.value("seed", 0), parseColor(j.value("primary", "")))](float u, float v) { return noise(u, v); };
-            
+                
             case "named"_h: {
                 if (!j["name"].is_string()) break;
                 string name = j["name"];
                 if (shaders.find(name) == shaders.end()) break;
                 return shaders[name];
             }
-            
+                
             case "negate"_h:
                 if (!j["value"].is_object()) break;
                 return [shader = parseShader(j["value"])](float u, float v) { return -shader(u, v); };
@@ -202,7 +205,7 @@ Shape *parseShape(json j) {
         case "cube-2"_h: return new Cuboid(parseVector(j["position"]), j.value("size_x", 1.f), j.value("size_y", 1.f), j.value("size_z", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
         case "cube-3"_h: return new Cuboid(parseVector(j["corner_min"]), parseVector(j["corner_max"]), parseVector(j["rotation"]), parseMaterial(j["material"]));
         case "plane"_h: return new Plane(parseVector(j["position"]), j.value("size_x", 1.f), j.value("size_y", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
-        case "triangle"_h: return new Triangle({parseVector(j["vertices"][0]), parseVector(j["vertices"][1]), parseVector(j["vertices"][2])}, parseVector(j["angles"]), parseMaterial(j["material"]));
+        case "object"_h: return new Object({parseOBJ(j.value("name", "object.obj")), parseVector(j["position"]), j.value("scale", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"])});
     }
     return nullptr;
 }
@@ -220,7 +223,7 @@ Light *parseLight(json j) {
 void parseScene(string filename, vector<Shape *> &objects, vector<Light *> &lights) {
     cout << "Parsing " << filename << endl;
     
-    ifstream ifile(filename, ios::in | ios::out);
+    ifstream ifile(filename, ios::in);
     if (ifile.is_open()) {
         json jfile;
         
@@ -250,5 +253,54 @@ void parseScene(string filename, vector<Shape *> &objects, vector<Light *> &ligh
                 if (light != nullptr) lights.push_back(light);
             }
         } else cout << "Missing entry: " << lights_key << endl;
+        
+        ifile.close();
     } else cout << "Unable to open file" << endl;
+}
+
+
+// MARK: - Wavefront .obj
+vector<array<Vector3, 3>> parseOBJ(string filename) {
+    cout << "Parsing " << filename << endl;
+
+    vector<array<Vector3, 3>> triangles;
+    
+    ifstream ifile(filename, ios::in);
+    if (ifile.is_open()) {
+        vector<Vector3> vertices;
+        
+        regex ignore("#.*");
+        smatch matches;
+        string line;
+        
+        while (getline(ifile, line)) {
+            line = regex_replace(line, ignore, "");
+            if (all_of(line.begin(), line.end(), ::isspace)) continue;
+            
+            stringstream ss(line);
+            string type;
+            ss >> type;
+            switch (::hash(type.c_str())) {
+                case "v"_h: {
+                    float x, y, z;
+                    ss >> x >> y >> z;
+                    Vector3 vertex{x, y, z};
+                    vertices.push_back(vertex);
+                } break;
+                case "f"_h: {
+                    vector<int> indices;
+                    int i;
+                    while (ss >> i) indices.push_back(i - 1);
+                    for (i = 1; i < indices.size() - 1; i++) {
+                        array<Vector3, 3> triangle{vertices.at(indices[0]), vertices.at(indices[i]), vertices.at(indices[i + 1])};
+                        triangles.push_back(triangle);
+                    }
+                } break;
+            }
+        }
+        
+        ifile.close();
+    } else cout << "Unable to open file" << endl;
+    
+    return triangles;
 }

@@ -6,7 +6,8 @@
 //  Copyright © 2020 Adam Svestka. All rights reserved.
 //
 
-class Ray;
+struct Input;
+struct Intersection;
 
 #pragma once
 

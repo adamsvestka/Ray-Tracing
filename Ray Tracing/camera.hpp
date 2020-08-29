@@ -6,6 +6,7 @@
 //  Copyright © 2020 Adam Svestka. All rights reserved.
 //
 
+struct RenderRegion;
 class Camera;
 
 #pragma once

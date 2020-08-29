@@ -9,7 +9,8 @@
 struct Vector3;
 struct Matrix3x3;
 struct Color;
-struct Material;
+struct NeuralNetwork;
+template<typename T> class ConcurrentQueue;
 
 #pragma once
 
