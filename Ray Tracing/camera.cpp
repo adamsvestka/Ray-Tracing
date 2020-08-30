@@ -38,7 +38,7 @@ Camera::~Camera() {
     KeySym key;
     char text[255];
     for (short i = 0; i < timer.c; i++) cout << "Calculating " << timer.names[i] << " took " << timer.times[i] / 1000.f << " seconds" << endl;
-    cout << "Toltal time was " << chrono::duration<float, milli>(end - start).count() / 1000.f << " seconds";
+    cout << "Total time was " << chrono::duration<float, milli>(end - start).count() / 1000.f << " seconds";
     
     while(true) {
         XNextEvent(display, &event);
@@ -141,22 +141,22 @@ void Camera::drawDebugBox(int x, int y, Input mask) {
         return;
     }
     
-    if (mask.transmission) XSetForeground(display, gc, Color::Green.dark());
-    else XSetForeground(display, gc, Color::Gray);
+    if (mask.transmission) XSetForeground(display, gc, Color::Green);
+    else XSetForeground(display, gc, Color::Gray.dark());
     XDrawLines(display, window, gc, points[0], npoints, CoordModeOrigin);
     
-    if (mask.reflections) XSetForeground(display, gc, Color::Blue.dark());
-    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::Yellow.dark());
-    else XSetForeground(display, gc, Color::Gray);
+    if (mask.reflections) XSetForeground(display, gc, Color::Blue);
+    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::Yellow);
+    else XSetForeground(display, gc, Color::Gray.dark());
     XDrawLines(display, window, gc, points[1], npoints, CoordModeOrigin);
     
-    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::Yellow.dark());
-    else if (mask.reflections) XSetForeground(display, gc, Color::Blue.dark());
-    else XSetForeground(display, gc, Color::Gray);
+    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::Yellow);
+    else if (mask.reflections) XSetForeground(display, gc, Color::Blue);
+    else XSetForeground(display, gc, Color::Gray.dark());
     XDrawLines(display, window, gc, points[2], npoints, CoordModeOrigin);
     
-    if (mask.transmission) XSetForeground(display, gc, Color::Green.dark());
-    else XSetForeground(display, gc, Color::Gray);
+    if (mask.transmission) XSetForeground(display, gc, Color::Green);
+    else XSetForeground(display, gc, Color::Gray.dark());
     XDrawLines(display, window, gc, points[3], npoints, CoordModeOrigin);
 }
 
@@ -196,14 +196,10 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
     NeuralNetwork depth_filter(depth_nodes);
     NeuralNetwork edge_filter(edge_nodes);
     
-    vector<const Shape *> ids;
-    
-    region_current = -1; // FIXME: This shouldn't be necessary
     region_count = 0;
     for (int x = 0; x < regions_x; x++) {
         for (int y = 0; y < regions_y; y++) {
             vector<float> depth_matrix(9);
-            vector<float> object_matrix(9);
             vector<float> reflect_matrix(9);
             vector<float> transmit_matrix(9);
             vector<vector<float>> shadow_matrix(buffer[0][0].shadows.size());
@@ -215,13 +211,6 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                     auto index = 3 * j + i;
                     
                     depth_matrix[index] = item.hit;
-                    
-                    const auto it = find(ids.begin(), ids.end(), item.object);
-                    if (it != ids.end()) object_matrix[index] = distance(ids.begin(), it);
-                    else {
-                        object_matrix[index] = ids.size();
-                        ids.push_back(item.object);
-                    }
 
                     if (item.hit && item.object->material.Ks) reflect_matrix[index] = item.reflection;
                     else reflect_matrix[3*i+j] = settings.background_color;
@@ -238,8 +227,8 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
             else {
                 processed[x][y] = {
                     true, 0, true, true,
-                    processed[x][y].reflections = edge_filter.eval(reflect_matrix)[0],
-                    processed[x][y].transmission = edge_filter.eval(transmit_matrix)[0],
+                    edge_filter.eval(reflect_matrix)[0] != 0,
+                    edge_filter.eval(transmit_matrix)[0] != 0,
                     vector<bool>(buffer[0][0].shadows.size(), true)
                 };
                 
@@ -329,7 +318,7 @@ RenderRegion Camera::renderRegion(const vector<Shape *> &objects, const vector<L
             
             if (!mask.reflections && ray.hit && ray.object->material.Ks) ray.reflection = estimate.reflection == Color::Black ? settings.background_color : estimate.reflection;
             if (!mask.transmission && ray.hit && ray.object->material.transparent) ray.transmission = estimate.transmission == Color::Black ? settings.background_color : estimate.transmission;
-            for (int i = 0; i < mask.shadows.size(); i++) if (!mask.shadows[i] && ray.hit) ray.shadows[i] = estimate.shadows[i];
+            for (int i = 0; i < mask.shadows.size(); i++) if (!mask.shadows[i] && ray.hit) if ((ray.shadows[i] = estimate.shadows[i])) ray.light = estimate.light;
             
             region.buffer[x][y] = getPixel(ray, settings.render_mode);
             region.timer += ray.timer;
@@ -349,7 +338,7 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
         if (event.type == Expose && event.xexpose.count == 0) {
             start = chrono::high_resolution_clock::now();
             
-            cout << "Starting render...";
+            cout << "Starting render..." << endl;
             
             for (const auto &object : objects) info += object->getInfo();
             if (settings.save_render) result.resize(RenderTypes, vector<vector<Color>>(width, vector<Color>(height, Color::Black)));
@@ -441,10 +430,7 @@ void Camera::resetPosition() {
             break;
     }
     
-    minX = fmax(x, 0);
-    maxX = fmin(x + settings.render_region_size, width);
-    minY = fmax(y, 0);
-    maxY = fmin(y + settings.render_region_size, height);
+    generateRange();
 }
 
 bool Camera::next(const vector<vector<Input>> &mask) {
