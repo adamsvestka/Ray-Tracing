@@ -10,7 +10,7 @@
 
 
 // MARK: Timer
-const array<string, Timer::c> Timer::names{"intersection", "shadows", "reflections", "transmission"};
+const array<string, Timer::c> Timer::names{"intersections", "shadows", "reflections", "transmission"};
 const array<Color, Timer::c> Timer::colors{Color::Green, Color::Red, Color::Blue, Color::Orange};
 
 Timer::Timer() {
@@ -119,6 +119,9 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     
     info.position = origin + direction * info.distance;
     if ((info.hit = info.object != nullptr)) {
+        // Return if only testing for clear line of sight
+        if (!mask.lighting) return info;
+        
         info.id = (float)distance(objects.begin(), find(objects.begin(), objects.end(), info.object)) / objects.size();
         info.normal = hit.getNormal();
         info.texture = hit.getTexture();
@@ -126,9 +129,6 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
         // Offset to avoid self-intersection
         if (info.normal * direction < 0 && info.object->material.transparent) info.position -= info.normal * settings.surface_bias;
         else info.position += info.normal * settings.surface_bias;
-        
-        // Return if only testing for clear line of sight
-        if (!mask.lighting) return info;
     } else return info;
     
     // MARK: Diffuse, Specular

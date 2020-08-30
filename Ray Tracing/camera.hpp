@@ -58,6 +58,7 @@ private:
     int region_count, region_current;
     chrono::steady_clock::time_point start, end;
     Timer timer;
+    Info info;
     
     int r, l, i;
     int minX, maxX, minY, maxY;

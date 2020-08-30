@@ -7,6 +7,8 @@
 //
 
 struct Hit;
+struct Info;
+
 class Shape;
 class Sphere;
 class Cuboid;
@@ -24,6 +26,14 @@ class Object;
 #include "data_types.hpp"
 #include "shaders.hpp"
 #include "ray.hpp"
+
+struct Info {
+    int vertices = 0;
+    int faces = 0;
+    int objects = 0;
+    
+    void operator+=(const Info &);
+};
 
 struct Hit {
     float distance;
@@ -47,6 +57,7 @@ public:
     /***/ Vector3 toObjectSpace(Vector3 point) const;
     /***/ Vector3 toWorldSpace(Vector3 _point) const;
     /***/ virtual Hit intersect(Vector3 origin, Vector3 direction) const = 0;
+    /***/ virtual Info getInfo() const = 0;
 };
 
 
@@ -60,6 +71,7 @@ public:
     Vector3 getNormal(Vector3) const;
     Color getTexture(Vector3) const;
     Hit intersect(Vector3, Vector3) const;
+    Info getInfo() const;
 };
 
 
@@ -75,6 +87,7 @@ public:
     Vector3 getNormal(Vector3) const;
     Color getTexture(Vector3) const;
     Hit intersect(Vector3, Vector3) const;
+    Info getInfo() const;
 };
 
 
@@ -87,6 +100,7 @@ public:
     Vector3 getNormal(Vector3) const;
     Color getTexture(Vector3) const;
     Hit intersect(Vector3, Vector3) const;
+    Info getInfo() const;
 };
 
 
@@ -100,6 +114,7 @@ public:
     Vector3 getNormal() const;
     Color getTexture(const Material &, Vector3) const;
     float intersect(Vector3, Vector3) const;
+    Info getInfo() const;
 };
 
 
@@ -111,4 +126,5 @@ private:
 public:
     Object(vector<array<Vector3, 3>>, Vector3, float, Vector3, Material);
     Hit intersect(Vector3, Vector3) const;
+    Info getInfo() const;
 };

@@ -37,7 +37,8 @@ Camera::~Camera() {
     XEvent event;
     KeySym key;
     char text[255];
-    for (short i = 0; i < timer.c; i++) cout << timer.names[i] << ":\t" << timer.times[i] / 1000.f << endl;
+    for (short i = 0; i < timer.c; i++) cout << "Calculating " << timer.names[i] << " took " << timer.times[i] / 1000.f << " seconds" << endl;
+    cout << "Toltal time was " << chrono::duration<float, milli>(end - start).count() / 1000.f << " seconds";
     
     while(true) {
         XNextEvent(display, &event);
@@ -275,7 +276,7 @@ inline void Camera::drawInfoString(int x, int y, stringstream &ss, Color color) 
 
 void Camera::renderInfo() {
     XSetForeground(display, gc, Color::Black);
-    XFillRectangle(display, window, gc, 2, 2, 169, 79);
+    XFillRectangle(display, window, gc, 2, 2, 1 + 6 * 28, 4 + 15 * 6);
     
     static vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Inverse Normals", "Depth", "Objects"};
     if (region_current < region_count) end = chrono::high_resolution_clock::now();
@@ -310,10 +311,13 @@ void Camera::renderInfo() {
     ss << "Quality: " << width << "x" << height << " (0," << settings.max_render_distance << "]";
     drawInfoString(1, 4, ss, Color::Green);
     
-    ss << "Mode: " << settings.render_mode << "/" << RenderTypes - 1 << " ";
+    ss << "Complexity: " << info.objects << " x " << settings.max_light_bounces;
     drawInfoString(1, 5, ss, Color::Green);
+    
+    ss << "Mode: " << settings.render_mode << "/" << RenderTypes - 1 << " ";
+    drawInfoString(1, 6, ss, Color::Green);
     ss << " (" << render_type_names[settings.render_mode] << ")";
-    drawInfoString(10, 5, ss, Color::Red);
+    drawInfoString(10, 6, ss, Color::Red);
     
     XFlush(display);
 }
@@ -344,6 +348,10 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
         XNextEvent(display, &event);
         if (event.type == Expose && event.xexpose.count == 0) {
             start = chrono::high_resolution_clock::now();
+            
+            cout << "Starting render...";
+            
+            for (const auto &object : objects) info += object->getInfo();
             if (settings.save_render) result.resize(RenderTypes, vector<vector<Color>>(width, vector<Color>(height, Color::Black)));
             
             // Render at lower resolution
