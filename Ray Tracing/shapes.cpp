@@ -245,6 +245,7 @@ Color Triangle::getTexture(const Material &material, Vector3 point) const {
 Object::Object(vector<array<Vector3, 3>> triangles, Vector3 position, float scale, Vector3 angles, Material material) : Shape(position, angles, material), bounds({}, {}, {}, {}) {
     Vector3 vmin = Vector3::Zero;
     Vector3 vmax = Vector3::Zero;
+    if (triangles.size() > 0) vmin = vmax = toWorldSpace(triangles[0][0] * scale);
     for (auto &triangle : triangles) {
         for (auto &vertex : triangle) {
             vertex = toWorldSpace(vertex * scale);

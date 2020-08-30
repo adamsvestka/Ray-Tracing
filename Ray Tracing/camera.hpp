@@ -35,6 +35,7 @@ using namespace std;
 struct RenderRegion {
     int x, y, w, h;
     vector<vector<Color>> buffer;
+    Timer timer;
     
     RenderRegion() {
         x = y = w = h = 0;
@@ -56,6 +57,7 @@ private:
     int width, height, x, y;
     int region_count, region_current;
     chrono::steady_clock::time_point start, end;
+    Timer timer;
     
     int r, l, i;
     int minX, maxX, minY, maxY;

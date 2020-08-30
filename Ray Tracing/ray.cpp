@@ -8,6 +8,26 @@
 
 #include "ray.hpp"
 
+
+// MARK: Timer
+const array<string, Timer::c> Timer::names{"intersection", "shadows", "reflections", "transmission"};
+const array<Color, Timer::c> Timer::colors{Color::Green, Color::Red, Color::Blue, Color::Orange};
+
+Timer::Timer() {
+    start = chrono::high_resolution_clock::now();
+    last = 0;
+}
+
+void Timer::operator()() {
+    auto now = chrono::high_resolution_clock::now();
+    times[last++] = chrono::duration<float, milli>(now - start).count();
+    start = now;
+}
+
+void Timer::operator+=(const Timer t) {
+    for (short i = 0; i < Timer::c; i++) times[i] += t.times[i];
+}
+
 // MARK: Intersection
 Color Intersection::shaded() const {
     if (!hit) return settings.background_color;
@@ -71,6 +91,8 @@ Vector3 refract(Vector3 direction, Vector3 normal, float ior) {
 Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &objects, const vector<Light *> &lights, Input mask) {
     Intersection info;
     
+    // MARK: Hit detection
+    info.timer = Timer();
     info.hit = false;
     info.position = origin;
     info.distance = settings.max_render_distance;
@@ -110,6 +132,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     } else return info;
     
     // MARK: Diffuse, Specular
+    info.timer();
     if (mask.diffuse && !info.object->material.transparent) {
         auto shadow_mask = mask;
         shadow_mask.lighting = false;
@@ -130,6 +153,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     }
     
     // MARK: Reflection
+    info.timer();
     auto reflect_mask = mask;
     reflect_mask.diffuse = reflect_mask.reflections = reflect_mask.transmission = true;
     reflect_mask.shadows = vector<bool>(lights.size(), true);
@@ -140,6 +164,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     }
     
     // MARK: Transmission
+    info.timer();
     if (info.object->material.transparent) {    // Nested ifs to fill info.kr but not waste computation
         if ((info.kr = fresnel(direction, info.normal, info.object->material.ior)) < 1 && mask.transmission) {
             const auto ray = castRay(info.position, refract(direction, info.normal, info.object->material.ior), objects, lights, reflect_mask);
@@ -147,5 +172,6 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
         }
     }
     
+    info.timer();
     return info;
 }

@@ -37,6 +37,7 @@ Camera::~Camera() {
     XEvent event;
     KeySym key;
     char text[255];
+    for (short i = 0; i < timer.c; i++) cout << timer.names[i] << ":\t" << timer.times[i] / 1000.f << endl;
     
     while(true) {
         XNextEvent(display, &event);
@@ -203,7 +204,7 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
             vector<float> depth_matrix(9);
             vector<float> object_matrix(9);
             vector<float> reflect_matrix(9);
-            vector<float> refract_matrix(9);
+            vector<float> transmit_matrix(9);
             vector<vector<float>> shadow_matrix(buffer[0][0].shadows.size());
             for (auto it = shadow_matrix.begin(); it != shadow_matrix.end(); it++) it->resize(9);
             
@@ -224,8 +225,8 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                     if (item.hit && item.object->material.Ks) reflect_matrix[index] = item.reflection;
                     else reflect_matrix[3*i+j] = settings.background_color;
                     
-                    if (item.hit && item.object->material.transparent) refract_matrix[index] = item.transmission;
-                    else refract_matrix[3*i+j] = settings.background_color;
+                    if (item.hit && item.object->material.transparent) transmit_matrix[index] = item.transmission;
+                    else transmit_matrix[3*i+j] = settings.background_color;
                     
                     for (int k = 0; k < shadow_matrix.size(); k++) shadow_matrix[k][index] = item.shadows[k];
                 }
@@ -237,7 +238,7 @@ vector<vector<Input>> Camera::processPreRender(const vector<vector<Intersection>
                 processed[x][y] = {
                     true, 0, true, true,
                     processed[x][y].reflections = edge_filter.eval(reflect_matrix)[0],
-                    processed[x][y].transmission = edge_filter.eval(refract_matrix)[0],
+                    processed[x][y].transmission = edge_filter.eval(transmit_matrix)[0],
                     vector<bool>(buffer[0][0].shadows.size(), true)
                 };
                 
@@ -293,8 +294,15 @@ void Camera::renderInfo() {
     drawInfoString(1, 3, ss, Color::Green);
     XSetForeground(display, gc, Color::Gray.dark());
     XFillRectangle(display, window, gc, 42, 35, 6 * 15, 12);
-    XSetForeground(display, gc, Color::Green);
-    XFillRectangle(display, window, gc, 42, 35, 6 * 15.f * region_current / region_count, 12);
+    const auto progress = 6 * 15.f * region_current / region_count;
+    const auto total = accumulate(timer.times.begin(), timer.times.end(), 0.f);
+    float current = 0;
+    for (short i = 0; i < timer.c; i++) {
+        XSetForeground(display, gc, timer.colors[i]);
+        const auto temp = round(progress * timer.times[i] / total);
+        XFillRectangle(display, window, gc, current + 42, 35, temp, 12);
+        current += temp;
+    }
     if (region_current >= region_count) ss << "100%";
     else ss << fixed << setprecision(1) << min(100.f * region_current / region_count, 99.9f) << defaultfloat << "%";
     drawInfoString(23, 3, ss, Color::Orange);
@@ -320,6 +328,7 @@ RenderRegion Camera::renderRegion(const vector<Shape *> &objects, const vector<L
             for (int i = 0; i < mask.shadows.size(); i++) if (!mask.shadows[i] && ray.hit) ray.shadows[i] = estimate.shadows[i];
             
             region.buffer[x][y] = getPixel(ray, settings.render_mode);
+            region.timer += ray.timer;
             
             if (!settings.save_render) continue;
             for (auto mode = 0; mode < RenderTypes; mode++) result[mode][region.x + x][region.y + y] = getPixel(ray, mode);
@@ -379,6 +388,7 @@ void Camera::render(const vector<Shape *> &objects, const vector<Light *> &light
                     }
                 }
                 
+                timer += region.timer;
                 region_current++;
                 renderInfo();
             } while (region_current < region_count);
