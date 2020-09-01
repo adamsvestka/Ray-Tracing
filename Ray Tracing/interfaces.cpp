@@ -172,3 +172,33 @@ char X11Interface::getChar() {
         if (event.type == KeyPress && XLookupString(&event.xkey, &ch, 1, &key, 0) == 1) return ch;
     }
 }
+
+bool X11Interface::loadFile(string filename, stringstream &buffer) {
+    ifstream ifile(filename, ios::in);
+    buffer.str("");
+    
+    if (ifile.is_open()) {
+        buffer << ifile.rdbuf();
+        ifile.close();
+        return true;
+    }
+    
+    return false;
+}
+
+
+bool X11Interface::saveFile(string filename, const stringstream &buffer) {
+    ofstream ofile(filename, ios::out);
+    
+    if (ofile.is_open()) {
+        ofile << buffer.rdbuf();
+        ofile.close();
+        return true;
+    }
+    
+    return false;
+}
+
+void X11Interface::log(string message) {
+    cout << message << endl;
+}

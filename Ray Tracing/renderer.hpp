@@ -65,17 +65,20 @@ private:
     int minX, maxX, minY, maxY;
     vector<vector<vector<Color>>> result;
     
-public:
-    Renderer(NativeInterface *, Vector3, Vector3, vector<Shape *>, vector<Light *>);
     
     vector<vector<Intersection>> preRender();
     vector<vector<Input>> processPreRender(const vector<vector<Intersection>> &);
-    void renderInfo();
+    
     RenderRegion renderRegion(RenderRegion, const Input &, const Intersection &);
-    void render();
-    void redraw();
     
     void generateRange();
     void resetPosition();
     bool next(const vector<vector<Input>> &);
+    
+public:
+    Renderer(NativeInterface *, Vector3, Vector3, vector<Shape *>, vector<Light *>);
+    
+    void renderInfo();
+    void render();
+    void redraw();
 };

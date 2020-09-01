@@ -180,7 +180,7 @@ RenderRegion Renderer::renderRegion(RenderRegion region, const Input &mask, cons
 void Renderer::render() {
     start = chrono::high_resolution_clock::now();
     
-    cout << "Starting render..." << endl;
+    display->log("Starting render...");
     
     for (const auto &object : objects) info += object->getInfo();
     if (settings.save_render) result.resize(RenderTypes, vector<vector<Color>>(width, vector<Color>(height, Color::Black)));
@@ -228,8 +228,8 @@ void Renderer::render() {
     task_queue.stop();
     for (auto &it : threads) it.join();
     
-    for (short i = 0; i < timer.c; i++) cout << "Calculating " << timer.names[i] << " took " << timer.times[i] / 1000.f << " seconds" << endl;
-    cout << "Total time was " << chrono::duration<float, milli>(end - start).count() / 1000.f << " seconds";
+    for (short i = 0; i < timer.c; i++) display->log("Calculating " + timer.names[i] + " took " + timer.times[i] / 1000.f + " seconds");
+    display->log("Total time was " + chrono::duration<float, milli>(end - start).count() / 1000.f + " seconds");
 }
 
 void Renderer::redraw() {

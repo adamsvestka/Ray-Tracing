@@ -16,6 +16,7 @@ class X11Interface;
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <thread>
@@ -49,6 +50,11 @@ public:
     virtual void renderInfo(DebugStats) = 0;
     virtual void refresh() = 0;
     virtual char getChar() = 0;
+    
+    virtual bool loadFile(string, stringstream &) = 0;
+    virtual bool saveFile(string, const stringstream &) = 0;
+    
+    virtual void log(string) = 0;
 };
 
 class X11Interface : public NativeInterface {
@@ -59,13 +65,20 @@ private:
     Window window;
     GC gc;
     
+    inline void drawInfoString(int, int, stringstream &, Color);
+    
 public:
     X11Interface();
     ~X11Interface();
+    
     void drawPixel(int, int, Color);
     void drawDebugBox(int, int, Input);
-    inline void drawInfoString(int, int, stringstream &, Color);
     void renderInfo(DebugStats);
     void refresh();
     char getChar();
+    
+    bool loadFile(string, stringstream &);
+    bool saveFile(string, const stringstream &);
+    
+    void log(string);
 };

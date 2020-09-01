@@ -22,20 +22,30 @@
 #include "data_types.hpp"
 #include "shapes.hpp"
 #include "light_sources.hpp"
+#include "interfaces.hpp"
 
 using namespace std;
 using json = nlohmann::json;
 
 typedef variant<bool *, short *, float *, Color *> SettingValue;
 
-void parseSettings(string, Settings &);
+class Parser {
+private:
+    NativeInterface *interface;
+    map<string, Shader> shaders;
+    
+    Vector3 parseVector(json);
+    Color parseColor(string);
+    Shader parseShader(json);
+    Material parseMaterial(json);
+    Shape *parseShape(json j);
+    Light *parseLight(json j);
+    
+    vector<array<Vector3, 3>> parseOBJ(string);
+    
+public:
+    Parser(NativeInterface *);
+    void parseSettings(string, Settings &);
+    void parseScene(string, vector<Shape *> &, vector<Light *> &);
+};
 
-Vector3 parseVector(json);
-Color parseColor(string);
-Shader parseShader(json);
-Material parseMaterial(json);
-Shape *parseShape(json j);
-Light *parseLight(json j);
-void parseScene(string, vector<Shape *> &, vector<Light *> &);
-
-vector<array<Vector3, 3>> parseOBJ(string);

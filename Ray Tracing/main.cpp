@@ -26,13 +26,14 @@ using namespace std;
 Settings settings;
 
 int main(int argc, const char *argv[]) {
-    parseSettings("settings.ini", settings);
+    NativeInterface *interface = new X11Interface();
     
     vector<Shape *> objects;
     vector<Light *> lights;
-    parseScene("scene.json", objects, lights);
     
-    NativeInterface *interface = new X11Interface();
+    Parser parser(interface);
+    parser.parseSettings("settings.ini", settings);
+    parser.parseScene("scene.json", objects, lights);
     
     Renderer renderer(interface, {0, 0, 0}, {0, 0, 0}, objects, lights);
     renderer.render();

@@ -34,8 +34,10 @@ constexpr unsigned long long operator ""_h(char const *p, size_t) {
 
 
 // MARK: - Settings
-void parseSettings(string filename, Settings &settings) {
-    cout << "Parsing " << filename << endl;
+Parser::Parser(NativeInterface *interface) : interface(interface) {};
+
+void Parser::parseSettings(string filename, Settings &settings) {
+    interface->log("Parsing " + filename);
     
     // MARK: Bind options
     map<string, SettingValue> bindings;
@@ -59,15 +61,15 @@ void parseSettings(string filename, Settings &settings) {
     bindings["background_color"] = &settings.background_color;
     
     // MARK: Parse file to structure
-    ifstream ifile(filename, ios::in);
-    if (ifile.is_open()) {
+    stringstream buffer;
+    if (interface->loadFile(filename, buffer)) {
         regex pair("\\s*(.+?)\\s*=\\s*(.+)");
         regex ignore("\\[.*\\]|#.*");
         
         smatch matches;
         string line;
         
-        while (getline(ifile, line)) {
+        while (getline(buffer, line)) {
             line = regex_replace(line, ignore, "");
             if (all_of(line.begin(), line.end(), ::isspace)) continue;
             
@@ -75,7 +77,7 @@ void parseSettings(string filename, Settings &settings) {
                 try {
                     auto it = bindings.find(matches[1].str());
                     if (it == bindings.end()) {
-                        cout << "Unused key: " << line << endl;
+                        interface->log("Unused key: " + line);
                         continue;
                     }
                     
@@ -89,50 +91,45 @@ void parseSettings(string filename, Settings &settings) {
                     
                     bindings.erase(it);
                 } catch(...) {
-                    cout << "Invalid value: " << line << endl;
+                    interface->log("Invalid value: " + line);
                 }
-            } else cout << "Invalid entry: " << line << endl;
+            } else interface->log("Invalid entry: " + line);
         }
-        
-        ifile.close();
-    } else cout << "Unable to open file" << endl;
+    } else interface->log("Unable to open file");
     
     // MARK: Add missing tags to file
-    ofstream ofile(filename, ios::out | ios::app);
-    if (ofile.is_open()) {
-        ofile.setf(ios_base::boolalpha);
+    buffer.setf(ios_base::boolalpha);
+    
+    for (auto it : bindings) {
+        interface->log("Missing entry: " + it.first);
         
-        for (auto it : bindings) {
-            cout << "Missing entry: " << it.first << endl;
-            
-            ofile << it.first << "=";
-            switch (it.second.index()) {
-                case 0: ofile << *get<bool *>(it.second); break;
-                case 1: ofile << *get<short *>(it.second); break;
-                case 2: ofile << *get<float *>(it.second); break;
-                case 3: {
-                    Color c = *get<Color *>(it.second);
-                    ios_base::fmtflags f(ofile.flags());
-                    ofile << 'x' << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
-                    ofile.flags(f);
-                } break;
-            }
-            ofile << endl;
+        buffer << it.first << "=";
+        switch (it.second.index()) {
+            case 0: buffer << *get<bool *>(it.second); break;
+            case 1: buffer << *get<short *>(it.second); break;
+            case 2: buffer << *get<float *>(it.second); break;
+            case 3: {
+                Color c = *get<Color *>(it.second);
+                ios_base::fmtflags f(buffer.flags());
+                buffer << 'x' << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
+                buffer.flags(f);
+            } break;
         }
-        
-        ofile.close();
-    } else cout << "Unable to create file" << endl;
+        buffer << endl;
+    }
+    
+    if (!interface->saveFile(filename, buffer)) interface->log("Unable to create file");
 }
 
 
 // MARK: - Scene
-Vector3 parseVector(json j) {
+Vector3 Parser::parseVector(json j) {
     if (!j.is_null()) return {j.value("x", 0.f), j.value("y", 0.f), j.value("z", 0.f)};
     
     return Vector3::Zero;
 }
 
-Color parseColor(string s) {
+Color Parser::parseColor(string s) {
     static regex hex("x([0-9a-fA-F]{2})([0-9a-fA-F]{2})([0-9a-fA-F]{2})");
     static map<string, Color> colors{{"white", Color::White}, {"lightGray", Color::Gray.light()}, {"gray", Color::Gray}, {"darkGray", Color::Gray.dark()}, {"black", Color::Black},
         {"red", Color::Red}, {"orange", Color::Orange}, {"yellow", Color::Yellow}, {"pink", Color::Pink}, {"brown", Color::Brown}, {"mocha", Color::Mocha}, {"asparagus", Color::Asparagus},
@@ -148,8 +145,7 @@ Color parseColor(string s) {
     return Color::Black;
 }
 
-map<string, Shader> shaders;
-Shader parseShader(json j) {
+Shader Parser::parseShader(json j) {
     if (!j.is_null()) {
         switch (::hash(j.value("type", "").c_str())) {
             case "color"_h: return [color = parseColor(j.value("color", ""))](float u, float v) { return color; };
@@ -192,13 +188,13 @@ Shader parseShader(json j) {
     return [](float u, float v) { return Color::Black; };
 }
 
-Material parseMaterial(json j) {
+Material Parser::parseMaterial(json j) {
     if (!j.is_null()) return {parseShader(j["shader"]), j.value("n", 0.f), j.value("Ks", 0.f), j.value("ior", 1.f), j.value("transparent", false)};
     
     return {parseShader(j["shader"]), 0.f, 0.f, 1.f, false};
 }
 
-Shape *parseShape(json j) {
+Shape *Parser::parseShape(json j) {
     switch (::hash(j.value("type", "").c_str())) {
         case "sphere"_h: return new Sphere(parseVector(j["position"]), j.value("diameter", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
         case "cube"_h: return new Cuboid(parseVector(j["position"]), j.value("size", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
@@ -210,7 +206,7 @@ Shape *parseShape(json j) {
     return nullptr;
 }
 
-Light *parseLight(json j) {
+Light *Parser::parseLight(json j) {
     switch (::hash(j.value("type", "").c_str())) {
         case "point"_h: return new PointLight(parseVector(j["position"]), parseColor(j["color"]), j.value("intensity", 1000));
         case "linear"_h: return new LinearLight(parseVector(j["position"]), parseColor(j["color"]), j.value("intensity", 300));
@@ -220,23 +216,23 @@ Light *parseLight(json j) {
     return nullptr;
 }
 
-void parseScene(string filename, vector<Shape *> &objects, vector<Light *> &lights) {
-    cout << "Parsing " << filename << endl;
+void Parser::parseScene(string filename, vector<Shape *> &objects, vector<Light *> &lights) {
+    interface->log("Parsing " + filename);
     
-    ifstream ifile(filename, ios::in);
-    if (ifile.is_open()) {
+    stringstream buffer;
+    if (interface->loadFile(filename, buffer)) {
         json jfile;
         
         const string shaders_key = "shaders", objects_key = "objects", lights_key = "lights";
         
-        ifile >> jfile;
+        buffer >> jfile;
         
         // MARK: Parse shaders from file
         if (jfile[shaders_key].is_object()) {
             for (const auto &[name, jshader] : jfile[shaders_key].items()) {
                 shaders[name] = parseShader(jshader);
             }
-        } else cout << "Missing entry: " << shaders_key << endl;
+        } else interface->log("Missing entry: " + shaders_key);
         
         // MARK: Parse objects from file
         if (jfile[objects_key].is_array()) {
@@ -244,7 +240,7 @@ void parseScene(string filename, vector<Shape *> &objects, vector<Light *> &ligh
                 auto object = parseShape(jobject);
                 if (object != nullptr) objects.push_back(object);
             }
-        } else cout << "Missing entry: " << objects_key << endl;
+        } else interface->log("Missing entry: " + objects_key);
         
         // MARK: Parse lights from file
         if (jfile[lights_key].is_array()) {
@@ -252,28 +248,26 @@ void parseScene(string filename, vector<Shape *> &objects, vector<Light *> &ligh
                 auto light = parseLight(jlight);
                 if (light != nullptr) lights.push_back(light);
             }
-        } else cout << "Missing entry: " << lights_key << endl;
-        
-        ifile.close();
-    } else cout << "Unable to open file" << endl;
+        } else interface->log("Missing entry: " + lights_key);
+    } else interface->log("Unable to open file");
 }
 
 
 // MARK: - Wavefront .obj
-vector<array<Vector3, 3>> parseOBJ(string filename) {
-    cout << "Parsing " << filename << endl;
-
+vector<array<Vector3, 3>> Parser::parseOBJ(string filename) {
+    interface->log("Parsing " + filename);
+    
     vector<array<Vector3, 3>> triangles;
     
-    ifstream ifile(filename, ios::in);
-    if (ifile.is_open()) {
+    stringstream buffer;
+    if (interface->loadFile(filename, buffer)) {
         vector<Vector3> vertices;
         
         regex ignore("#.*");
         smatch matches;
         string line;
         
-        while (getline(ifile, line)) {
+        while (getline(buffer, line)) {
             line = regex_replace(line, ignore, "");
             if (all_of(line.begin(), line.end(), ::isspace)) continue;
             
@@ -298,9 +292,7 @@ vector<array<Vector3, 3>> parseOBJ(string filename) {
                 } break;
             }
         }
-        
-        ifile.close();
-    } else cout << "Unable to open file" << endl;
+    } else interface->log("Unable to open file");
     
     return triangles;
 }
