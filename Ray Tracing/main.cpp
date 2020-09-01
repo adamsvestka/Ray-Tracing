@@ -18,23 +18,35 @@
 #include "light_sources.hpp"
 #include "ray.hpp"
 #include "camera.hpp"
+#include "renderer.hpp"
+#include "interfaces.hpp"
 
 using namespace std;
 
 Settings settings;
 
 int main(int argc, const char *argv[]) {
-    settings.ambient_lighting = Color::Gray.dark();
-    settings.background_color = Color::Gray;
-    
     parseSettings("settings.ini", settings);
     
     vector<Shape *> objects;
     vector<Light *> lights;
     parseScene("scene.json", objects, lights);
     
-    Camera camera({0, 0, 0});
-    camera.render(objects, lights);
+    NativeInterface *interface = new X11Interface();
+    
+    Renderer renderer(interface, {0, 0, 0}, {0, 0, 0}, objects, lights);
+    renderer.render();
+    
+    char c = '\0';
+    while ((c = interface->getChar()) != 'q') {
+        if (!settings.save_render) continue;
+        
+        int n = c - '0';
+        if (n >= 0 && n < RenderTypes) settings.render_mode = n;
+        else continue;
+        
+        renderer.redraw();
+    }
     
     return 0;
 }
