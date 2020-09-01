@@ -188,7 +188,7 @@ bool X11Interface::loadFile(string filename, stringstream &buffer) {
 
 
 bool X11Interface::saveFile(string filename, const stringstream &buffer) {
-    ofstream ofile(filename, ios::out);
+    ofstream ofile(filename, ios::out | ios::app);
     
     if (ofile.is_open()) {
         ofile << buffer.rdbuf();

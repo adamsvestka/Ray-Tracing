@@ -18,9 +18,9 @@ class Camera {
 private:
     Vector3 position;
     Matrix3x3 rotation;
-    int width, height;
+    float width, height;
     float fovFactor;
-
+    
 public:
     Camera();
     Camera(Vector3, Vector3, float, float);

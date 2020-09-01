@@ -45,7 +45,7 @@ inline Color getPixel(Intersection data, int mode) {
 
 Renderer::Renderer(NativeInterface *display, Vector3 position, Vector3 angles, vector<Shape *> objects, vector<Light *> lights) : objects(objects), lights(lights), display(display) {
     display->getDimensions(width, height);
-    camera = Camera(position, angles, width, height);
+    camera = Camera(position, angles, (float)width / settings.resolution_decrease, (float)height / settings.resolution_decrease);
     resetPosition();
 }
 
@@ -228,8 +228,8 @@ void Renderer::render() {
     task_queue.stop();
     for (auto &it : threads) it.join();
     
-    for (short i = 0; i < timer.c; i++) display->log("Calculating " + timer.names[i] + " took " + timer.times[i] / 1000.f + " seconds");
-    display->log("Total time was " + chrono::duration<float, milli>(end - start).count() / 1000.f + " seconds");
+    for (short i = 0; i < timer.c; i++) display->log("Calculating " + timer.names[i] + " took " + to_string(timer.times[i] / 1000.f) + " seconds");
+    display->log("Total time was " + to_string(chrono::duration<float, milli>(end - start).count() / 1000.f) + " seconds");
 }
 
 void Renderer::redraw() {
@@ -267,6 +267,7 @@ void Renderer::resetPosition() {
     }
     
     region_current = 0;
+    timer = Timer();
     generateRange();
 }
 

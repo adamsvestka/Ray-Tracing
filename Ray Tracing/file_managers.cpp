@@ -98,27 +98,26 @@ void Parser::parseSettings(string filename, Settings &settings) {
     } else interface->log("Unable to open file");
     
     // MARK: Add missing tags to file
-    buffer.setf(ios_base::boolalpha);
-    
+    stringstream append;
+    append.setf(ios_base::boolalpha);
     for (auto it : bindings) {
         interface->log("Missing entry: " + it.first);
         
-        buffer << it.first << "=";
+        append << it.first << "=";
         switch (it.second.index()) {
-            case 0: buffer << *get<bool *>(it.second); break;
-            case 1: buffer << *get<short *>(it.second); break;
-            case 2: buffer << *get<float *>(it.second); break;
+            case 0: append << *get<bool *>(it.second); break;
+            case 1: append << *get<short *>(it.second); break;
+            case 2: append << *get<float *>(it.second); break;
             case 3: {
                 Color c = *get<Color *>(it.second);
-                ios_base::fmtflags f(buffer.flags());
-                buffer << 'x' << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
-                buffer.flags(f);
+                ios_base::fmtflags f(append.flags());
+                append << 'x' << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
+                append.flags(f);
             } break;
         }
-        buffer << endl;
+        append << endl;
     }
-    
-    if (!interface->saveFile(filename, buffer)) interface->log("Unable to create file");
+    if (!interface->saveFile(filename, append)) interface->log("Unable to update file");
 }
 
 
