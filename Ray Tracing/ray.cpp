@@ -16,6 +16,7 @@ const array<Color, Timer::c> Timer::colors{Color::Green, Color::Red, Color::Blue
 Timer::Timer() {
     start = chrono::high_resolution_clock::now();
     last = 0;
+    for (auto &time : times) time = 0;
 }
 
 void Timer::operator()() {

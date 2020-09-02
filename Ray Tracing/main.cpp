@@ -37,7 +37,7 @@ int main(int argc, const char *argv[]) {
     
     Renderer renderer(interface, {0, 0, 0}, {0, 0, 0}, objects, lights);
     renderer.render();
-    auto buffer = renderer.getResult();
+    auto buffer = renderer.getResult(settings.render_mode);
     
     char c = '\0';
     while ((c = interface->getChar()) != 'q') {
@@ -45,9 +45,7 @@ int main(int argc, const char *argv[]) {
         
         int n = c - '0';
         if (n >= 0 && n < RenderTypes) {
-            settings.render_mode = n;
-            
-            buffer = renderer.getResult();
+            buffer = renderer.getResult(n);
             for (int x = 0; x < buffer.size(); x++) {
                 for (int y = 0; y < buffer[x].size(); y++) {
                     interface->drawPixel(x, y, buffer[x][y]);
@@ -55,6 +53,7 @@ int main(int argc, const char *argv[]) {
             }
             renderer.renderInfo();
         } else if (c == 's') interface->saveImage("output.png", buffer);
+        else if (c == 'r') renderer.render();
     }
     
     return 0;

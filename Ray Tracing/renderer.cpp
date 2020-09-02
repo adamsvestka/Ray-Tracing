@@ -46,7 +46,6 @@ inline Color getPixel(Intersection data, int mode) {
 Renderer::Renderer(NativeInterface *display, Vector3 position, Vector3 angles, vector<Shape *> objects, vector<Light *> lights) : objects(objects), lights(lights), display(display) {
     display->getDimensions(width, height);
     camera = Camera(position, angles, width, height);
-    resetPosition();
 }
 
 // MARK: - Preprocessing
@@ -180,10 +179,12 @@ RenderRegion Renderer::renderRegion(RenderRegion region, const Input &mask, cons
 void Renderer::render() {
     start = chrono::high_resolution_clock::now();
     
-    display->log("Starting render...");
-    
+    // Reset
+    resetPosition();
     for (const auto &object : objects) info += object->getInfo();
-    if (settings.save_render) result.resize(RenderTypes, Buffer(width, vector<Color>(height, Color::Black)));
+    if (settings.save_render) result = vector<Buffer>(RenderTypes, Buffer(width, vector<Color>(height, Color::Black)));
+    
+    display->log("Starting render...");
     
     // Render at lower resolution
     const auto buffer = preRender();
@@ -232,8 +233,8 @@ void Renderer::render() {
     display->log("Total time was " + to_string(chrono::duration<float, milli>(end - start).count() / 1000.f) + " seconds");
 }
 
-Buffer Renderer::getResult() {
-    return result[settings.render_mode];
+Buffer Renderer::getResult(short layer) {
+    return result[layer];
 }
 
 // MARK: - Region management
@@ -260,8 +261,10 @@ void Renderer::resetPosition() {
             break;
     }
     
-    region_current = 0;
     timer = Timer();
+    info = Info();
+    region_current = 0;
+    
     generateRange();
 }
 

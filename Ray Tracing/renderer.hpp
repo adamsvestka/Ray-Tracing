@@ -80,5 +80,5 @@ public:
     
     void renderInfo();
     void render();
-    Buffer getResult();
+    Buffer getResult(short);
 };
