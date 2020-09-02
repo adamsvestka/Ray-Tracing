@@ -172,14 +172,14 @@ Color::Color() {
 
 Color::Color(float r, float g, float b) : r(r), g(g), b(b) {}
 
-Color::Color(int r, int g, int b) : r(r / 255.f), g(g / 255.f), b(b / 255.f) {}
+Color::Color(int r, int g, int b) : r(r / 256.f), g(g / 256.f), b(b / 256.f) {}
 
 float Color::value() const {
     return (r + g + b) / 3.f;
 }
 
 array<unsigned char, 3> Color::array() const {
-    return std::array<unsigned char, 3>{(unsigned char)(this->r * 255), (unsigned char)(this->g * 255), (unsigned char)(this->b * 255)};
+    return std::array<unsigned char, 3>{(unsigned char)clamp((this->r * 256.f), 0.f, 255.f), (unsigned char)clamp((this->g * 256.f), 0.f, 255.f), (unsigned char)clamp((this->b * 256.f), 0.f, 255.f)};
 }
 
 Color Color::light() const {

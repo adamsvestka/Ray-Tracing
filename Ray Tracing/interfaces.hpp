@@ -22,6 +22,15 @@ class X11Interface;
 #include <thread>
 #include <chrono>
 
+#include <png.h>
+#include <jpeglib.h>
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
+#define cimg_use_png
+#define cimg_use_jpeg
+#include <CImg.h>
+#pragma clang diagnostic pop
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xos.h>
@@ -30,6 +39,9 @@ class X11Interface;
 
 #include "data_types.hpp"
 #include "ray.hpp"
+
+using namespace std;
+using namespace cimg_library;
 
 struct DebugStats {
     int region_current, region_count, render_time, object_count;
@@ -53,6 +65,9 @@ public:
     
     virtual bool loadFile(string, stringstream &) = 0;
     virtual bool saveFile(string, const stringstream &) = 0;
+    
+    virtual bool loadImage(string, Buffer &) = 0;
+    virtual bool saveImage(string, const Buffer &) = 0;
     
     virtual void log(string) = 0;
 };
@@ -79,6 +94,9 @@ public:
     
     bool loadFile(string, stringstream &);
     bool saveFile(string, const stringstream &);
+    
+    bool loadImage(string, Buffer &);
+    bool saveImage(string, const Buffer &);
     
     void log(string);
 };

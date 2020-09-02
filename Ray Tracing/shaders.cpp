@@ -20,27 +20,10 @@ Color colorRamp(float n, Color a, Color b) {
 
 // MARK: - Textures
 ///
-Image::Image(string path) {
-    cout << "Opening " << path << endl;
-    try {
-        image.load(path.c_str());
-    } catch(...) {
-        image = CImg<unsigned char>(64, 64, 1, 3);
-        
-        cimg_forXYC(image, x, y, c) { image(x, y, c) = (x / 8 % 2) != (y / 8 % 2) ? Color::Black.array().data()[c] : Color::Magenta.array().data()[c]; }
-        image.draw_text(16, 8, "Image", Color::White.array().data(), 0, 1, 13);
-        image.draw_text(24, 24, "not", Color::White.array().data(), 0, 1, 13);
-        image.draw_text(16, 40, "found", Color::White.array().data(), 0, 1, 13);
-        
-        cout << "Couldn't open file" << endl;
-    }
-}
+Image::Image(Buffer &image) : image(image) {}
 
 Color Image::operator()(float x, float y) const {
-    return Color{image(y * image.width(), (1 - x) * image.height(), 0, 0),
-        image(y * image.width(), (1 - x) * image.height(), 0, 1),
-        image(y * image.width(), (1 - x) * image.height(), 0, 2)
-    };
+    return image[x * image.size()][y * image[0].size()];
 }
 
 

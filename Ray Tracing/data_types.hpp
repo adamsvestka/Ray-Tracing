@@ -23,6 +23,8 @@ template<typename T> class ConcurrentQueue;
 
 using namespace std;
 
+typedef vector<vector<Color>> Buffer;
+
 struct Vector3 {
     float x, y, z;
     

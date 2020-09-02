@@ -45,7 +45,7 @@ inline Color getPixel(Intersection data, int mode) {
 
 Renderer::Renderer(NativeInterface *display, Vector3 position, Vector3 angles, vector<Shape *> objects, vector<Light *> lights) : objects(objects), lights(lights), display(display) {
     display->getDimensions(width, height);
-    camera = Camera(position, angles, (float)width / settings.resolution_decrease, (float)height / settings.resolution_decrease);
+    camera = Camera(position, angles, width, height);
     resetPosition();
 }
 
@@ -183,7 +183,7 @@ void Renderer::render() {
     display->log("Starting render...");
     
     for (const auto &object : objects) info += object->getInfo();
-    if (settings.save_render) result.resize(RenderTypes, vector<vector<Color>>(width, vector<Color>(height, Color::Black)));
+    if (settings.save_render) result.resize(RenderTypes, Buffer(width, vector<Color>(height, Color::Black)));
     
     // Render at lower resolution
     const auto buffer = preRender();
@@ -232,14 +232,8 @@ void Renderer::render() {
     display->log("Total time was " + to_string(chrono::duration<float, milli>(end - start).count() / 1000.f) + " seconds");
 }
 
-void Renderer::redraw() {
-    for (int x = 0; x < result[settings.render_mode].size(); x++) {
-        for (int y = 0; y < result[settings.render_mode][x].size(); y++) {
-            display->drawPixel(x, y, result[settings.render_mode][x][y]);
-        }
-    }
-    
-    renderInfo();
+Buffer Renderer::getResult() {
+    return result[settings.render_mode];
 }
 
 // MARK: - Region management

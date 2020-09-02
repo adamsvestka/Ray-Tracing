@@ -148,7 +148,11 @@ Shader Parser::parseShader(json j) {
     if (!j.is_null()) {
         switch (::hash(j.value("type", "").c_str())) {
             case "color"_h: return [color = parseColor(j.value("color", ""))](float u, float v) { return color; };
-            case "image"_h: return [image = Image(j.value("name", "image.png"))](float u, float v) { return image(u, v); };
+            case "image"_h: {
+                Buffer buffer;
+                if (!interface->loadImage(j.value("name", "image.png"), buffer)) interface->log("Couldn't open file");
+                return [image = Image(buffer)](float u, float v) { return image(u, v); };
+            }
             case "checkerboard"_h: return [checkerboard = Checkerboard(j.value("scale", 2), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](float u, float v) { return checkerboard(u, v); };
             case "bricks"_h: return [bricks = Brick(j.value("scale", 4), j.value("ratio", 2.f), j.value("mortar", 0.1f), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")), parseColor(j.value("tertiary", "")), j.value("seed", 0))](float u, float v) { return bricks(u, v); };
             case "noise"_h: return [noise = Noise(j.value("scale", 1), j.value("seed", 0), parseColor(j.value("primary", "")))](float u, float v) { return noise(u, v); };

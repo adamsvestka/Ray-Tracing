@@ -7,6 +7,7 @@
 //
 
 struct Material;
+
 class Image;
 class Checkerboard;
 class Brick;
@@ -20,19 +21,9 @@ class Noise;
 #include <algorithm>
 #include <functional>
 
-#include <png.h>
-#include <jpeglib.h>
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
-#define cimg_use_png
-#define cimg_use_jpeg
-#include <CImg.h>
-#pragma clang diagnostic pop
-
 #include "data_types.hpp"
 
 using namespace std;
-using namespace cimg_library;
 
 typedef function<Color(float, float)> Shader;
 
@@ -52,10 +43,10 @@ Color colorRamp(float, Color, Color);
 // MARK: - Textures
 class Image {
 private:
-    CImg<unsigned char> image;
+    Buffer image;
     
 public:
-    explicit Image(string);
+    explicit Image(Buffer &);
     
     Color operator()(float, float) const;
 };
@@ -75,7 +66,7 @@ public:
 
 class Brick {
 private:
-    vector<vector<Color>> colors;
+    Buffer colors;
     int scale;
     float ratio, mortar;
     Color primary, secondary, tertiary;

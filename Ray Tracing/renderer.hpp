@@ -32,7 +32,7 @@ using namespace std;
 
 struct RenderRegion {
     int x, y, w, h;
-    vector<vector<Color>> buffer;
+    Buffer buffer;
     Timer timer;
     
     RenderRegion() {
@@ -63,7 +63,7 @@ private:
     
     int r, l, i;
     int minX, maxX, minY, maxY;
-    vector<vector<vector<Color>>> result;
+    vector<Buffer> result;
     
     
     vector<vector<Intersection>> preRender();
@@ -80,5 +80,5 @@ public:
     
     void renderInfo();
     void render();
-    void redraw();
+    Buffer getResult();
 };

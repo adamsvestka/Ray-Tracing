@@ -9,8 +9,8 @@
 #include "interfaces.hpp"
 
 void NativeInterface::getDimensions(int &w, int &h) {
-    w = width;
-    h = height;
+    w = width / settings.resolution_decrease;
+    h = height / settings.resolution_decrease;
 }
 
 
@@ -28,8 +28,8 @@ X11Interface::X11Interface() {
     XClearWindow(display, window);
     XMapRaised(display, window);
 
-    width = screen->width / settings.resolution_decrease;
-    height = screen->height / settings.resolution_decrease;
+    width = screen->width;
+    height = screen->height;
     
     XEvent event;
     while (true) {
@@ -145,7 +145,7 @@ void X11Interface::renderInfo(DebugStats stats) {
     else ss << fixed << setprecision(1) << min(100.f * stats.region_current / stats.region_count, 99.9f) << defaultfloat << "%";
     drawInfoString(23, 3, ss, Color::Orange);
     
-    ss << "Quality: " << width << "x" << height << " (0," << settings.max_render_distance << "]";
+    ss << "Quality: " << width / settings.resolution_decrease << "x" << height / settings.resolution_decrease << " (0," << settings.max_render_distance << "]";
     drawInfoString(1, 4, ss, Color::Green);
     
     ss << "Complexity: " << stats.object_count << " x " << settings.max_light_bounces;
@@ -195,6 +195,43 @@ bool X11Interface::saveFile(string filename, const stringstream &buffer) {
         ofile.close();
         return true;
     }
+    
+    return false;
+}
+
+bool X11Interface::loadImage(string filename, Buffer &buffer) {
+    CImg<unsigned char> image;
+    bool success = true;
+    
+    try {
+        image.load(filename.c_str());
+    } catch(...) {
+        image = CImg<unsigned char>(64, 64, 1, 3);
+        
+        cimg_forXYC(image, x, y, c) { image(x, y, c) = (x / 8 % 2) != (y / 8 % 2) ? Color::Black.array()[c] : Color::Magenta.array()[c]; }
+        image.draw_text(16, 8, "Image", Color::White.array().data(), 0, 1, 13);
+        image.draw_text(24, 24, "not", Color::White.array().data(), 0, 1, 13);
+        image.draw_text(16, 40, "found", Color::White.array().data(), 0, 1, 13);
+        
+        success = false;
+    }
+    
+    buffer.resize(image.width(), vector<Color>(image.height(), Color::Black));
+    cimg_forXY(image, x, y) { buffer[x][y] = { image(x, y, 0), image(x, y, 1), image(x, y, 2) }; }
+    
+    return success;
+}
+
+bool X11Interface::saveImage(string filename, const Buffer &buffer) {
+    CImg<unsigned char> image((int)buffer.size(), (int)buffer[0].size(), 1, 3);
+    
+    try {
+        cimg_forXYC(image, x, y, c) { image(x, y, c) = buffer[x][y].array()[c]; }
+        
+        image.save(filename.c_str());
+        
+        return true;
+    } catch(...) {}
     
     return false;
 }
