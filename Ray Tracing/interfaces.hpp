@@ -8,7 +8,7 @@
 
 struct DebugStats;
 
-class NativeInterface;
+class InterfaceTemplate;
 class X11Interface;
 
 #pragma once
@@ -22,26 +22,12 @@ class X11Interface;
 #include <thread>
 #include <chrono>
 
-#include <png.h>
-#include <jpeglib.h>
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
-#define cimg_use_png
-#define cimg_use_jpeg
-#include <CImg.h>
-#pragma clang diagnostic pop
-
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/Xos.h>
-
 #include "settings.hpp"
 
 #include "data_types.hpp"
 #include "ray.hpp"
 
 using namespace std;
-using namespace cimg_library;
 
 struct DebugStats {
     int region_current, region_count, render_time, object_count;
@@ -50,7 +36,7 @@ struct DebugStats {
 };
 
 
-class NativeInterface {
+class InterfaceTemplate {
 protected:
     int width, height;
     
@@ -72,7 +58,25 @@ public:
     virtual void log(string) = 0;
 };
 
-class X11Interface : public NativeInterface {
+#ifndef __EMSCRIPTEN__
+
+#include <png.h>
+#include <jpeglib.h>
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
+#define cimg_use_png
+#define cimg_use_jpeg
+#include <CImg.h>
+#pragma clang diagnostic pop
+
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xos.h>
+
+using namespace cimg_library;
+
+#define X11Interface NativeInterface
+class X11Interface : public InterfaceTemplate {
 private:
     Display *display;
     Screen *screen;
@@ -100,3 +104,51 @@ public:
     
     void log(string);
 };
+
+#else
+
+#include <emscripten.h>
+#include <emscripten/val.h>
+#include <emscripten/bind.h>
+#include <emscripten/html5.h>
+
+using namespace emscripten;
+
+#define WASMInterface NativeInterface
+class WASMInterface : public InterfaceTemplate {
+private:
+    val window = val::undefined();
+    val document = val::undefined();
+    val canvas = val::undefined();
+    val context = val::undefined();
+    val hud = val::undefined();
+    val keys = val::undefined();
+    static val image;
+    
+    inline void drawInfoString(int, int, stringstream &, Color);
+    inline void drawBoxCorner(vector<array<short, 2>>);
+    
+public:
+    WASMInterface();
+    ~WASMInterface();
+    
+    void drawPixel(int, int, Color);
+    void drawDebugBox(int, int, Input);
+    void renderInfo(DebugStats);
+    void refresh();
+    char getChar();
+    
+    bool loadFile(string, stringstream &);
+    bool saveFile(string, const stringstream &);
+    
+    bool loadImage(string, Buffer &);
+    bool saveImage(string, const Buffer &);
+    
+    void log(string);
+    
+    static EM_BOOL key_callback(int, const EmscriptenKeyboardEvent *, void *);
+    void push_key(int);
+    static void init_image(val, val);
+};
+
+#endif

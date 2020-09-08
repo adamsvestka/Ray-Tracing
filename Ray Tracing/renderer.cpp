@@ -43,8 +43,8 @@ inline Color getPixel(Intersection data, int mode) {
     }
 }
 
-Renderer::Renderer(NativeInterface *display, Vector3 position, Vector3 angles, vector<Shape *> objects, vector<Light *> lights) : objects(objects), lights(lights), display(display) {
-    display->getDimensions(width, height);
+Renderer::Renderer(NativeInterface &display, Vector3 position, Vector3 angles, vector<Shape *> &objects, vector<Light *> &lights) : objects(objects), lights(lights), display(display) {
+    display.getDimensions(width, height);
     camera = Camera(position, angles, width, height);
 }
 
@@ -62,12 +62,12 @@ vector<vector<Intersection>> Renderer::preRender() {
             
             for (int dx = 0; dx < settings.render_region_size; dx++) {
                 if (settings.save_render) for (auto mode = 0; mode < RenderTypes; mode++) fill(&result[mode][x * settings.render_region_size + dx][y * settings.render_region_size], &result[mode][x * settings.render_region_size + dx][(y + 1) * settings.render_region_size], getPixel(buffer[x][y], mode));
-                for (int dy = 0; dy < settings.render_region_size; dy++) display->drawPixel(x * settings.render_region_size + dx, y * settings.render_region_size + dy, getPixel(buffer[x][y], settings.render_mode));
+                for (int dy = 0; dy < settings.render_region_size; dy++) display.drawPixel(x * settings.render_region_size + dx, y * settings.render_region_size + dy, getPixel(buffer[x][y], settings.render_mode));
             }
         }
     }
     
-    display->refresh();
+    display.refresh();
     return buffer;
 }
 
@@ -135,13 +135,13 @@ vector<vector<Input>> Renderer::processPreRender(const vector<vector<Intersectio
                 
                 if (processed[x][y].render) {
                     region_count++;
-                    if (settings.show_debug) display->drawDebugBox(x, y, processed[x][y]);
+                    if (settings.show_debug) display.drawDebugBox(x, y, processed[x][y]);
                 }
             }
         }
     }
     
-    display->refresh();
+    display.refresh();
     return processed;
 }
 
@@ -150,9 +150,9 @@ void Renderer::renderInfo() {
     static const vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Inverse Normals", "Depth", "Objects"};
     
     if (region_current < region_count) end = chrono::high_resolution_clock::now();
-    display->renderInfo({region_current, region_count, (int)chrono::duration<float, milli>(end - start).count(), info.objects, timer, render_type_names[settings.render_mode]});
+    display.renderInfo({region_current, region_count, (int)chrono::duration<float, milli>(end - start).count(), info.objects, timer, render_type_names[settings.render_mode]});
     
-    display->refresh();
+    display.refresh();
 }
 
 RenderRegion Renderer::renderRegion(RenderRegion region, const Input &mask, const Intersection &estimate) {
@@ -184,13 +184,15 @@ void Renderer::render() {
     for (const auto &object : objects) info += object->getInfo();
     if (settings.save_render) result = vector<Buffer>(RenderTypes, Buffer(width, vector<Color>(height, Color::Black)));
     
-    display->log("Starting render...");
+    display.log("Starting render...");
     
     // Render at lower resolution
     const auto buffer = preRender();
     
     // Process what to render
     const auto mask = processPreRender(buffer);
+    
+#ifndef __EMSCRIPTEN__
     
     // Create job queue
     ConcurrentQueue<RenderRegion> task_queue;
@@ -218,7 +220,7 @@ void Renderer::render() {
     do {
         RenderRegion region;
         result_queue.pop(region);
-        for (int x = 0; x < region.w; x++) for (int y = 0; y < region.h; y++) display->drawPixel(region.x + x, region.y + y, region.buffer[x][y]);
+        for (int x = 0; x < region.w; x++) for (int y = 0; y < region.h; y++) display.drawPixel(region.x + x, region.y + y, region.buffer[x][y]);
         
         timer += region.timer;
         region_current++;
@@ -229,8 +231,30 @@ void Renderer::render() {
     task_queue.stop();
     for (auto &it : threads) it.join();
     
-    for (short i = 0; i < timer.c; i++) display->log("Calculating " + timer.names[i] + " took " + to_string(timer.times[i] / 1000.f) + " seconds");
-    display->log("Total time was " + to_string(chrono::duration<float, milli>(end - start).count() / 1000.f) + " seconds");
+#else
+    
+    auto refresh = chrono::high_resolution_clock::now();
+    
+    do {
+        RenderRegion task(minX, maxX, minY, maxY);
+        int x = task.x / settings.render_region_size, y = task.y / settings.render_region_size;
+        
+        RenderRegion region = renderRegion(task, mask[x][y], buffer[x][y]);
+        for (int x = 0; x < region.w; x++) for (int y = 0; y < region.h; y++) display.drawPixel(region.x + x, region.y + y, region.buffer[x][y]);
+        
+        timer += region.timer;
+        region_current++;
+        if ((int)chrono::duration<float, milli>(chrono::high_resolution_clock::now() - refresh).count() > 1000) {
+            renderInfo();
+            refresh = chrono::high_resolution_clock::now();
+        }
+    } while (next(mask));
+    renderInfo();
+    
+#endif
+    
+    for (short i = 0; i < timer.c; i++) display.log("Calculating " + timer.names[i] + " took " + to_string(timer.times[i] / 1000.f) + " seconds");
+    display.log("Total time was " + to_string(chrono::duration<float, milli>(end - start).count() / 1000.f) + " seconds");
 }
 
 Buffer Renderer::getResult(short layer) {

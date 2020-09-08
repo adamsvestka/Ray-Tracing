@@ -182,6 +182,12 @@ array<unsigned char, 3> Color::array() const {
     return std::array<unsigned char, 3>{(unsigned char)clamp((this->r * 256.f), 0.f, 255.f), (unsigned char)clamp((this->g * 256.f), 0.f, 255.f), (unsigned char)clamp((this->b * 256.f), 0.f, 255.f)};
 }
 
+string Color::css() const {
+    stringstream ss;
+    ss << "rgb(" << r * 255 << ", " << g * 255 << ", " << b * 255 << ")";
+    return ss.str();
+}
+
 Color Color::light() const {
     return *this * 3.f;
 }

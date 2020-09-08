@@ -50,9 +50,9 @@ struct RenderRegion {
 
 class Renderer {
 private:
-    vector<Shape *> objects;
-    vector<Light *> lights;
-    NativeInterface *display;
+    vector<Shape *> &objects;
+    vector<Light *> &lights;
+    NativeInterface &display;
     Camera camera;
     
     int width, height, x, y;
@@ -76,7 +76,7 @@ private:
     bool next(const vector<vector<Input>> &);
     
 public:
-    Renderer(NativeInterface *, Vector3, Vector3, vector<Shape *>, vector<Light *>);
+    Renderer(NativeInterface &, Vector3, Vector3, vector<Shape *> &, vector<Light *> &);
     
     void renderInfo();
     void render();

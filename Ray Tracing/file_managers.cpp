@@ -34,35 +34,35 @@ constexpr unsigned long long operator ""_h(char const *p, size_t) {
 
 
 // MARK: - Settings
-Parser::Parser(NativeInterface *interface) : interface(interface) {};
+Parser::Parser(NativeInterface &interface) : interface(interface) {};
 
 void Parser::parseSettings(string filename, Settings &settings) {
-    interface->log("Parsing " + filename);
+    interface.log("Parsing " + filename);
     
     // MARK: Bind options
-    map<string, SettingValue> bindings;
+//    map<string, SettingValue> bindings;
+    map<string, pair<short, void *>> bindings;
     // Ray
-    bindings["max_render_distance"] = &settings.max_render_distance;
-    bindings["max_render_distance"] = &settings.max_render_distance;
-    bindings["surface_bias"] = &settings.surface_bias;
-    bindings["max_light_bounces"] = &settings.max_light_bounces;
+    bindings["max_render_distance"] = {1, &settings.max_render_distance};
+    bindings["surface_bias"] = {2, &settings.surface_bias};
+    bindings["max_light_bounces"] = {1, &settings.max_light_bounces};
     
     // Camera
-    bindings["render_mode"] = &settings.render_mode;
-    bindings["render_pattern"] = &settings.render_pattern;
-    bindings["show_debug"] = &settings.show_debug;
-    bindings["preprocess"] = &settings.preprocess;
-    bindings["save_render"] = &settings.save_render;
-    bindings["field_of_view"] = &settings.field_of_view;
-    bindings["resolution_decrease"] = &settings.resolution_decrease;
-    bindings["render_region_size"] = &settings.render_region_size;
-    bindings["rendering_threads"] = &settings.rendering_threads;
-    bindings["ambient_lighting"] = &settings.ambient_lighting;
-    bindings["background_color"] = &settings.background_color;
+    bindings["render_mode"] = {1, &settings.render_mode};
+    bindings["render_pattern"] = {1, &settings.render_pattern};
+    bindings["show_debug"] = {0, &settings.show_debug};
+    bindings["preprocess"] = {0, &settings.preprocess};
+    bindings["save_render"] = {0, &settings.save_render};
+    bindings["field_of_view"] = {1, &settings.field_of_view};
+    bindings["resolution_decrease"] = {1, &settings.resolution_decrease};
+    bindings["render_region_size"] = {1, &settings.render_region_size};
+    bindings["rendering_threads"] = {1, &settings.rendering_threads};
+    bindings["ambient_lighting"] = {3, &settings.ambient_lighting};
+    bindings["background_color"] = {3, &settings.background_color};
     
     // MARK: Parse file to structure
     stringstream buffer;
-    if (interface->loadFile(filename, buffer)) {
+    if (interface.loadFile(filename, buffer)) {
         regex pair("\\s*(.+?)\\s*=\\s*(.+)");
         regex ignore("\\[.*\\]|#.*");
         
@@ -77,39 +77,39 @@ void Parser::parseSettings(string filename, Settings &settings) {
                 try {
                     auto it = bindings.find(matches[1].str());
                     if (it == bindings.end()) {
-                        interface->log("Unused key: " + line);
+                        interface.log("Unused key: " + line);
                         continue;
                     }
                     
                     auto &value = bindings[matches[1].str()];
-                    switch (value.index()) {
-                        case 0: *get<bool *>(value) = matches[2].str() == "true"; break;
-                        case 1: *get<short *>(value) = (short)stoi(matches[2].str()); break;
-                        case 2: *get<float *>(value) = stof(matches[2].str()); break;
-                        case 3: *get<Color *>(value) = parseColor(matches[2].str()); break;
+                    switch (value.first) {
+                        case 0: *(bool *)(value.second) = matches[2].str() == "true"; break;
+                        case 1: *(short *)(value.second) = (short)stoi(matches[2].str()); break;
+                        case 2: *(float *)(value.second) = stof(matches[2].str()); break;
+                        case 3: *(Color *)(value.second) = parseColor(matches[2].str()); break;
                     }
                     
                     bindings.erase(it);
                 } catch(...) {
-                    interface->log("Invalid value: " + line);
+                    interface.log("Invalid value: " + line);
                 }
-            } else interface->log("Invalid entry: " + line);
+            } else interface.log("Invalid entry: " + line);
         }
-    } else interface->log("Unable to open file");
+    } else interface.log("Unable to open file");
     
     // MARK: Add missing tags to file
     stringstream append;
     append.setf(ios_base::boolalpha);
     for (auto it : bindings) {
-        interface->log("Missing entry: " + it.first);
+        interface.log("Missing entry: " + it.first);
         
         append << it.first << "=";
-        switch (it.second.index()) {
-            case 0: append << *get<bool *>(it.second); break;
-            case 1: append << *get<short *>(it.second); break;
-            case 2: append << *get<float *>(it.second); break;
+        switch (it.second.first) {
+            case 0: append << *(bool *)(it.second.second); break;
+            case 1: append << *(short *)(it.second.second); break;
+            case 2: append << *(float *)(it.second.second); break;
             case 3: {
-                Color c = *get<Color *>(it.second);
+                Color c = *(Color *)(it.second.second);
                 ios_base::fmtflags f(append.flags());
                 append << 'x' << setfill('0') << setw(2) << std::hex << (int)round(c.r * 255) << setw(2) << (int)round(c.g * 255) << setw(2) << (int)round(c.b * 255);
                 append.flags(f);
@@ -117,7 +117,7 @@ void Parser::parseSettings(string filename, Settings &settings) {
         }
         append << endl;
     }
-    if (!interface->saveFile(filename, append)) interface->log("Unable to update file");
+    if (!interface.saveFile(filename, append)) interface.log("Unable to update file");
 }
 
 
@@ -150,7 +150,7 @@ Shader Parser::parseShader(json j) {
             case "color"_h: return [color = parseColor(j.value("color", ""))](float u, float v) { return color; };
             case "image"_h: {
                 Buffer buffer;
-                if (!interface->loadImage(j.value("name", "image.png"), buffer)) interface->log("Couldn't open file");
+                if (!interface.loadImage(j.value("name", "image.png"), buffer)) interface.log("Couldn't open image");
                 return [image = Image(buffer)](float u, float v) { return image(u, v); };
             }
             case "checkerboard"_h: return [checkerboard = Checkerboard(j.value("scale", 2), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](float u, float v) { return checkerboard(u, v); };
@@ -220,10 +220,10 @@ Light *Parser::parseLight(json j) {
 }
 
 void Parser::parseScene(string filename, vector<Shape *> &objects, vector<Light *> &lights) {
-    interface->log("Parsing " + filename);
+    interface.log("Parsing " + filename);
     
     stringstream buffer;
-    if (interface->loadFile(filename, buffer)) {
+    if (interface.loadFile(filename, buffer)) {
         json jfile;
         
         const string shaders_key = "shaders", objects_key = "objects", lights_key = "lights";
@@ -235,7 +235,7 @@ void Parser::parseScene(string filename, vector<Shape *> &objects, vector<Light 
             for (const auto &[name, jshader] : jfile[shaders_key].items()) {
                 shaders[name] = parseShader(jshader);
             }
-        } else interface->log("Missing entry: " + shaders_key);
+        } else interface.log("Missing entry: " + shaders_key);
         
         // MARK: Parse objects from file
         if (jfile[objects_key].is_array()) {
@@ -243,7 +243,7 @@ void Parser::parseScene(string filename, vector<Shape *> &objects, vector<Light 
                 auto object = parseShape(jobject);
                 if (object != nullptr) objects.push_back(object);
             }
-        } else interface->log("Missing entry: " + objects_key);
+        } else interface.log("Missing entry: " + objects_key);
         
         // MARK: Parse lights from file
         if (jfile[lights_key].is_array()) {
@@ -251,19 +251,19 @@ void Parser::parseScene(string filename, vector<Shape *> &objects, vector<Light 
                 auto light = parseLight(jlight);
                 if (light != nullptr) lights.push_back(light);
             }
-        } else interface->log("Missing entry: " + lights_key);
-    } else interface->log("Unable to open file");
+        } else interface.log("Missing entry: " + lights_key);
+    } else interface.log("Unable to open file");
 }
 
 
 // MARK: - Wavefront .obj
 vector<array<Vector3, 3>> Parser::parseOBJ(string filename) {
-    interface->log("Parsing " + filename);
+    interface.log("Parsing " + filename);
     
     vector<array<Vector3, 3>> triangles;
     
     stringstream buffer;
-    if (interface->loadFile(filename, buffer)) {
+    if (interface.loadFile(filename, buffer)) {
         vector<Vector3> vertices;
         
         regex ignore("#.*");
@@ -295,7 +295,7 @@ vector<array<Vector3, 3>> Parser::parseOBJ(string filename) {
                 } break;
             }
         }
-    } else interface->log("Unable to open file");
+    } else interface.log("Unable to open file");
     
     return triangles;
 }

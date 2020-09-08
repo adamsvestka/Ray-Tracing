@@ -8,11 +8,25 @@
 
 #include "interfaces.hpp"
 
-void NativeInterface::getDimensions(int &w, int &h) {
+void InterfaceTemplate::getDimensions(int &w, int &h) {
     w = width / settings.resolution_decrease;
     h = height / settings.resolution_decrease;
 }
 
+
+string formatTime(int milliseconds) {
+    time_t seconds = milliseconds / 1000;
+    milliseconds -= seconds * 1000;
+
+    struct tm result;
+    gmtime_r(&seconds, &result);
+
+    stringstream ss;
+    ss << put_time(&result, "%T") << '.' << setfill('0') << setw(3) << milliseconds;
+    return ss.str();
+}
+
+#ifndef __EMSCRIPTEN__
 
 // MARK: - X11Interface
 X11Interface::X11Interface() {
@@ -49,63 +63,52 @@ void X11Interface::drawPixel(int x, int y, Color c) {
 }
 
 void X11Interface::drawDebugBox(int x, int y, Input mask) {
-    const auto size = 0.3;
-
+    const float size = 0.25;
+    static const short region_size = settings.resolution_decrease * settings.render_region_size;
+    
     XPoint points[4][3] = {{
-        {(short)((x * settings.resolution_decrease + size) * settings.render_region_size), (short)(y * settings.resolution_decrease * settings.render_region_size)},
-        {(short)(x * settings.resolution_decrease * settings.render_region_size), (short)(y * settings.resolution_decrease * settings.render_region_size)},
-        {(short)(x * settings.resolution_decrease * settings.render_region_size), (short)((y * settings.resolution_decrease + size) * settings.render_region_size)}
+        {(short)((x + size) * region_size), (short)(y * region_size)},
+        {(short)(x * region_size), (short)(y * region_size)},
+        {(short)(x * region_size), (short)((y + size) * region_size)}
     }, {
-        {(short)(((x + 1) * settings.resolution_decrease - size) * settings.render_region_size - 2), (short)(y * settings.resolution_decrease * settings.render_region_size)},
-        {(short)((x + 1) * settings.resolution_decrease * settings.render_region_size - 2), (short)(y * settings.resolution_decrease * settings.render_region_size)},
-        {(short)((x + 1) * settings.resolution_decrease * settings.render_region_size - 2), (short)((y * settings.resolution_decrease + size) * settings.render_region_size)}
+        {(short)((x + 1 - size) * region_size - 2), (short)(y * region_size)},
+        {(short)((x + 1) * region_size - 2), (short)(y * region_size)},
+        {(short)((x + 1) * region_size - 2), (short)((y + size) * region_size)}
     }, {
-        {(short)((x * settings.resolution_decrease + size) * settings.render_region_size), (short)((y + 1) * settings.resolution_decrease * settings.render_region_size - 2)},
-        {(short)(x * settings.resolution_decrease * settings.render_region_size), (short)((y + 1) * settings.resolution_decrease * settings.render_region_size - 2)},
-        {(short)(x * settings.resolution_decrease * settings.render_region_size), (short)(((y + 1) * settings.resolution_decrease - size) * settings.render_region_size - 2)}
+        {(short)((x + size) * region_size), (short)((y + 1) * region_size - 2)},
+        {(short)(x * region_size), (short)((y + 1) * region_size - 2)},
+        {(short)(x * region_size), (short)((y + 1 - size) * region_size - 2)}
     }, {
-        {(short)(((x + 1) * settings.resolution_decrease - size) * settings.render_region_size - 2), (short)((y + 1) * settings.resolution_decrease * settings.render_region_size - 2)},
-        {(short)((x + 1) * settings.resolution_decrease * settings.render_region_size - 2), (short)((y + 1) * settings.resolution_decrease * settings.render_region_size - 2)},
-        {(short)((x + 1) * settings.resolution_decrease * settings.render_region_size - 2), (short)(((y + 1) * settings.resolution_decrease - size) * settings.render_region_size - 2)}
+        {(short)((x + 1 - size) * region_size - 2), (short)((y + 1) * region_size - 2)},
+        {(short)((x + 1) * region_size - 2), (short)((y + 1) * region_size - 2)},
+        {(short)((x + 1) * region_size - 2), (short)((y + 1 - size) * region_size - 2)}
     }};
-
-    int npoints = sizeof(points[0]) / sizeof(XPoint);
-
+    
+    const short npoints = sizeof(points[0]) / sizeof(XPoint);
+    
     if (mask.bounce_count < 0) {
         XSetForeground(display, gc, Color::Orange);
-        for (int i = 0; i < 4; i++) XDrawLines(display, window, gc, points[i], npoints, CoordModeOrigin);
+        for (auto &point : points) XDrawLines(display, window, gc, point, npoints, CoordModeOrigin);
         return;
     }
-
+    
     if (mask.transmission) XSetForeground(display, gc, Color::Green);
     else XSetForeground(display, gc, Color::Gray.dark());
     XDrawLines(display, window, gc, points[0], npoints, CoordModeOrigin);
-
+    
     if (mask.reflections) XSetForeground(display, gc, Color::Blue);
     else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::Yellow);
     else XSetForeground(display, gc, Color::Gray.dark());
     XDrawLines(display, window, gc, points[1], npoints, CoordModeOrigin);
-
+    
     if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) XSetForeground(display, gc, Color::Yellow);
     else if (mask.reflections) XSetForeground(display, gc, Color::Blue);
     else XSetForeground(display, gc, Color::Gray.dark());
     XDrawLines(display, window, gc, points[2], npoints, CoordModeOrigin);
-
+    
     if (mask.transmission) XSetForeground(display, gc, Color::Green);
     else XSetForeground(display, gc, Color::Gray.dark());
     XDrawLines(display, window, gc, points[3], npoints, CoordModeOrigin);
-}
-
-string formatTime(int milliseconds) {
-    time_t seconds = milliseconds / 1000;
-    milliseconds -= seconds * 1000;
-
-    struct tm result;
-    gmtime_r(&seconds, &result);
-
-    stringstream ss;
-    ss << put_time(&result, "%T") << '.' << setfill('0') << setw(3) << milliseconds;
-    return ss.str();
 }
 
 inline void X11Interface::drawInfoString(int x, int y, stringstream &ss, Color color) {
@@ -136,8 +139,8 @@ void X11Interface::renderInfo(DebugStats stats) {
     const auto total = accumulate(stats.timer.times.begin(), stats.timer.times.end(), 0.f);
     float current = 0;
     for (short i = 0; i < stats.timer.c; i++) {
-        XSetForeground(display, gc, stats.timer.colors[i]);
         const auto temp = round(progress * stats.timer.times[i] / total);
+        XSetForeground(display, gc, stats.timer.colors[i]);
         XFillRectangle(display, window, gc, current + 42, 35, temp, 12);
         current += temp;
     }
@@ -239,3 +242,233 @@ bool X11Interface::saveImage(string filename, const Buffer &buffer) {
 void X11Interface::log(string message) {
     cout << message << endl;
 }
+
+#else
+
+// MARK: - WASMInterface
+EM_BOOL WASMInterface::key_callback(int eventType, const EmscriptenKeyboardEvent *e, void *userData) {
+    WASMInterface *interface = (WASMInterface *)userData;
+    interface->push_key(e->keyCode);
+    
+    return 1;
+}
+
+void WASMInterface::push_key(int code) {
+    keys.call<void>("push", code);
+}
+
+WASMInterface::WASMInterface() {
+    window = val::global("window");
+    document = val::global("document");
+    
+    width = window["innerWidth"].as<int>();
+    height = window["innerHeight"].as<int>();
+    
+    canvas = document.call<val>("createElement", string("canvas"));
+    canvas.set("width", width);
+    canvas.set("height", height);
+    document["body"].call<void>("append", canvas);
+    
+    context = canvas.call<val>("getContext", string("2d"));
+    context.set("font", string("10px monospace"));
+    
+    hud = document.call<val>("createElement", string("span"));
+    hud.set("id", string("console_display"));
+    document["body"].call<void>("append", hud);
+    
+    keys = val::array();
+    emscripten_set_keypress_callback(EMSCRIPTEN_EVENT_TARGET_WINDOW, this, 1, &WASMInterface::key_callback);
+}
+
+WASMInterface::~WASMInterface() {
+//    document.call<void>("removeChild", canvas);
+}
+
+void WASMInterface::drawPixel(int x, int y, Color c) {
+    context.set("fillStyle", c.css());
+    context.call<void>("fillRect", x * settings.resolution_decrease, y * settings.resolution_decrease, settings.resolution_decrease, settings.resolution_decrease);
+}
+
+inline void WASMInterface::drawBoxCorner(vector<array<short, 2>> points) {
+    context.call<void>("moveTo", points[0][0], points[0][1]);
+    for (int i = 1; i < points.size(); i++) context.call<void>("lineTo", points[i][0], points[i][1]);
+    context.call<void>("stroke");
+}
+
+void WASMInterface::drawDebugBox(int x, int y, Input mask) {
+    const float size = 0.25;
+    static const short region_size = settings.resolution_decrease * settings.render_region_size;
+    
+    vector<vector<array<short, 2>>> points = {{
+        {(short)((x + size) * region_size + 1), (short)(y * region_size + 1)},
+        {(short)(x * region_size + 1), (short)(y * region_size + 1)},
+        {(short)(x * region_size + 1), (short)((y + size) * region_size + 1)}
+    }, {
+        {(short)((x + 1 - size) * region_size - 2), (short)(y * region_size + 1)},
+        {(short)((x + 1) * region_size - 2), (short)(y * region_size + 1)},
+        {(short)((x + 1) * region_size - 2), (short)((y + size) * region_size + 1)}
+    }, {
+        {(short)((x + size) * region_size + 1), (short)((y + 1) * region_size - 2)},
+        {(short)(x * region_size + 1), (short)((y + 1) * region_size - 2)},
+        {(short)(x * region_size + 1), (short)((y + 1 - size) * region_size - 2)}
+    }, {
+        {(short)((x + 1 - size) * region_size - 2), (short)((y + 1) * region_size - 2)},
+        {(short)((x + 1) * region_size - 2), (short)((y + 1) * region_size - 2)},
+        {(short)((x + 1) * region_size - 2), (short)((y + 1 - size) * region_size - 2)}
+    }};
+    
+    context.call<void>("beginPath");
+    context.set("lineWidth", 1);
+    
+    if (mask.bounce_count < 0) {
+        context.set("strokeStyle", Color::Orange.css());
+        for (const auto &point : points) drawBoxCorner(point);
+        return;
+    }
+    
+    if (mask.transmission) context.set("strokeStyle", Color::Green.css());
+    else context.set("strokeStyle", Color::Gray.dark().css());
+    drawBoxCorner(points[0]);
+    
+    if (mask.reflections) context.set("strokeStyle", Color::Blue.css());
+    else if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) context.set("strokeStyle", Color::Yellow.css());
+    else context.set("strokeStyle", Color::Gray.dark().css());
+    drawBoxCorner(points[1]);
+    
+    if (any_of(mask.shadows.begin(), mask.shadows.end(), [](bool b) { return b; })) context.set("strokeStyle", Color::Yellow.css());
+    else if (mask.reflections) context.set("strokeStyle", Color::Blue.css());
+    else context.set("strokeStyle", Color::Gray.dark().css());
+    drawBoxCorner(points[2]);
+    
+    if (mask.transmission) context.set("strokeStyle", Color::Green.css());
+    else context.set("strokeStyle", Color::Gray.dark().css());
+    drawBoxCorner(points[3]);
+}
+
+inline void WASMInterface::drawInfoString(int x, int y, stringstream &ss, Color color) {
+    context.set("fillStyle", color.css());
+    context.call<void>("fillText", ss.str(), x * 6, y * 15);
+    ss.str("");
+}
+
+void WASMInterface::renderInfo(DebugStats stats) {
+    context.set("fillStyle", Color::Black.css());
+    context.call<void>("fillRect", 2, 2, 1 + 6 * 28, 4 + 15 * 6);
+    
+    stringstream ss;
+    
+    ss << "Render time: ";
+    drawInfoString(1, 1, ss, Color::Green);
+    ss << formatTime(stats.render_time);
+    drawInfoString(14, 1, ss, Color::Yellow);
+    
+    ss << "Region: " << stats.region_current << "/" << stats.region_count << " @ " << settings.render_region_size << " px";
+    drawInfoString(1, 2, ss, Color::Green);
+    
+    ss << "Prog:";
+    drawInfoString(1, 3, ss, Color::Green);
+    context.set("fillStyle", Color::Gray.dark().css());
+    context.call<void>("fillRect", 42, 35, 6 * 15, 12);
+    const auto progress = 6 * 15.f * stats.region_current / stats.region_count;
+    const auto total = accumulate(stats.timer.times.begin(), stats.timer.times.end(), 0.f);
+    float current = 0;
+    for (short i = 0; i < stats.timer.c; i++) {
+        const auto temp = round(progress * stats.timer.times[i] / total);
+        context.set("fillStyle", stats.timer.colors[i].css());
+        context.call<void>("fillRect", current + 42, 35, temp, 12);
+        current += temp;
+    }
+    if (stats.region_current >= stats.region_count) ss << "100%";
+    else ss << fixed << setprecision(1) << min(100.f * stats.region_current / stats.region_count, 99.9f) << defaultfloat << "%";
+    drawInfoString(23, 3, ss, Color::Orange);
+    
+    ss << "Quality: " << width / settings.resolution_decrease << "x" << height / settings.resolution_decrease << " (0," << settings.max_render_distance << "]";
+    drawInfoString(1, 4, ss, Color::Green);
+    
+    ss << "Complexity: " << stats.object_count << " x " << settings.max_light_bounces;
+    drawInfoString(1, 5, ss, Color::Green);
+    
+    ss << "Mode: " << settings.render_mode << "/" << RenderTypes - 1 << " ";
+    drawInfoString(1, 6, ss, Color::Green);
+    ss << " (" << stats.render_mode_name << ")";
+    drawInfoString(10, 6, ss, Color::Red);
+    
+    refresh();
+}
+
+void WASMInterface::refresh() {
+    emscripten_sleep(0);
+}
+
+char WASMInterface::getChar() {
+    val ch = val::undefined();
+    do {
+        refresh();
+        ch = keys.call<val>("shift");
+    } while (!ch.as<bool>());
+    
+    return ch.as<int>();
+}
+
+bool WASMInterface::loadFile(string filename, stringstream &buffer) {
+    val temp = window.call<val>("fetch", filename).await();
+    string result = temp.call<val>("text").await().as<string>();
+    
+    buffer.str(result);
+    
+    return buffer.str()[0] != '!';
+}
+
+bool WASMInterface::saveFile(string, const stringstream &) {
+    return false;
+}
+
+val WASMInterface::image = val::undefined();
+void WASMInterface::init_image(val resolve, val reject) {
+    WASMInterface::image.set("onload", resolve);
+}
+
+EMSCRIPTEN_BINDINGS(events) {
+    emscripten::function("init_image", &WASMInterface::init_image);
+}
+
+bool WASMInterface::loadImage(string filename, Buffer &buffer) {
+    image = val::global("Image").new_();
+    image.set("src", filename);
+    val::global("Promise").new_(val::module_property("init_image")).await();
+    int width = image["width"].as<int>();
+    int height = image["height"].as<int>();
+    
+    val canvas = document.call<val>("createElement", string("canvas"));
+    canvas.set("width", width);
+    canvas.set("height", height);
+    
+    val context = canvas.call<val>("getContext", string("2d"));
+    context.call<void>("drawImage", image, 0, 0);
+    
+    val imageData = context.call<val>("getImageData", 0, 0, width, height);
+    vector<int> arrayBuffer = vecFromJSArray<int>(imageData["data"]);
+    
+    buffer.resize(width, vector<Color>(height));
+    
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++) {
+            int i = (y * height + x) * 4;
+            buffer[x][y] = Color{arrayBuffer[i], arrayBuffer[i + 1], arrayBuffer[i + 2]};
+        }
+    }
+    
+    return true;
+}
+
+bool WASMInterface::saveImage(string, const Buffer &) {
+    return false;
+}
+
+void WASMInterface::log(string message) {
+    emscripten_console_log(message.c_str());
+    hud.set("innerText", message);
+    refresh();
+}
+
+#endif

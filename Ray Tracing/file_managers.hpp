@@ -27,11 +27,9 @@
 using namespace std;
 using json = nlohmann::json;
 
-typedef variant<bool *, short *, float *, Color *> SettingValue;
-
 class Parser {
 private:
-    NativeInterface *interface;
+    NativeInterface &interface;
     map<string, Shader> shaders;
     
     Vector3 parseVector(json);
@@ -44,7 +42,7 @@ private:
     vector<array<Vector3, 3>> parseOBJ(string);
     
 public:
-    Parser(NativeInterface *);
+    Parser(NativeInterface &);
     void parseSettings(string, Settings &);
     void parseScene(string, vector<Shape *> &, vector<Light *> &);
 };

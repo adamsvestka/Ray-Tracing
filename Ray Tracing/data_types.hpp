@@ -17,9 +17,7 @@ template<typename T> class ConcurrentQueue;
 #include <cmath>
 #include <vector>
 #include <array>
-#include <thread>
-#include <queue>
-#include <atomic>
+#include <sstream>
 
 using namespace std;
 
@@ -82,6 +80,7 @@ struct Color {
     
     float value() const;
     array<unsigned char, 3> array() const;
+    string css() const;
     Color light() const;
     Color dark() const;
     
@@ -117,6 +116,11 @@ struct NeuralNetwork {
     vector<float> eval(vector<float> &);
 };
 
+#ifndef __EMSCRIPTEN__
+
+#include <thread>
+#include <queue>
+#include <atomic>
 
 template<typename T>
 class ConcurrentQueue {
@@ -154,3 +158,5 @@ public:
         cond_.notify_all();
     }
 };
+
+#endif

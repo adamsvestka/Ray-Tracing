@@ -26,7 +26,7 @@ using namespace std;
 Settings settings;
 
 int main(int argc, const char *argv[]) {
-    NativeInterface *interface = new X11Interface();
+    NativeInterface interface;
     
     vector<Shape *> objects;
     vector<Light *> lights;
@@ -37,24 +37,31 @@ int main(int argc, const char *argv[]) {
     
     Renderer renderer(interface, {0, 0, 0}, {0, 0, 0}, objects, lights);
     renderer.render();
+    
+    if (!settings.save_render) { while (interface.getChar() != 'q') continue; return 0; }
+    
     auto buffer = renderer.getResult(settings.render_mode);
     
     char c = '\0';
-    while ((c = interface->getChar()) != 'q') {
-        if (!settings.save_render) continue;
-        
+    while ((c = interface.getChar()) != 'q') {
         int n = c - '0';
         if (n >= 0 && n < RenderTypes) {
             buffer = renderer.getResult(n);
             for (int x = 0; x < buffer.size(); x++) {
                 for (int y = 0; y < buffer[x].size(); y++) {
-                    interface->drawPixel(x, y, buffer[x][y]);
+                    interface.drawPixel(x, y, buffer[x][y]);
                 }
             }
             renderer.renderInfo();
-        } else if (c == 's') interface->saveImage("output.png", buffer);
-        else if (c == 'r') renderer.render();
+        } else if (c == 's') interface.saveImage("output.png", buffer);
+        else if (c == 'r') {
+//            parser.parseSettings("settings.ini", settings);
+//            parser.parseScene("scene.json", objects, lights);
+            renderer.render();
+        }
     }
+    
+    interface.log("Exiting...");
     
     return 0;
 }

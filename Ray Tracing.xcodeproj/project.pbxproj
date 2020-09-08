@@ -6,6 +6,32 @@
 	objectVersion = 50;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		66CF548A2506C2FC005CB2A7 /* Master */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 66CF548B2506C2FC005CB2A7 /* Build configuration list for PBXAggregateTarget "Master" */;
+			buildPhases = (
+			);
+			dependencies = (
+				66CF548F2506C306005CB2A7 /* PBXTargetDependency */,
+				66CF54912506C307005CB2A7 /* PBXTargetDependency */,
+			);
+			name = Master;
+			productName = Master;
+		};
+		66FDB882250185660089E080 /* WebAssembly */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 66FDB883250185660089E080 /* Build configuration list for PBXAggregateTarget "WebAssembly" */;
+			buildPhases = (
+				66FDB886250185800089E080 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = WebAssembly;
+			productName = WebAssembly;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		6630E3D82443CD690066BCCC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3D72443CD690066BCCC /* main.cpp */; };
 		6630E3E32445E2B20066BCCC /* data_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E12445E2B20066BCCC /* data_types.cpp */; };
@@ -24,6 +50,23 @@
 		66F15CBF24CCFCE0003D81DC /* libpng16.16.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		66F15CC024CCFCE1003D81DC /* libX11.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 665B9CC324CBAC80000C4E1E /* libX11.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		66CF548E2506C306005CB2A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6630E3CC2443CD680066BCCC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6630E3D32443CD680066BCCC;
+			remoteInfo = "Ray Tracing";
+		};
+		66CF54902506C307005CB2A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6630E3CC2443CD680066BCCC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 66FDB882250185660089E080;
+			remoteInfo = WebAssembly;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		6630E3D22443CD680066BCCC /* CopyFiles */ = {
@@ -77,6 +120,7 @@
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
 		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
+		66FDB88025017AA70089E080 /* template.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = template.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,6 +181,7 @@
 			isa = PBXGroup;
 			children = (
 				665B9C9524C8D2C4000C4E1E /* README.md */,
+				66FDB88025017AA70089E080 /* template.html */,
 				6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */,
 			);
 			name = Other;
@@ -214,6 +259,12 @@
 					6630E3D32443CD680066BCCC = {
 						CreatedOnToolsVersion = 11.4;
 					};
+					66CF548A2506C2FC005CB2A7 = {
+						CreatedOnToolsVersion = 11.7;
+					};
+					66FDB882250185660089E080 = {
+						CreatedOnToolsVersion = 11.7;
+					};
 				};
 			};
 			buildConfigurationList = 6630E3CF2443CD680066BCCC /* Build configuration list for PBXProject "Ray Tracing" */;
@@ -229,10 +280,32 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				66CF548A2506C2FC005CB2A7 /* Master */,
 				6630E3D32443CD680066BCCC /* Ray Tracing */,
+				66FDB882250185660089E080 /* WebAssembly */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		66FDB886250185800089E080 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "OUTPUT_DIR=$HOME/Sites/Ray-Tracing\n\n# rm -r \"$OUTPUT_DIR/\"*\n\n# cp $(ls -d \"$BUILT_PRODUCTS_DIR/\"* | egrep \"(.obj|.png|.jpe?g|.ini|.json)$\") \"$OUTPUT_DIR\"\n\n$HOME/Desktop/Xcode/emsdk/upstream/emscripten/em++ \"$PROJECT_DIR/Ray Tracing/\"*.cpp -I/usr/local/Cellar/nlohmann-json/3.8.0/include --std=c++20 -O3 --bind -s LLD_REPORT_UNDEFINED -s WASM=1 -s NO_FILESYSTEM=1 -s DISABLE_EXCEPTION_CATCHING=1 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=0 -s ASYNCIFY -s EXTRA_EXPORTED_RUNTIME_METHODS=['UTF8ToString','lengthBytesUTF8','stringToUTF8'] --shell-file \"$PROJECT_DIR/Ray Tracing/template.html\" -o \"$OUTPUT_DIR/index.html\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6630E3D02443CD680066BCCC /* Sources */ = {
@@ -253,6 +326,19 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		66CF548F2506C306005CB2A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6630E3D32443CD680066BCCC /* Ray Tracing */;
+			targetProxy = 66CF548E2506C306005CB2A7 /* PBXContainerItemProxy */;
+		};
+		66CF54912506C307005CB2A7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 66FDB882250185660089E080 /* WebAssembly */;
+			targetProxy = 66CF54902506C307005CB2A7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		6630E3D92443CD690066BCCC /* Debug */ = {
@@ -403,6 +489,7 @@
 				DEVELOPMENT_TEAM = RTA4PXE74H;
 				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_OPTIMIZATION_LEVEL = s;
 				HEADER_SEARCH_PATHS = /usr/local/include;
 				LIBRARY_SEARCH_PATHS = (
 					/opt/X11/lib,
@@ -416,6 +503,42 @@
 				OTHER_OSACOMPILEFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+			};
+			name = Release;
+		};
+		66CF548C2506C2FC005CB2A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RTA4PXE74H;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		66CF548D2506C2FC005CB2A7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RTA4PXE74H;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		66FDB884250185660089E080 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RTA4PXE74H;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		66FDB885250185660089E080 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RTA4PXE74H;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -436,6 +559,24 @@
 			buildConfigurations = (
 				6630E3DC2443CD690066BCCC /* Debug */,
 				6630E3DD2443CD690066BCCC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		66CF548B2506C2FC005CB2A7 /* Build configuration list for PBXAggregateTarget "Master" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				66CF548C2506C2FC005CB2A7 /* Debug */,
+				66CF548D2506C2FC005CB2A7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		66FDB883250185660089E080 /* Build configuration list for PBXAggregateTarget "WebAssembly" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				66FDB884250185660089E080 /* Debug */,
+				66FDB885250185660089E080 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
