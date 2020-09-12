@@ -25,7 +25,7 @@ class Noise;
 
 using namespace std;
 
-typedef function<Color(float, float)> Shader;
+typedef function<Color(TCoords)> Shader;
 
 // MARK: - Material
 struct Material {
@@ -41,18 +41,24 @@ Color colorRamp(float, Color, Color);
 
 
 // MARK: - Textures
-class Image {
+class Texture {
+public:
+    virtual Color operator()(TCoords) const = 0;
+};
+
+
+class Image : public Texture {
 private:
     Buffer image;
     
 public:
     explicit Image(Buffer &);
     
-    Color operator()(float, float) const;
+    Color operator()(TCoords) const;
 };
 
 
-class Checkerboard {
+class Checkerboard : public Texture {
 private:
     int scale;
     Color primary, secondary;
@@ -60,11 +66,11 @@ private:
 public:
     Checkerboard(int, Color, Color);
     
-    Color operator()(float, float) const;
+    Color operator()(TCoords) const;
 };
 
 
-class Brick {
+class Brick : public Texture {
 private:
     Buffer colors;
     int scale;
@@ -74,11 +80,11 @@ private:
 public:
     Brick(int, float, float, Color, Color, Color, int);
     
-    Color operator()(float, float) const;
+    Color operator()(TCoords) const;
 };
 
 
-class Noise {
+class Noise : public Texture {
 private:
     vector<vector<pair<float, float>>> points;
     int scale;
@@ -90,5 +96,5 @@ public:
     float lerp(float, float, float) const;
     float dotGradient(int, int, float, float) const;
     
-    Color operator()(float, float) const;
+    Color operator()(TCoords) const;
 };

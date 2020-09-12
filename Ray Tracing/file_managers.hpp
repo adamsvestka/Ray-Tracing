@@ -22,6 +22,7 @@
 #include "data_types.hpp"
 #include "shapes.hpp"
 #include "light_sources.hpp"
+#include "camera.hpp"
 #include "interfaces.hpp"
 
 using namespace std;
@@ -36,14 +37,14 @@ private:
     Color parseColor(string);
     Shader parseShader(json);
     Material parseMaterial(json);
-    Shape *parseShape(json j);
-    Light *parseLight(json j);
+    Shape *parseShape(json);
+    Light *parseLight(json);
+    Camera parseCamera(json);
     
-    vector<array<Vector3, 3>> parseOBJ(string);
+    void parseOBJ(string, vector<array<Vector3, 3>> &, vector<array<TCoords, 3>> &, vector<array<Vector3, 3>> &);
     
 public:
     Parser(NativeInterface &);
     void parseSettings(string, Settings &);
-    void parseScene(string, vector<Shape *> &, vector<Light *> &);
+    void parseScene(string, Camera &, vector<Shape *> &, vector<Light *> &);
 };
-

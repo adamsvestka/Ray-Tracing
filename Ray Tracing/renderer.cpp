@@ -43,9 +43,9 @@ inline Color getPixel(Intersection data, int mode) {
     }
 }
 
-Renderer::Renderer(NativeInterface &display, Vector3 position, Vector3 angles, vector<Shape *> &objects, vector<Light *> &lights) : objects(objects), lights(lights), display(display) {
+Renderer::Renderer(NativeInterface &display, Camera &camera, vector<Shape *> &objects, vector<Light *> &lights) : display(display), camera(camera), objects(objects), lights(lights) {
     display.getDimensions(width, height);
-    camera = Camera(position, angles, width, height);
+    camera.getDimensions(width, height);
 }
 
 // MARK: - Preprocessing

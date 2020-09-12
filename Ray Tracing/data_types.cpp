@@ -286,6 +286,73 @@ void Color::operator/=(Color c) {
 }
 
 
+// MARK: - TCoords
+TCoords::TCoords() {
+    u = v = 0;
+}
+
+TCoords::TCoords(float u, float v) : u(u), v(v) {}
+
+TCoords::TCoords(int u, int v) : u(u), v(v) {}
+
+const TCoords TCoords::Zero{0, 0};
+
+float TCoords::guard(float f) {
+    return clamp(f, 0.f, nextafter(1.f, 0.f));
+}
+
+bool TCoords::operator==(const TCoords t) const {
+    return this->u == t.u && this->v == t.v;
+}
+
+bool TCoords::operator!=(const TCoords t) const {
+    return this->u != t.u && this->v != t.v;
+}
+
+TCoords TCoords::operator+(const TCoords t) const {
+    return TCoords{this->u + t.u, this->v + t.v};
+}
+
+TCoords TCoords::operator-(const TCoords t) const {
+    return TCoords{this->u - t.u, this->v - t.v};
+}
+
+TCoords TCoords::operator-() const {
+    return TCoords{-this->u, -this->v};
+}
+
+TCoords TCoords::operator*(const double n) const {
+    return TCoords{this->u * (float)n, this->v * (float)n};
+}
+
+TCoords TCoords::operator*(const float n) const {
+    return TCoords{this->u * n, this->v * n};
+}
+
+TCoords TCoords::operator*(const int n) const {
+    return TCoords{this->u * n, this->v * n};
+}
+float TCoords::getU() const {
+    return guard(u);
+}
+
+float TCoords::getV() const {
+    return guard(v);
+}
+
+TCoords TCoords::operator/(const double n) const {
+    return TCoords{this->u / (float)n, this->v / (float)n};
+}
+
+TCoords TCoords::operator/(const float n) const {
+    return TCoords{this->u / n, this->v / n};
+}
+
+TCoords TCoords::operator/(const int n) const {
+    return TCoords{this->u / n, this->v / n};
+}
+
+
 // MARK: - NeuralNetwork
 NeuralNetwork::NeuralNetwork(vector<vector<vector<float>>> &nodes) {
     this->nodes = nodes;

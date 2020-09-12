@@ -22,16 +22,16 @@ Color colorRamp(float n, Color a, Color b) {
 ///
 Image::Image(Buffer &image) : image(image) {}
 
-Color Image::operator()(float x, float y) const {
-    return image[x * image.size()][y * image[0].size()];
+Color Image::operator()(TCoords t) const {
+    return image[t.getU() * image.size()][t.getV() * image[0].size()];
 }
 
 
 ///
 Checkerboard::Checkerboard(int scale, Color primary, Color secondary) : scale(scale), primary(primary), secondary(secondary) {}
 
-Color Checkerboard::operator()(float x, float y) const {
-    return (int)(x * scale) % 2 != (int)(y * scale) % 2 ? primary : secondary;
+Color Checkerboard::operator()(TCoords t) const {
+    return (int)(t.getU() * scale) % 2 != (int)(t.getV() * scale) % 2 ? primary : secondary;
 }
 
 
@@ -50,9 +50,9 @@ Brick::Brick(int scale, float ratio, float mortar, Color primary, Color secondar
      }
 }
 
-Color Brick::operator()(float x, float y) const {
-    float dx = x * scale;
-    float dy = y * scale / ratio + !((int)(x * scale) % 2) / 2.f;
+Color Brick::operator()(TCoords t) const {
+    float dx = t.getU() * scale;
+    float dy = t.getV() * scale / ratio + !((int)(t.getU() * scale) % 2) / 2.f;
     float ix = fmod(dx, 1);
     float iy = fmod(dy, 1);
     return iy * ratio < mortar || ix < mortar ? tertiary : colors[floor(dx)][floor(dy)];
@@ -86,8 +86,9 @@ float Noise::dotGradient(int ix, int iy, float x, float y) const {
     return (dx * points[iy][ix].first + dy * points[iy][ix].second);
 }
 
-Color Noise::operator()(float x, float y) const {
-    x *= scale - 1; y *= scale - 1;
+Color Noise::operator()(TCoords t) const {
+    float x = t.getU() * (scale - 1);
+    float y = t.getV() * (scale - 1);
     int x0 = (int)x, x1 = x0 + 1;
     int y0 = (int)y, y1 = y0 + 1;
     float dx = smoothstep(x - x0);

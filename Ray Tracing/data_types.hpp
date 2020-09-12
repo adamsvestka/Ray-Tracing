@@ -108,6 +108,34 @@ struct Color {
 };
 
 
+struct TCoords {
+    float u, v;
+    
+    TCoords();
+    TCoords(float, float);
+    TCoords(int, int);
+    
+    inline static float guard(float f);
+    
+    const static TCoords Zero;
+    
+    bool operator==(const TCoords) const;
+    bool operator!=(const TCoords) const;
+    TCoords operator+(const TCoords) const;
+    TCoords operator-(const TCoords) const;
+    TCoords operator-() const;
+    TCoords operator*(const double) const;
+    TCoords operator*(const float) const;
+    TCoords operator*(const int) const;
+    TCoords operator/(const double) const;
+    TCoords operator/(const float) const;
+    TCoords operator/(const int) const;
+    
+    float getU() const;
+    float getV() const;
+};
+
+
 struct NeuralNetwork {
     vector<vector<vector<float>>> nodes;
     

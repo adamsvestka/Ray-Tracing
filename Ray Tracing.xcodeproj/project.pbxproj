@@ -46,9 +46,6 @@
 		665B9CC724CBAC8F000C4E1E /* libpng16.16.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */; };
 		665B9CCA24CBAC9D000C4E1E /* libjpeg.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */; };
 		6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6667DFF924604DFC00A1DDE1 /* shaders.cpp */; };
-		66F15CBD24CCFCDD003D81DC /* libjpeg.9.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		66F15CBF24CCFCE0003D81DC /* libpng16.16.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
-		66F15CC024CCFCE1003D81DC /* libX11.6.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 665B9CC324CBAC80000C4E1E /* libX11.6.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -77,19 +74,6 @@
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 1;
-		};
-		66F15CBE24CCFCDD003D81DC /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				66F15CC024CCFCE1003D81DC /* libX11.6.dylib in Embed Libraries */,
-				66F15CBD24CCFCDD003D81DC /* libjpeg.9.dylib in Embed Libraries */,
-				66F15CBF24CCFCE0003D81DC /* libpng16.16.dylib in Embed Libraries */,
-			);
-			name = "Embed Libraries";
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
 
@@ -236,7 +220,6 @@
 				6630E3D02443CD680066BCCC /* Sources */,
 				6630E3D12443CD680066BCCC /* Frameworks */,
 				6630E3D22443CD680066BCCC /* CopyFiles */,
-				66F15CBE24CCFCDD003D81DC /* Embed Libraries */,
 			);
 			buildRules = (
 			);

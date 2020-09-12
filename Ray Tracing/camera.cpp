@@ -14,12 +14,17 @@ Camera::Camera() {
     width = height = 0;
 }
 
-Camera::Camera(Vector3 position, Vector3 angles, float width, float height) {
+Camera::Camera(Vector3 position, Vector3 angles, float width, float height, float fov) {
     this->position = position;
     rotation = Matrix3x3::RotationMatrix(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
     this->width = width;
     this->height = height;
-    fovFactor = 1 / tan(settings.field_of_view / 2);
+    fovFactor = 1 / tan(fov / 2);
+}
+
+void Camera::getDimensions(int width, int height) {
+    this->width = width;
+    this->height = height;
 }
 
 Vector3 Camera::getPosition() {

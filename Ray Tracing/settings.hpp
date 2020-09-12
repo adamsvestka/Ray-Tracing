@@ -37,8 +37,6 @@ struct Settings {
     
     bool save_render = true;
     
-    short field_of_view = 120;
-    
     short resolution_decrease = 1;
     
     short render_region_size = 10;

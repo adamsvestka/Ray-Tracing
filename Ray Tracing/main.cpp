@@ -28,14 +28,15 @@ Settings settings;
 int main(int argc, const char *argv[]) {
     NativeInterface interface;
     
+    Camera camera;
     vector<Shape *> objects;
     vector<Light *> lights;
     
     Parser parser(interface);
     parser.parseSettings("settings.ini", settings);
-    parser.parseScene("scene.json", objects, lights);
+    parser.parseScene("scene.json", camera, objects, lights);
     
-    Renderer renderer(interface, {0, 0, 0}, {0, 0, 0}, objects, lights);
+    Renderer renderer(interface, camera, objects, lights);
     renderer.render();
     
     if (!settings.save_render) { while (interface.getChar() != 'q') continue; return 0; }
@@ -55,8 +56,10 @@ int main(int argc, const char *argv[]) {
             renderer.renderInfo();
         } else if (c == 's') interface.saveImage("output.png", buffer);
         else if (c == 'r') {
-//            parser.parseSettings("settings.ini", settings);
-//            parser.parseScene("scene.json", objects, lights);
+            objects.clear();
+            lights.clear();
+            parser.parseSettings("settings.ini", settings);
+            parser.parseScene("scene.json", camera, objects, lights);
             renderer.render();
         }
     }

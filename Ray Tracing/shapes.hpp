@@ -106,14 +106,17 @@ public:
 
 class Triangle {
 private:
-    Vector3 v0, v0v1, v0v2, normal;
-    float height;
+    bool vn, tc;
+    Vector3 v0, v0v1, v0v2;
+    array<TCoords, 3> textures;
+    array<Vector3, 3> normals;
+    Material &material;
     
 public:
-    explicit Triangle(array<Vector3, 3>);
-    Vector3 getNormal() const;
-    Color getTexture(const Material &, Vector3) const;
-    float intersect(Vector3, Vector3) const;
+    explicit Triangle(array<Vector3, 3>, array<TCoords, 3>, array<Vector3, 3>, Material &);
+    Vector3 getNormal(TCoords) const;
+    Color getTexture(TCoords) const;
+    Hit intersect(Vector3, Vector3) const;
     Info getInfo() const;
 };
 
@@ -124,7 +127,7 @@ private:
     Cuboid bounds;
     
 public:
-    Object(vector<array<Vector3, 3>>, Vector3, float, Vector3, Material);
+    Object(vector<array<Vector3, 3>>, vector<array<TCoords, 3>>, vector<array<Vector3, 3>>, Vector3, float, Vector3, Material);
     Hit intersect(Vector3, Vector3) const;
     Info getInfo() const;
 };

@@ -18,12 +18,13 @@ class Camera {
 private:
     Vector3 position;
     Matrix3x3 rotation;
-    float width, height;
+    int width, height;
     float fovFactor;
     
 public:
     Camera();
-    Camera(Vector3, Vector3, float, float);
+    Camera(Vector3, Vector3, float, float, float);
+    void getDimensions(int, int);
     Vector3 getPosition();
     Vector3 getRay(int, int);
 };
