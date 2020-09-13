@@ -146,10 +146,10 @@ Color Parser::parseColor(string s) {
 Shader Parser::parseShader(json j) {
     if (!j.is_null()) {
         switch (::hash(j.value("type", "").c_str())) {
-            case "color"_h: return [color = parseColor(j.value("color", ""))](TCoords t) { return color; };
+            case "color"_h: return [color = parseColor(j.value("value", ""))](TCoords t) { return color; };
             case "image"_h: {
                 Buffer buffer;
-                if (!interface.loadImage(j.value("name", "image.png"), buffer)) interface.log("Couldn't open image");
+                if (!interface.loadImage(j.value("value", "image.png"), buffer)) interface.log("Couldn't open image");
                 return [image = Image(buffer)](TCoords t) { return image(t); };
             }
             case "checkerboard"_h: return [checkerboard = Checkerboard(j.value("scale", 2), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](TCoords t) { return checkerboard(t); };
@@ -157,12 +157,15 @@ Shader Parser::parseShader(json j) {
             case "noise"_h: return [noise = Noise(j.value("scale", 1), j.value("seed", 0), parseColor(j.value("primary", "")))](TCoords t) { return noise(t); };
                 
             case "named"_h: {
-                if (!j["name"].is_string()) break;
-                string name = j["name"];
+                if (!j["value"].is_string()) break;
+                string name = j["value"];
                 if (shaders.find(name) == shaders.end()) break;
                 return shaders[name];
             }
-                
+            
+            case "grayscale"_h:
+                if (!j["value"].is_object()) break;
+                return [shader = parseShader(j["value"])](TCoords t) { return Color::White * shader(t).value(); };
             case "negate"_h:
                 if (!j["value"].is_object()) break;
                 return [shader = parseShader(j["value"])](TCoords t) { return -shader(t); };

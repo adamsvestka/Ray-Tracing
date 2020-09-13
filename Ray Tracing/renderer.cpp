@@ -43,10 +43,7 @@ inline Color getPixel(Intersection data, int mode) {
     }
 }
 
-Renderer::Renderer(NativeInterface &display, Camera &camera, vector<Shape *> &objects, vector<Light *> &lights) : display(display), camera(camera), objects(objects), lights(lights) {
-    display.getDimensions(width, height);
-    camera.getDimensions(width, height);
-}
+Renderer::Renderer(NativeInterface &display, Camera &camera, vector<Shape *> &objects, vector<Light *> &lights) : display(display), camera(camera), objects(objects), lights(lights) {}
 
 // MARK: - Preprocessing
 vector<vector<Intersection>> Renderer::preRender() {
@@ -79,7 +76,7 @@ vector<vector<Input>> Renderer::processPreRender(const vector<vector<Intersectio
     if (!settings.preprocess) {
         region_count = regions_x * regions_y;
         return processed;
-    } else region_count = 1;
+    } else region_count = 0;
     
     vector<vector<vector<float>>> depth_nodes = {{{0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}, {0.1}}};
     vector<vector<vector<float>>> edge_nodes = {{{-0.5}, {-1.5}, {-2.5}, {-3.5}, {0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5}, {-4.5}, {-5.5}, {-6.5}, {-7.5}}, {{0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}, {0.5}}};
@@ -180,7 +177,11 @@ void Renderer::render() {
     start = chrono::high_resolution_clock::now();
     
     // Reset
+    display.getDimensions(width, height);
+    camera.getDimensions(width, height);
+    
     resetPosition();
+    
     for (const auto &object : objects) info += object->getInfo();
     if (settings.save_render) result = vector<Buffer>(RenderTypes, Buffer(width, vector<Color>(height, Color::Black)));
     

@@ -137,7 +137,7 @@ Matrix3x3 Matrix3x3::RotationMatrixZ(float c) {
 };
 
 Matrix3x3 Matrix3x3::RotationMatrix(float yaw, float pitch, float roll) {
-    return RotationMatrixX(roll) * RotationMatrixY(pitch) * RotationMatrixZ(yaw);
+    return RotationMatrixX(yaw) * RotationMatrixY(pitch) * RotationMatrixZ(roll);
 };
 
 float Matrix3x3::operator()(const int i, const int j) const {
