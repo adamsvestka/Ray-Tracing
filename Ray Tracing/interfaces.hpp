@@ -55,7 +55,7 @@ public:
     virtual bool loadImage(string, Buffer &) = 0;
     virtual bool saveImage(string, const Buffer &) = 0;
     
-    virtual void log(string) = 0;
+    virtual void log(const string &) = 0;
 };
 
 #ifndef __EMSCRIPTEN__
@@ -102,7 +102,7 @@ public:
     bool loadImage(string, Buffer &);
     bool saveImage(string, const Buffer &);
     
-    void log(string);
+    void log(const string &);
 };
 
 #else
@@ -144,7 +144,7 @@ public:
     bool loadImage(string, Buffer &);
     bool saveImage(string, const Buffer &);
     
-    void log(string);
+    void log(const string &);
     
     static EM_BOOL key_callback(int, const EmscriptenKeyboardEvent *, void *);
     void push_key(int);

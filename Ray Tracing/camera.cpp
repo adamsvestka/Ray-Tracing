@@ -12,6 +12,7 @@ Camera::Camera() {
     position = Vector3::Zero;
     rotation = Matrix3x3::Identity;
     width = height = 0;
+    fovFactor = 1;
 }
 
 Camera::Camera(Vector3 position, Vector3 angles, float width, float height, float fov) {

@@ -44,7 +44,7 @@ private:
     void parseOBJ(string, vector<array<Vector3, 3>> &, vector<array<TCoords, 3>> &, vector<array<Vector3, 3>> &);
     
 public:
-    Parser(NativeInterface &);
+    explicit Parser(NativeInterface &);
     void parseSettings(string, Settings &);
     void parseScene(string, Camera &, vector<Shape *> &, vector<Light *> &);
 };

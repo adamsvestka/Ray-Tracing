@@ -217,7 +217,7 @@ Info Plane::getInfo() const {
 /// @param vertices Vector3{x, y, z}[3]
 Triangle::Triangle(array<Vector3, 3> vertices, array<TCoords, 3> textures, array<Vector3, 3> normals, Material &material) : v0(vertices[0]), v0v1(vertices[1] - vertices[0]), v0v2(vertices[2] - vertices[0]), textures(textures), normals(normals), material(material) {
     tc = textures[0] == textures[1] && textures[0] == textures[2];
-    if ((vn = normals[0] == Vector3::Zero)) this->normals[0] = v0v1.cross(v0v2).normal();
+    if ((vn = (normals[0] == Vector3::Zero))) this->normals[0] = v0v1.cross(v0v2).normal();
 }
 
 Hit Triangle::intersect(Vector3 origin, Vector3 direction) const {

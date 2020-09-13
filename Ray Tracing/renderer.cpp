@@ -43,7 +43,9 @@ inline Color getPixel(Intersection data, int mode) {
     }
 }
 
-Renderer::Renderer(NativeInterface &display, Camera &camera, vector<Shape *> &objects, vector<Light *> &lights) : display(display), camera(camera), objects(objects), lights(lights) {}
+Renderer::Renderer(NativeInterface &display, Camera &camera, vector<Shape *> &objects, vector<Light *> &lights) : display(display), camera(camera), objects(objects), lights(lights) {
+    width = height = 0;
+}
 
 // MARK: - Preprocessing
 vector<vector<Intersection>> Renderer::preRender() {

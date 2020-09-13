@@ -239,7 +239,7 @@ bool X11Interface::saveImage(string filename, const Buffer &buffer) {
     return false;
 }
 
-void X11Interface::log(string message) {
+void X11Interface::log(const string &message) {
     cout << message << endl;
 }
 
@@ -468,7 +468,7 @@ bool WASMInterface::saveImage(string, const Buffer &) {
     return false;
 }
 
-void WASMInterface::log(string message) {
+void WASMInterface::log(const string &message) {
     emscripten_console_log(message.c_str());
     hud.set("innerText", message);
     refresh();
