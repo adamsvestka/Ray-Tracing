@@ -261,12 +261,15 @@ WASMInterface::WASMInterface() {
     window = val::global("window");
     document = val::global("document");
     
-    width = window["innerWidth"].as<int>();
-    height = window["innerHeight"].as<int>();
+    float ratio = window["devicePixelRatio"].as<float>();
+    width = window["innerWidth"].as<int>() * ratio;
+    height = window["innerHeight"].as<int>() * ratio;
     
     canvas = document.call<val>("createElement", string("canvas"));
     canvas.set("width", width);
     canvas.set("height", height);
+    canvas["style"].set("width", to_string(width / ratio) + "px");
+    canvas["style"].set("height", to_string(height / ratio) + "px");
     document["body"].call<void>("append", canvas);
     
     context = canvas.call<val>("getContext", string("2d"));
