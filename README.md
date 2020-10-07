@@ -167,7 +167,25 @@ Material: {
 - `gray` lowercase color name
 
 Supported colors:
-        `white`, `lightGray`, `gray`, `darkGray`, `black`,
-        `red`, `orange`, `yellow`, `pink`, `brown`, `mocha`, `asparagus`,
-        `lime`, `green`, `moss`, `fern`,
-        `blue`, `cyan`, `magenta`, `teal`, `indigo`, `purple`
+        ![white](https://via.placeholder.com/10/ffffff/000000?text=+) `white`,
+        ![lightGray](https://via.placeholder.com/10/ffffff/000000?text=+) `lightGray`,
+        ![gray](https://via.placeholder.com/10/8e8e93/000000?text=+) `gray`,
+        ![darkGray](https://via.placeholder.com/10/2f2f31/000000?text=+) `darkGray`,
+        ![black](https://via.placeholder.com/10/000000/000000?text=+) `black`,
+        ![red](https://via.placeholder.com/10/ff3b30/000000?text=+) `red`,
+        ![orange](https://via.placeholder.com/10/ff9500/000000?text=+) `orange`,
+        ![yellow](https://via.placeholder.com/10/ffcc00/000000?text=+) `yellow`,
+        ![pink](https://via.placeholder.com/10/ff2d55/000000?text=+) `pink`,
+        ![brown](https://via.placeholder.com/10/a2845e/000000?text=+) `brown`,
+        ![mocha](https://via.placeholder.com/10/945200/000000?text=+) `mocha`,
+        ![asparagus](https://via.placeholder.com/10/929000/000000?text=+) `asparagus`,
+        ![lime](https://via.placeholder.com/10/8efa00/000000?text=+) `lime`,
+        ![green](https://via.placeholder.com/10/28cd41/000000?text=+) `green`,
+        ![moss](https://via.placeholder.com/10/009051/000000?text=+) `moss`,
+        ![fern](https://via.placeholder.com/10/4f8f00/000000?text=+) `fern`,
+        ![blue](https://via.placeholder.com/10/007aff/000000?text=+) `blue`,
+        ![cyan](https://via.placeholder.com/10/00fdff/000000?text=+) `cyan`,
+        ![magenta](https://via.placeholder.com/10/ff40ff/000000?text=+) `magenta`,
+        ![teal](https://via.placeholder.com/10/5ac8fa/000000?text=+) `teal`,
+        ![indigo](https://via.placeholder.com/10/5856d6/000000?text=+) `indigo`,
+        ![purple](https://via.placeholder.com/10/af52de/000000?text=+) `purple`
