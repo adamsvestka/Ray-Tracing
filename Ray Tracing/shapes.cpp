@@ -8,22 +8,22 @@
 
 #include "shapes.hpp"
 
-void Info::operator+=(const Info &i) {
+void ObjectInfo::operator+=(const ObjectInfo &i) {
     vertices += i.vertices;
     faces += i.faces;
     objects += i.objects;
 }
 
-Shape::Shape(Vector3 position, Vector3 angles, Material material) : center(position), material(material) {
+Object::Object(Vector3 position, Vector3 angles, Material material) : center(position), material(material) {
     rotation = Matrix3x3::RotationMatrix(angles.x * (float)M_PI / 180, angles.y * (float)M_PI / 180, angles.z * (float)M_PI / 180);
     Irotation = rotation.inverse();
     if (this->material.transparent) this->material.Ks = 1;
 }
-Vector3 Shape::getCenter() const { return center; };
-Matrix3x3 Shape::getRotation() const { return rotation; }
-Matrix3x3 Shape::getInverseRotation() const { return Irotation; }
-Vector3 Shape::toObjectSpace(Vector3 point) const { return Irotation * (point - center); };
-Vector3 Shape::toWorldSpace(Vector3 _point) const { return rotation * _point + center; };
+Vector3 Object::getCenter() const { return center; };
+Matrix3x3 Object::getRotation() const { return rotation; }
+Matrix3x3 Object::getInverseRotation() const { return Irotation; }
+Vector3 Object::toObjectSpace(Vector3 point) const { return Irotation * (point - center); };
+Vector3 Object::toWorldSpace(Vector3 _point) const { return rotation * _point + center; };
 
 
 // MARK: - Sphere
@@ -31,12 +31,12 @@ Vector3 Shape::toWorldSpace(Vector3 _point) const { return rotation * _point + c
 /// @param diameter float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Sphere::Sphere(Vector3 position, float diameter, Vector3 angles, Material material) : Shape(position, angles, material) {
+Sphere::Sphere(Vector3 position, float diameter, Vector3 angles, Material material) : Object(position, angles, material) {
     this->radius = diameter / 2.f;
     this->radius2 = pow(radius, 2.f);
 }
 
-Hit Sphere::intersect(Vector3 origin, Vector3 direction) const {
+ObjectHit Sphere::intersect(Vector3 origin, Vector3 direction) const {
     float t0, t1;
     
     Vector3 path = center - origin;
@@ -61,7 +61,7 @@ Hit Sphere::intersect(Vector3 origin, Vector3 direction) const {
 }
 
 Vector3 Sphere::getNormal(Vector3 point) const {
-    return rotation * toObjectSpace(point).normal();
+    return rotation * toObjectSpace(point).normalized();
 }
 
 Color Sphere::getTexture(Vector3 point) const {
@@ -73,7 +73,7 @@ Color Sphere::getTexture(Vector3 point) const {
     return material.texture({u, v});
 }
 
-Info Sphere::getInfo() const {
+ObjectInfo Sphere::getInfo() const {
     return {0, 1, 1};
 }
 
@@ -91,7 +91,7 @@ Cuboid::Cuboid(Vector3 position, float size, Vector3 angles, Material material) 
 /// @param size_z float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Cuboid::Cuboid(Vector3 position, float size_x, float size_y, float size_z, Vector3 angles, Material material) : Shape(position, angles, material) {
+Cuboid::Cuboid(Vector3 position, float size_x, float size_y, float size_z, Vector3 angles, Material material) : Object(position, angles, material) {
     this->size = Vector3{size_x, size_y, size_z};
     this->vmin = position - size / 2.f;
     this->vmax = position + size / 2.f;
@@ -101,13 +101,13 @@ Cuboid::Cuboid(Vector3 position, float size_x, float size_y, float size_z, Vecto
 /// @param corner_max Vector3{x, y, z}
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Cuboid::Cuboid(Vector3 corner_min, Vector3 corner_max, Vector3 angles, Material material) : Shape((corner_min + corner_max) / 2, angles, material) {
+Cuboid::Cuboid(Vector3 corner_min, Vector3 corner_max, Vector3 angles, Material material) : Object((corner_min + corner_max) / 2, angles, material) {
     this->size = corner_max - corner_min;
     this->vmin = corner_min;
     this->vmax = corner_max;
 }
 
-Hit Cuboid::intersect(Vector3 origin, Vector3 direction) const {
+ObjectHit Cuboid::intersect(Vector3 origin, Vector3 direction) const {
     Vector3 _origin = toObjectSpace(origin) + center;
     Vector3 _direction = Irotation * direction;
     
@@ -138,8 +138,8 @@ Hit Cuboid::intersect(Vector3 origin, Vector3 direction) const {
 Vector3 Cuboid::getNormal(Vector3 point) const {
     const Vector3 _point = toObjectSpace(point);
     
-    if (abs(_point.x) > abs(_point.y) && abs(_point.x) > abs(_point.z)) return rotation * Vector3{_point.x > 0 ? 1.f : -1.f, 0, 0};
-    else if (abs(_point.y) > abs(_point.z)) return rotation * Vector3{0, _point.y > 0 ? 1.f : -1.f, 0};
+    if (abs(_point.x / size.x) > abs(_point.y / size.y) && abs(_point.x / size.x) > abs(_point.z / size.z)) return rotation * Vector3{_point.x > 0 ? 1.f : -1.f, 0, 0};
+    else if (abs(_point.y / size.y) > abs(_point.z / size.z)) return rotation * Vector3{0, _point.y > 0 ? 1.f : -1.f, 0};
     else return rotation * Vector3{0, 0, _point.z > 0 ? 1.f : -1.f};
 }
 
@@ -161,7 +161,7 @@ Color Cuboid::getTexture(Vector3 point) const {
     return material.texture({u, v});
 }
 
-Info Cuboid::getInfo() const {
+ObjectInfo Cuboid::getInfo() const {
     return {8, 6, 1};
 }
 
@@ -172,12 +172,12 @@ Info Cuboid::getInfo() const {
 /// @param size_y float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Plane::Plane(Vector3 position, float size_x, float size_y, Vector3 angles, Material material) : Shape(position, angles, material) {
+Plane::Plane(Vector3 position, float size_x, float size_y, Vector3 angles, Material material) : Object(position, angles, material) {
     this->size_x = size_x;
     this->size_y = size_y;
 }
 
-Hit Plane::intersect(Vector3 origin, Vector3 direction) const {
+ObjectHit Plane::intersect(Vector3 origin, Vector3 direction) const {
     Vector3 normal = getNormal(direction);
     float denom = normal * direction;
     
@@ -208,19 +208,19 @@ Color Plane::getTexture(Vector3 point) const {
     return material.texture({u, v});
 }
 
-Info Plane::getInfo() const {
+ObjectInfo Plane::getInfo() const {
     return {4, 2, 1};
 }
 
 
 // MARK: - Triangle
 /// @param vertices Vector3{x, y, z}[3]
-Triangle::Triangle(array<Vector3, 3> vertices, array<TCoords, 3> textures, array<Vector3, 3> normals, Material &material) : v0(vertices[0]), v0v1(vertices[1] - vertices[0]), v0v2(vertices[2] - vertices[0]), textures(textures), normals(normals), material(material) {
+Triangle::Triangle(array<Vector3, 3> vertices, array<VectorUV, 3> textures, array<Vector3, 3> normals, Material &material) : v0(vertices[0]), v0v1(vertices[1] - vertices[0]), v0v2(vertices[2] - vertices[0]), textures(textures), normals(normals), material(material) {
     tc = textures[0] == textures[1] && textures[0] == textures[2];
-    if ((vn = (normals[0] == Vector3::Zero))) this->normals[0] = v0v1.cross(v0v2).normal();
+    if ((vn = (normals[0] == Vector3::Zero))) this->normals[0] = v0v1.cross(v0v2).normalized();
 }
 
-Hit Triangle::intersect(Vector3 origin, Vector3 direction) const {
+ObjectHit Triangle::intersect(Vector3 origin, Vector3 direction) const {
     Vector3 pvec = direction.cross(v0v2);
     float det = v0v1 * pvec;
 
@@ -241,21 +241,21 @@ Hit Triangle::intersect(Vector3 origin, Vector3 direction) const {
     return {t, [=] { return getNormal({u, v}); }, [=] { return getTexture({u, v}); }};
 }
 
-Vector3 Triangle::getNormal(TCoords t) const {
+Vector3 Triangle::getNormal(VectorUV t) const {
     if (vn) return normals[0];
     
     return normals[0] * (1 - t.getU() - t.getV()) + normals[1] * t.getU() + normals[2] * t.getV();
 }
 
-Color Triangle::getTexture(TCoords t) const {
+Color Triangle::getTexture(VectorUV t) const {
     if (tc) return material.texture({0, 0});
     
-    TCoords tex = textures[0] * (1 - t.getU() - t.getV()) + textures[1] * t.getU() + textures[2] * t.getV();
+    VectorUV tex = textures[0] * (1 - t.getU() - t.getV()) + textures[1] * t.getU() + textures[2] * t.getV();
     
     return material.texture(tex);
 }
 
-Info Triangle::getInfo() const {
+ObjectInfo Triangle::getInfo() const {
     return {3, 1, 1};
 }
 
@@ -268,7 +268,7 @@ Info Triangle::getInfo() const {
 /// @param scale float
 /// @param angles Vector3{x, y, z}
 /// @param material Material{texture, n, Ks, ior, transparent}
-Object::Object(vector<array<Vector3, 3>> vertices, vector<array<TCoords, 3>> textures, vector<array<Vector3, 3>> normals, Vector3 position, float scale, Vector3 angles, Material material) : Shape(position, angles, material), bounds({}, {}, {}, {}) {
+Mesh::Mesh(vector<array<Vector3, 3>> vertices, vector<array<VectorUV, 3>> textures, vector<array<Vector3, 3>> normals, Vector3 position, float scale, Vector3 angles, Material material) : Object(position, angles, material), bounds({}, {}, {}, {}) {
     Vector3 vmin = Vector3::Zero;
     Vector3 vmax = Vector3::Zero;
     if (vertices.size() > 0) vmin = vmax = toWorldSpace(vertices[0][0] * scale);
@@ -284,13 +284,13 @@ Object::Object(vector<array<Vector3, 3>> vertices, vector<array<TCoords, 3>> tex
             else if (vertex.z > vmax.z) vmax.z = vertex.z;
         }
         
-        array<TCoords, 3> texture{TCoords::Zero, TCoords::Zero, TCoords::Zero};
+        array<VectorUV, 3> texture{VectorUV::Zero, VectorUV::Zero, VectorUV::Zero};
         if (i < textures.size()) texture = textures[i];
         
         array<Vector3, 3> normal{Vector3::Zero, Vector3::Zero, Vector3::Zero};
         if (i < normals.size()) {
             normal = normals[i];
-            for (auto &norm : normal) norm = (rotation * norm).normal();
+            for (auto &norm : normal) norm = (rotation * norm).normalized();
         }
         
         this->triangles.push_back(Triangle(triangle, texture, normal, this->material));
@@ -298,14 +298,14 @@ Object::Object(vector<array<Vector3, 3>> vertices, vector<array<TCoords, 3>> tex
     bounds = Cuboid(vmin, vmax, Vector3::Zero, {});
 }
 
-Hit Object::intersect(Vector3 origin, Vector3 direction) const {
+ObjectHit Mesh::intersect(Vector3 origin, Vector3 direction) const {
     if (bounds.intersect(origin, direction).distance < 0) return {-1};
     
     const Triangle *object = nullptr;
-    Hit best{(float)settings.max_render_distance, [] { return Vector3::Zero; }, [] { return Color::Black; }};
+    ObjectHit best{(float)settings.max_render_distance, [] { return Vector3::Zero; }, [] { return Color::Black; }};
     
     for (const auto &triangle : triangles) {
-        Hit hit = triangle.intersect(origin, direction);
+        ObjectHit hit = triangle.intersect(origin, direction);
         if (hit.distance < best.distance && hit.distance > 0) {
             object = &triangle;
             best = hit;
@@ -317,6 +317,6 @@ Hit Object::intersect(Vector3 origin, Vector3 direction) const {
     return best;
 }
 
-Info Object::getInfo() const {
+ObjectInfo Mesh::getInfo() const {
     return {(int)triangles.size() * 3, (int)triangles.size(), (int)triangles.size()};
 }

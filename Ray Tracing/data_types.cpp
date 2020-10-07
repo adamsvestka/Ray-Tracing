@@ -14,11 +14,11 @@ float Vector3::length() const {
     return sqrt(pow(x, 2) + pow(y, 2) + pow(z, 2));
 }
 
-Vector3 Vector3::normal() const {
+Vector3 Vector3::normalized() const {
     return this->operator/(length());
 }
 
-Color Vector3::toColor() const {
+Color Vector3::asColor() const {
     const float len = length();
     return Color(x / len, y / len, z / len);
 //    return Color(x > 0 ? x / len : -x / len, y > 0 ? y / len : -y / len, z > 0 ? z / len : -z / len);
@@ -174,17 +174,21 @@ Color::Color(float r, float g, float b) : r(r), g(g), b(b) {}
 
 Color::Color(int r, int g, int b) : r(r / 256.f), g(g / 256.f), b(b / 256.f) {}
 
-float Color::value() const {
+int Color::guard(float f) {
+    return clamp(f * 256.f, 0.f, 255.f);
+}
+
+float Color::asValue() const {
     return (r + g + b) / 3.f;
 }
 
-array<unsigned char, 3> Color::array() const {
-    return std::array<unsigned char, 3>{(unsigned char)clamp((this->r * 256.f), 0.f, 255.f), (unsigned char)clamp((this->g * 256.f), 0.f, 255.f), (unsigned char)clamp((this->b * 256.f), 0.f, 255.f)};
+array<unsigned char, 3> Color::cimg() const {
+    return std::array<unsigned char, 3>{(unsigned char)guard(r), (unsigned char)guard(g), (unsigned char)guard(b)};
 }
 
 string Color::css() const {
     stringstream ss;
-    ss << "rgb(" << r * 255 << ", " << g * 255 << ", " << b * 255 << ")";
+    ss << "rgb(" << guard(r) << ", " << guard(g) << ", " << guard(b) << ")";
     return ss.str();
 }
 
@@ -222,7 +226,16 @@ const Color Color::Indigo{88, 86, 214};
 const Color Color::Purple{175, 82, 222};
 
 Color::operator int() const {
-    return ((int)(fmin(fmax(r, 0.0), 1.0) * 255) << 16) + ((int)(fmin(fmax(g, 0.0), 1.0) * 255) << 8) + (int)(fmin(fmax(b, 0.0), 1.0) * 255);
+    return (guard(r) << 16) + (guard(g) << 8) + guard(b);
+}
+
+unsigned char Color::operator[](short i) const {
+    switch (i) {
+        case 0: return guard(r);
+        case 1: return guard(g);
+        case 2: return guard(b);
+    }
+    return 0;
 }
 
 bool Color::operator==(const Color c) const {
@@ -287,69 +300,69 @@ void Color::operator/=(Color c) {
 
 
 // MARK: - TCoords
-TCoords::TCoords() {
+VectorUV::VectorUV() {
     u = v = 0;
 }
 
-TCoords::TCoords(float u, float v) : u(u), v(v) {}
+VectorUV::VectorUV(float u, float v) : u(u), v(v) {}
 
-TCoords::TCoords(int u, int v) : u(u), v(v) {}
+VectorUV::VectorUV(int u, int v) : u(u), v(v) {}
 
-const TCoords TCoords::Zero{0, 0};
+const VectorUV VectorUV::Zero{0, 0};
 
-float TCoords::guard(float f) {
+float VectorUV::guard(float f) {
     return clamp(f, 0.f, nextafter(1.f, 0.f));
 }
 
-bool TCoords::operator==(const TCoords t) const {
+bool VectorUV::operator==(const VectorUV t) const {
     return this->u == t.u && this->v == t.v;
 }
 
-bool TCoords::operator!=(const TCoords t) const {
+bool VectorUV::operator!=(const VectorUV t) const {
     return this->u != t.u && this->v != t.v;
 }
 
-TCoords TCoords::operator+(const TCoords t) const {
-    return TCoords{this->u + t.u, this->v + t.v};
+VectorUV VectorUV::operator+(const VectorUV t) const {
+    return VectorUV{this->u + t.u, this->v + t.v};
 }
 
-TCoords TCoords::operator-(const TCoords t) const {
-    return TCoords{this->u - t.u, this->v - t.v};
+VectorUV VectorUV::operator-(const VectorUV t) const {
+    return VectorUV{this->u - t.u, this->v - t.v};
 }
 
-TCoords TCoords::operator-() const {
-    return TCoords{-this->u, -this->v};
+VectorUV VectorUV::operator-() const {
+    return VectorUV{-this->u, -this->v};
 }
 
-TCoords TCoords::operator*(const double n) const {
-    return TCoords{this->u * (float)n, this->v * (float)n};
+VectorUV VectorUV::operator*(const double n) const {
+    return VectorUV{this->u * (float)n, this->v * (float)n};
 }
 
-TCoords TCoords::operator*(const float n) const {
-    return TCoords{this->u * n, this->v * n};
+VectorUV VectorUV::operator*(const float n) const {
+    return VectorUV{this->u * n, this->v * n};
 }
 
-TCoords TCoords::operator*(const int n) const {
-    return TCoords{this->u * n, this->v * n};
+VectorUV VectorUV::operator*(const int n) const {
+    return VectorUV{this->u * n, this->v * n};
 }
-float TCoords::getU() const {
+float VectorUV::getU() const {
     return guard(u);
 }
 
-float TCoords::getV() const {
+float VectorUV::getV() const {
     return guard(v);
 }
 
-TCoords TCoords::operator/(const double n) const {
-    return TCoords{this->u / (float)n, this->v / (float)n};
+VectorUV VectorUV::operator/(const double n) const {
+    return VectorUV{this->u / (float)n, this->v / (float)n};
 }
 
-TCoords TCoords::operator/(const float n) const {
-    return TCoords{this->u / n, this->v / n};
+VectorUV VectorUV::operator/(const float n) const {
+    return VectorUV{this->u / n, this->v / n};
 }
 
-TCoords TCoords::operator/(const int n) const {
-    return TCoords{this->u / n, this->v / n};
+VectorUV VectorUV::operator/(const int n) const {
+    return VectorUV{this->u / n, this->v / n};
 }
 
 

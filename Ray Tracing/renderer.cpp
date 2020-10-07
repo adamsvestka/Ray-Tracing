@@ -9,15 +9,15 @@
 #include "renderer.hpp"
 
 // MARK: Select render_mode
-inline Color getPixel(Intersection data, int mode) {
+inline Color getPixel(RayIntersection data, int mode) {
     switch (mode) {
         case RENDER_COLOR: return data.texture;
         case RENDER_REFLECTION: return data.reflection;
         case RENDER_TRANSMISSION: return data.transmission;
         case RENDER_LIGHT: return data.hit ? data.light : Color::Black;
-        case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Color{255, 0, 0} : data.light) : Color::Black;
-        case RENDER_NORMALS: return data.hit ? data.normal.toColor() : Color::Black;
-        case RENDER_INORMALS: return data.hit ? -data.normal.toColor() : Color::Black;
+        case RENDER_SHADOWS: return data.hit ? (any_of(data.shadows.begin(), data.shadows.end(), [](bool b) { return b; }) ? Color(255, 0, 0) : data.light) : Color::Black;
+        case RENDER_NORMALS: return data.hit ? data.normal.asColor() : Color::Black;
+        case RENDER_INORMALS: return data.hit ? -data.normal.asColor() : Color::Black;
         case RENDER_DEPTH: return Color::White * (1 - data.distance / settings.max_render_distance);
         case RENDER_UNIQUE: { if (data.id < 0) return Color::Black;
             float hh, ff, p, q, t, v = 0.7, s = 1;
@@ -43,16 +43,16 @@ inline Color getPixel(Intersection data, int mode) {
     }
 }
 
-Renderer::Renderer(NativeInterface &display, Camera &camera, vector<Shape *> &objects, vector<Light *> &lights) : display(display), camera(camera), objects(objects), lights(lights) {
+Renderer::Renderer(NativeInterface &display, Camera &camera, vector<Object *> &objects, vector<Light *> &lights) : display(display), camera(camera), objects(objects), lights(lights) {
     width = height = 0;
 }
 
 // MARK: - Preprocessing
-vector<vector<Intersection>> Renderer::preRender() {
+vector<vector<RayIntersection>> Renderer::preRender() {
     const int regions_x = ceil((float)width / settings.render_region_size);
     const int regions_y = ceil((float)height / settings.render_region_size);
     
-    vector<vector<Intersection>> buffer(regions_x, vector<Intersection>(regions_y));
+    vector<vector<RayIntersection>> buffer(regions_x, vector<RayIntersection>(regions_y));
     if (!settings.preprocess) return buffer;
     
     for (int x = 0; x < regions_x; x++) {
@@ -70,11 +70,11 @@ vector<vector<Intersection>> Renderer::preRender() {
     return buffer;
 }
 
-vector<vector<Input>> Renderer::processPreRender(const vector<vector<Intersection>> &buffer) {
+vector<vector<RayInput>> Renderer::processPreRender(const vector<vector<RayIntersection>> &buffer) {
     const int regions_x = (int)buffer.size();
     const int regions_y = (int)buffer[0].size();
     
-    vector<vector<Input>> processed(buffer.size(), vector<Input>(buffer[0].size(), Input{true, 0, true, true, true, true, vector<bool>(lights.size(), true)}));
+    vector<vector<RayInput>> processed(buffer.size(), vector<RayInput>(buffer[0].size(), RayInput{true, 0, true, true, true, true, vector<bool>(lights.size(), true)}));
     if (!settings.preprocess) {
         region_count = regions_x * regions_y;
         return processed;
@@ -154,7 +154,7 @@ void Renderer::renderInfo() {
     display.refresh();
 }
 
-RenderRegion Renderer::renderRegion(RenderRegion region, const Input &mask, const Intersection &estimate) {
+RenderRegion Renderer::renderRegion(RenderRegion region, const RayInput &mask, const RayIntersection &estimate) {
     for (int x = 0; x < region.w; x++) {
         for (int y = 0; y < region.h; y++) {
             auto ray = castRay(camera.getPosition(), camera.getRay(region.x + x, region.y + y), objects, lights, mask);
@@ -289,13 +289,13 @@ void Renderer::resetPosition() {
     }
     
     timer = Timer();
-    info = Info();
+    info = ObjectInfo();
     region_current = 0;
     
     generateRange();
 }
 
-bool Renderer::next(const vector<vector<Input>> &mask) {
+bool Renderer::next(const vector<vector<RayInput>> &mask) {
     switch (settings.render_pattern) {
         case PATTERN_VERTICAL: // MARK: Vertical
             do {

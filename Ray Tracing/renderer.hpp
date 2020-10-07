@@ -52,31 +52,31 @@ class Renderer {
 private:
     NativeInterface &display;
     Camera &camera;
-    vector<Shape *> &objects;
+    vector<Object *> &objects;
     vector<Light *> &lights;
     
     int width, height, x, y;
     int region_count, region_current;
     chrono::steady_clock::time_point start, end;
     Timer timer;
-    Info info;
+    ObjectInfo info;
     
     int r, l, i;
     int minX, maxX, minY, maxY;
     vector<Buffer> result;
     
     
-    vector<vector<Intersection>> preRender();
-    vector<vector<Input>> processPreRender(const vector<vector<Intersection>> &);
+    vector<vector<RayIntersection>> preRender();
+    vector<vector<RayInput>> processPreRender(const vector<vector<RayIntersection>> &);
     
-    RenderRegion renderRegion(RenderRegion, const Input &, const Intersection &);
+    RenderRegion renderRegion(RenderRegion, const RayInput &, const RayIntersection &);
     
     void generateRange();
     void resetPosition();
-    bool next(const vector<vector<Input>> &);
+    bool next(const vector<vector<RayInput>> &);
     
 public:
-    Renderer(NativeInterface &, Camera &, vector<Shape *> &, vector<Light *> &);
+    Renderer(NativeInterface &, Camera &, vector<Object *> &, vector<Light *> &);
     
     void renderInfo();
     void render();

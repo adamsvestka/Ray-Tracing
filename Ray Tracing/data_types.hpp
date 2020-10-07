@@ -27,8 +27,8 @@ struct Vector3 {
     float x, y, z;
     
     float length() const;
-    Vector3 normal() const;
-    Color toColor() const;
+    Vector3 normalized() const;
+    Color asColor() const;
     Vector3 cross(const Vector3) const;
     
     const static Vector3 Zero, One, North, South, East, West, Up, Down;
@@ -78,8 +78,10 @@ struct Color {
     Color(float, float, float);
     Color(int, int, int);
     
-    float value() const;
-    array<unsigned char, 3> array() const;
+    inline static int guard(float f);
+    
+    float asValue() const;
+    array<unsigned char, 3> cimg() const;
     string css() const;
     Color light() const;
     Color dark() const;
@@ -90,6 +92,7 @@ struct Color {
         Blue, Cyan, Magenta, Teal, Indigo, Purple;
     
     operator int() const;
+    unsigned char operator[](short) const;
     bool operator==(const Color) const;
     Color operator+(const Color) const;
     Color operator-(const Color) const;
@@ -108,28 +111,28 @@ struct Color {
 };
 
 
-struct TCoords {
+struct VectorUV {
     float u, v;
     
-    TCoords();
-    TCoords(float, float);
-    TCoords(int, int);
+    VectorUV();
+    VectorUV(float, float);
+    VectorUV(int, int);
     
     inline static float guard(float f);
     
-    const static TCoords Zero;
+    const static VectorUV Zero;
     
-    bool operator==(const TCoords) const;
-    bool operator!=(const TCoords) const;
-    TCoords operator+(const TCoords) const;
-    TCoords operator-(const TCoords) const;
-    TCoords operator-() const;
-    TCoords operator*(const double) const;
-    TCoords operator*(const float) const;
-    TCoords operator*(const int) const;
-    TCoords operator/(const double) const;
-    TCoords operator/(const float) const;
-    TCoords operator/(const int) const;
+    bool operator==(const VectorUV) const;
+    bool operator!=(const VectorUV) const;
+    VectorUV operator+(const VectorUV) const;
+    VectorUV operator-(const VectorUV) const;
+    VectorUV operator-() const;
+    VectorUV operator*(const double) const;
+    VectorUV operator*(const float) const;
+    VectorUV operator*(const int) const;
+    VectorUV operator/(const double) const;
+    VectorUV operator/(const float) const;
+    VectorUV operator/(const int) const;
     
     float getU() const;
     float getV() const;

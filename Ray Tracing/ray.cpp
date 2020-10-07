@@ -29,27 +29,32 @@ void Timer::operator+=(const Timer t) {
     for (short i = 0; i < Timer::c; i++) times[i] += t.times[i];
 }
 
-// MARK: Intersection
-Color Intersection::shaded() const {
+// MARK: RayIntersection
+Color RayIntersection::shaded() {
     if (!hit) return settings.background_color;
     else {
-        Color lighting = Color::Black;
-        for (int i = 0; i < shadows.size(); i++) if (!shadows[i]) lighting += texture * diffuse[i] * (1 - object->material.Ks) + specular[i] * object->material.Ks;
-        return (ambient * (1 - object->material.Ks) + lighting) * !object->material.transparent + reflection * object->material.Ks * kr + transmission * object->material.transparent * (1 - kr);
+        light = Color::Black;
+        for (int i = 0; i < shadows.size(); i++) if (!shadows[i]) light += texture * diffuse[i] * (1 - object->material.Ks) + specular[i] * object->material.Ks;
+        return light * !object->material.transparent + reflection * object->material.Ks * kr + transmission * object->material.transparent * (1 - kr);
     }
     
-    // I = Ka + Ke + sum(Vi * Li * (Kd * max(li . n, 0) + Ks * (max(hi . n, 0))) ^ s) + Ks * Ir + Kt * It;
+    //     .......   ..   ______________–––––––lambert––––––________–––––phong–––––_____________   ____________   __________________
+    // I = Kd * Ka + Ke + sum(Vi * Li * (Kd * max(li . N, 0) + Ks * (max(hi . N, 0)) ^ n)) * !Kt + Ir * Ks * kr + It * Kt * (1 - kr);
     /*
-     Ka ... ambient (environment) lighting
+   x Ka ... ambient (environment) lighting
    - Ke ... emission lighting
-     Vi ... is not in shadow?
-     Li ... light value
-     Kd ... object diffuse ratio
-     Ks ... object specular (reflectivity) ratio
-     s  ... shininess
-     Ir ... recursive reflection
-     Kt ... object transmission ratio
-     It ... recursive transmission
+   / Vi ... clear line of sight to light?
+   | Li ... light value
+   | Kd ... object diffuse ratio
+   | Ks ... object specular (reflectance) ratio
+   | N  ... surface normal
+   | li ... light direction
+   | hi ... camera direction
+   \ n  ... shininess
+     Ir ... compound reflection
+     kr ... fresnel ratio
+     It ... compound transmission
+     Kt ... object transparent?
      */
 }
 
@@ -85,12 +90,12 @@ Vector3 refract(Vector3 direction, Vector3 normal, float ior) {
     }
     float eta = etai / etat;
     float k = 1 - eta * eta * (1 - cosi * cosi);
-    return (k < 0 ? Vector3::Zero : direction * eta + normal * (eta * cosi - sqrt(k))).normal();
+    return (k < 0 ? Vector3::Zero : direction * eta + normal * (eta * cosi - sqrt(k))).normalized();
 }
 
 // MARK: castRay
-Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &objects, const vector<Light *> &lights, Input mask) {
-    Intersection info;
+RayIntersection castRay(Vector3 origin, Vector3 direction, const vector<Object *> &objects, const vector<Light *> &lights, RayInput mask) {
+    RayIntersection info;
     
     // MARK: Hit detection
     info.timer = Timer();
@@ -103,14 +108,13 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     info.kr = 1;
     info.shadows = vector<bool>(lights.size(), false);
     info.diffuse = info.specular = valarray<Color>(Color::Black, objects.size());
-    info.ambient = settings.ambient_lighting;
     info.light = info.texture = info.reflection = info.transmission = Color::Black;
     
     if (++mask.bounce_count > settings.max_light_bounces) return info;
     
-    Hit hit;
+    ObjectHit hit;
     for (const auto &object : objects) {
-        Hit temp = object->intersect(origin, direction);
+        ObjectHit temp = object->intersect(origin, direction);
         if (temp.distance > 0 && temp.distance < info.distance && (mask.lighting || !object->material.transparent)) {
             info.object = object;
             info.distance = temp.distance;
@@ -144,7 +148,8 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
             if (info.object->material.Ks > 0) info.specular[i] = light->getSpecularValue(info.position, info.normal, direction, info.object->material.n);
             
             // Check clear line of sight to light
-            if (mask.shadows[i] && light->shadow && castRay(info.position, light->getVector(info.position).normal(), objects, lights, shadow_mask).hit) {
+            const auto vector_to_light = light->getVector(info.position);
+            if (mask.shadows[i] && light->shadow && castRay(info.position, vector_to_light.normalized(), objects, lights, shadow_mask).distance < vector_to_light.length()) {
                 info.shadows[i] = true;
                 continue;
             }
@@ -160,7 +165,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     reflect_mask.shadows = vector<bool>(lights.size(), true);
     
     if (mask.reflections && (info.object->material.Ks > 0 || info.object->material.transparent)) {
-        const auto ray = castRay(info.position, reflect(direction, info.normal), objects, lights, reflect_mask);
+        auto ray = castRay(info.position, reflect(direction, info.normal), objects, lights, reflect_mask);
         info.reflection = ray.shaded();
     }
     
@@ -168,7 +173,7 @@ Intersection castRay(Vector3 origin, Vector3 direction, const vector<Shape *> &o
     info.timer();
     if (info.object->material.transparent) {    // Nested ifs to fill info.kr but not waste computation
         if ((info.kr = fresnel(direction, info.normal, info.object->material.ior)) < 1 && mask.transmission) {
-            const auto ray = castRay(info.position, refract(direction, info.normal, info.object->material.ior), objects, lights, reflect_mask);
+            auto ray = castRay(info.position, refract(direction, info.normal, info.object->material.ior), objects, lights, reflect_mask);
             info.transmission = ray.shaded();
         }
     }

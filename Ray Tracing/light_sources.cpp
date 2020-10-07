@@ -25,7 +25,7 @@ Vector3 PointLight::getVector(Vector3 point) {
 Color PointLight::getDiffuseValue(Vector3 point, Vector3 normal) {
     Vector3 vector_to_light = getVector(point);
     
-    const float cosine_term = vector_to_light.normal() * normal;
+    const float cosine_term = vector_to_light.normalized() * normal;
     
     return color * intensity * (float)(fmax(cosine_term, 0.f) / (vector_to_light * vector_to_light * 4 * M_PI));
 }
@@ -33,9 +33,9 @@ Color PointLight::getDiffuseValue(Vector3 point, Vector3 normal) {
 Color PointLight::getSpecularValue(Vector3 point, Vector3 normal, Vector3 direction, int n) {
     Vector3 vector_to_light = getVector(point);
     
-    const float cosine_term = vector_to_light.normal() * normal;
+    const float cosine_term = vector_to_light.normalized() * normal;
     
-    return color * pow(intensity, 0.3) * (pow(fmax(-(normal * (cosine_term * 2) - vector_to_light.normal()) * direction, 0.f), n));
+    return color * pow(intensity, 0.3) * (pow(fmax(-(normal * (cosine_term * 2) - vector_to_light.normalized()) * direction, 0.f), n));
 }
 
 
@@ -55,7 +55,7 @@ Vector3 LinearLight::getVector(Vector3 point) {
 Color LinearLight::getDiffuseValue(Vector3 point, Vector3 normal) {
     Vector3 vector_to_light = getVector(point);
     
-    const float cosine_term = vector_to_light.normal() * normal;
+    const float cosine_term = vector_to_light.normalized() * normal;
     
     return color * intensity * (float)(fmax(cosine_term, 0.f) / (vector_to_light.length() * 4 * M_PI));
 }
@@ -63,9 +63,9 @@ Color LinearLight::getDiffuseValue(Vector3 point, Vector3 normal) {
 Color LinearLight::getSpecularValue(Vector3 point, Vector3 normal, Vector3 direction, int n) {
     Vector3 vector_to_light = getVector(point);
     
-    const float cosine_term = vector_to_light.normal() * normal;
+    const float cosine_term = vector_to_light.normalized() * normal;
     
-    return color * pow(intensity, 0.4) * (pow(fmax(-(normal * (cosine_term * 2) - vector_to_light.normal()) * direction, 0.f), n));
+    return color * pow(intensity, 0.4) * (pow(fmax(-(normal * (cosine_term * 2) - vector_to_light.normalized()) * direction, 0.f), n));
 }
 
 
@@ -94,7 +94,7 @@ Color GlobalLight::getSpecularValue(Vector3, Vector3, Vector3, int) {
 /// @param direction Vector3{x, y, z}
 /// @param color Color{r, g, b} ~ (0 - 1)
 /// @param intensity int ~ (0 - 1)
-DirectionalLight::DirectionalLight(Vector3 direction, Color color, float intensity) : direction(direction.normal()), intensity(intensity) {
+DirectionalLight::DirectionalLight(Vector3 direction, Color color, float intensity) : direction(direction.normalized()), intensity(intensity) {
     this->color = color;
     shadow = true;
 }

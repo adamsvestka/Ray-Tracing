@@ -29,7 +29,7 @@ int main(int argc, const char *argv[]) {
     NativeInterface interface;
     
     Camera camera;
-    vector<Shape *> objects;
+    vector<Object *> objects;
     vector<Light *> lights;
     
     Parser parser(interface);
@@ -41,13 +41,14 @@ int main(int argc, const char *argv[]) {
     
     if (!settings.save_render) { while (interface.getChar() != 'q') continue; return 0; }
     
-    auto buffer = renderer.getResult(settings.render_mode);
+    int mode = settings.render_mode;
+    auto buffer = renderer.getResult(mode);
     
     char c = '\0';
     while ((c = interface.getChar()) != 'q') {
-        int n = c - '0';
-        if (n >= 0 && n < RenderTypes) {
-            buffer = renderer.getResult(n);
+        if (c >= '0' && c < RenderTypes + '0') {
+            mode = c - '0';
+            buffer = renderer.getResult(mode);
             for (int x = 0; x < buffer.size(); x++) {
                 for (int y = 0; y < buffer[x].size(); y++) {
                     interface.drawPixel(x, y, buffer[x][y]);
@@ -61,6 +62,7 @@ int main(int argc, const char *argv[]) {
             parser.parseSettings("settings.ini", settings);
             parser.parseScene("scene.json", camera, objects, lights);
             renderer.render();
+            buffer = renderer.getResult(mode);
         }
     }
     

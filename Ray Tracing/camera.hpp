@@ -19,7 +19,7 @@ private:
     Vector3 position;
     Matrix3x3 rotation;
     int width, height;
-    float fovFactor;
+    float scale;
     
 public:
     Camera();

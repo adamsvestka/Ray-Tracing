@@ -6,15 +6,15 @@
 //  Copyright © 2020 Adam Svestka. All rights reserved.
 //
 
-struct Hit;
-struct Info;
+struct ObjectHit;
+struct ObjectInfo;
 
-class Shape;
+class Object;
 class Sphere;
 class Cuboid;
 class Plane;
 class Triangle;
-class Object;
+class Mesh;
 
 #pragma once
 
@@ -27,22 +27,22 @@ class Object;
 #include "shaders.hpp"
 #include "ray.hpp"
 
-struct Info {
+struct ObjectInfo {
     int vertices = 0;
     int faces = 0;
     int objects = 0;
     
-    void operator+=(const Info &);
+    void operator+=(const ObjectInfo &);
 };
 
-struct Hit {
+struct ObjectHit {
     float distance;
     function<Vector3()> getNormal;
     function<Color()> getTexture;
 };
 
 
-class Shape {
+class Object {
 protected:
     Vector3 center;
     Matrix3x3 rotation, Irotation;
@@ -50,18 +50,18 @@ protected:
 public:
     Material material;
     
-    Shape(Vector3, Vector3, Material);
+    Object(Vector3, Vector3, Material);
     /***/ Vector3 getCenter() const;
     /***/ Matrix3x3 getRotation() const;
     /***/ Matrix3x3 getInverseRotation() const;
     /***/ Vector3 toObjectSpace(Vector3 point) const;
     /***/ Vector3 toWorldSpace(Vector3 _point) const;
-    /***/ virtual Hit intersect(Vector3 origin, Vector3 direction) const = 0;
-    /***/ virtual Info getInfo() const = 0;
+    /***/ virtual ObjectHit intersect(Vector3 origin, Vector3 direction) const = 0;
+    /***/ virtual ObjectInfo getInfo() const = 0;
 };
 
 
-class Sphere : public Shape {
+class Sphere : public Object {
 private:
     float radius;
     float radius2;
@@ -70,12 +70,12 @@ public:
     Sphere(Vector3, float, Vector3, Material);
     Vector3 getNormal(Vector3) const;
     Color getTexture(Vector3) const;
-    Hit intersect(Vector3, Vector3) const;
-    Info getInfo() const;
+    ObjectHit intersect(Vector3, Vector3) const;
+    ObjectInfo getInfo() const;
 };
 
 
-class Cuboid : public Shape {
+class Cuboid : public Object {
 private:
     Vector3 size;
     Vector3 vmin, vmax;
@@ -86,12 +86,12 @@ public:
     Cuboid(Vector3, Vector3, Vector3, Material);
     Vector3 getNormal(Vector3) const;
     Color getTexture(Vector3) const;
-    Hit intersect(Vector3, Vector3) const;
-    Info getInfo() const;
+    ObjectHit intersect(Vector3, Vector3) const;
+    ObjectInfo getInfo() const;
 };
 
 
-class Plane : public Shape {
+class Plane : public Object {
 private:
     float size_x, size_y;
     
@@ -99,8 +99,8 @@ public:
     Plane(Vector3, float, float, Vector3, Material);
     Vector3 getNormal(Vector3) const;
     Color getTexture(Vector3) const;
-    Hit intersect(Vector3, Vector3) const;
-    Info getInfo() const;
+    ObjectHit intersect(Vector3, Vector3) const;
+    ObjectInfo getInfo() const;
 };
 
 
@@ -108,26 +108,26 @@ class Triangle {
 private:
     bool vn, tc;
     Vector3 v0, v0v1, v0v2;
-    array<TCoords, 3> textures;
+    array<VectorUV, 3> textures;
     array<Vector3, 3> normals;
     Material &material;
     
 public:
-    explicit Triangle(array<Vector3, 3>, array<TCoords, 3>, array<Vector3, 3>, Material &);
-    Vector3 getNormal(TCoords) const;
-    Color getTexture(TCoords) const;
-    Hit intersect(Vector3, Vector3) const;
-    Info getInfo() const;
+    explicit Triangle(array<Vector3, 3>, array<VectorUV, 3>, array<Vector3, 3>, Material &);
+    Vector3 getNormal(VectorUV) const;
+    Color getTexture(VectorUV) const;
+    ObjectHit intersect(Vector3, Vector3) const;
+    ObjectInfo getInfo() const;
 };
 
 
-class Object : public Shape {
+class Mesh : public Object {
 private:
     vector<Triangle> triangles;
     Cuboid bounds;
     
 public:
-    Object(vector<array<Vector3, 3>>, vector<array<TCoords, 3>>, vector<array<Vector3, 3>>, Vector3, float, Vector3, Material);
-    Hit intersect(Vector3, Vector3) const;
-    Info getInfo() const;
+    Mesh(vector<array<Vector3, 3>>, vector<array<VectorUV, 3>>, vector<array<Vector3, 3>>, Vector3, float, Vector3, Material);
+    ObjectHit intersect(Vector3, Vector3) const;
+    ObjectInfo getInfo() const;
 };

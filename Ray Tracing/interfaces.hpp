@@ -6,7 +6,7 @@
 //  Copyright © 2020 Adam Svestka. All rights reserved.
 //
 
-struct DebugStats;
+struct DebugInfo;
 
 class InterfaceTemplate;
 class X11Interface;
@@ -29,7 +29,7 @@ class X11Interface;
 
 using namespace std;
 
-struct DebugStats {
+struct DebugInfo {
     int region_current, region_count, render_time, object_count;
     Timer timer;
     string render_mode_name;
@@ -44,8 +44,8 @@ public:
     void getDimensions(int &, int &);
     
     virtual void drawPixel(int, int, Color) = 0;
-    virtual void drawDebugBox(int, int, Input) = 0;
-    virtual void renderInfo(DebugStats) = 0;
+    virtual void drawDebugBox(int, int, RayInput) = 0;
+    virtual void renderInfo(DebugInfo) = 0;
     virtual void refresh() = 0;
     virtual char getChar() = 0;
     
@@ -91,8 +91,8 @@ public:
     ~X11Interface();
     
     void drawPixel(int, int, Color);
-    void drawDebugBox(int, int, Input);
-    void renderInfo(DebugStats);
+    void drawDebugBox(int, int, RayInput);
+    void renderInfo(DebugInfo);
     void refresh();
     char getChar();
     
@@ -133,8 +133,8 @@ public:
     ~WASMInterface();
     
     void drawPixel(int, int, Color);
-    void drawDebugBox(int, int, Input);
-    void renderInfo(DebugStats);
+    void drawDebugBox(int, int, RayInput);
+    void renderInfo(DebugInfo);
     void refresh();
     char getChar();
     

@@ -10,8 +10,8 @@ struct Material;
 
 class Image;
 class Checkerboard;
-class Brick;
-class Noise;
+class Bricks;
+class PerlinNoise;
 
 #pragma once
 
@@ -25,7 +25,7 @@ class Noise;
 
 using namespace std;
 
-typedef function<Color(TCoords)> Shader;
+typedef function<Color(VectorUV)> Shader;
 
 // MARK: - Material
 struct Material {
@@ -35,15 +35,10 @@ struct Material {
 };
 
 
-// MARK: - Functions
-float smoothstep(float);
-Color colorRamp(float, Color, Color);
-
-
 // MARK: - Textures
 class Texture {
 public:
-    virtual Color operator()(TCoords) const = 0;
+    virtual Color operator()(VectorUV) const = 0;
 };
 
 
@@ -54,7 +49,7 @@ private:
 public:
     explicit Image(Buffer &);
     
-    Color operator()(TCoords) const;
+    Color operator()(VectorUV) const;
 };
 
 
@@ -66,11 +61,11 @@ private:
 public:
     Checkerboard(int, Color, Color);
     
-    Color operator()(TCoords) const;
+    Color operator()(VectorUV) const;
 };
 
 
-class Brick : public Texture {
+class Bricks : public Texture {
 private:
     Buffer colors;
     int scale;
@@ -78,23 +73,24 @@ private:
     Color primary, secondary, tertiary;
     
 public:
-    Brick(int, float, float, Color, Color, Color, int);
+    Bricks(int, float, float, Color, Color, Color, int);
     
-    Color operator()(TCoords) const;
+    Color operator()(VectorUV) const;
 };
 
 
-class Noise : public Texture {
+class PerlinNoise : public Texture {
 private:
     vector<vector<pair<float, float>>> points;
     int scale;
     Color primary;
     
 public:
-    Noise(int, int, Color);
+    PerlinNoise(int, int, Color);
     
-    float lerp(float, float, float) const;
-    float dotGradient(int, int, float, float) const;
+    inline float smoothstep(float) const;
+    inline float lerp(float, float, float) const;
+    inline float dotGradient(int, int, float, float) const;
     
-    Color operator()(TCoords) const;
+    Color operator()(VectorUV) const;
 };

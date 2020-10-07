@@ -7,8 +7,8 @@
 //
 
 struct Timer;
-struct Input;
-struct Intersection;
+struct RayInput;
+struct RayIntersection;
 
 #pragma once
 
@@ -38,7 +38,7 @@ struct Timer {
     void operator+=(const Timer);
 };
 
-struct Input {
+struct RayInput {
     bool render;
     short bounce_count;
     
@@ -46,11 +46,11 @@ struct Input {
     vector<bool> shadows;
 };
 
-struct Intersection {
+struct RayIntersection {
     bool hit;
     Vector3 position;
     float distance;
-    const Shape *object;
+    const Object *object;
     float id;
     
     Vector3 normal;
@@ -59,9 +59,9 @@ struct Intersection {
     valarray<Color> diffuse, specular;
     Color light, ambient, texture, reflection, transmission;
     
-    Color shaded() const;
+    Color shaded();
     
     Timer timer;
 };
 
-Intersection castRay(Vector3, Vector3, const vector<Shape *> &, const vector<Light *> &, Input mask);
+RayIntersection castRay(Vector3, Vector3, const vector<Object *> &, const vector<Light *> &, RayInput mask);

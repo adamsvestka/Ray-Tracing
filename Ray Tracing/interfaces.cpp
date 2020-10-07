@@ -62,7 +62,7 @@ void X11Interface::drawPixel(int x, int y, Color c) {
     XFillRectangle(display, window, gc, x * settings.resolution_decrease, y * settings.resolution_decrease, settings.resolution_decrease, settings.resolution_decrease);
 }
 
-void X11Interface::drawDebugBox(int x, int y, Input mask) {
+void X11Interface::drawDebugBox(int x, int y, RayInput mask) {
     const float size = 0.25;
     static const short region_size = settings.resolution_decrease * settings.render_region_size;
     
@@ -117,7 +117,7 @@ inline void X11Interface::drawInfoString(int x, int y, stringstream &ss, Color c
     ss.str("");
 }
 
-void X11Interface::renderInfo(DebugStats stats) {
+void X11Interface::renderInfo(DebugInfo stats) {
     XSetForeground(display, gc, Color::Black);
     XFillRectangle(display, window, gc, 2, 2, 1 + 6 * 28, 4 + 15 * 6);
     
@@ -211,10 +211,10 @@ bool X11Interface::loadImage(string filename, Buffer &buffer) {
     } catch(...) {
         image = CImg<unsigned char>(64, 64, 1, 3);
         
-        cimg_forXYC(image, x, y, c) { image(x, y, c) = (x / 8 % 2) != (y / 8 % 2) ? Color::Black.array()[c] : Color::Magenta.array()[c]; }
-        image.draw_text(16, 8, "Image", Color::White.array().data(), 0, 1, 13);
-        image.draw_text(24, 24, "not", Color::White.array().data(), 0, 1, 13);
-        image.draw_text(16, 40, "found", Color::White.array().data(), 0, 1, 13);
+        cimg_forXYC(image, x, y, c) { image(x, y, c) = (x / 8 % 2) != (y / 8 % 2) ? Color::Black[c] : Color::Magenta[c]; }
+        image.draw_text(16, 8, "Image", Color::White.cimg().data(), 0, 1, 13);
+        image.draw_text(24, 24, "not", Color::White.cimg().data(), 0, 1, 13);
+        image.draw_text(16, 40, "found", Color::White.cimg().data(), 0, 1, 13);
         
         success = false;
     }
@@ -229,7 +229,7 @@ bool X11Interface::saveImage(string filename, const Buffer &buffer) {
     CImg<unsigned char> image((int)buffer.size(), (int)buffer[0].size(), 1, 3);
     
     try {
-        cimg_forXYC(image, x, y, c) { image(x, y, c) = buffer[x][y].array()[c]; }
+        cimg_forXYC(image, x, y, c) { image(x, y, c) = buffer[x][y][c]; }
         
         image.save(filename.c_str());
         
@@ -298,7 +298,7 @@ inline void WASMInterface::drawBoxCorner(vector<array<short, 2>> points) {
     context.call<void>("stroke");
 }
 
-void WASMInterface::drawDebugBox(int x, int y, Input mask) {
+void WASMInterface::drawDebugBox(int x, int y, RayInput mask) {
     const float size = 0.25;
     static const short region_size = settings.resolution_decrease * settings.render_region_size;
     
@@ -354,7 +354,7 @@ inline void WASMInterface::drawInfoString(int x, int y, stringstream &ss, Color 
     ss.str("");
 }
 
-void WASMInterface::renderInfo(DebugStats stats) {
+void WASMInterface::renderInfo(DebugInfo stats) {
     context.set("fillStyle", Color::Black.css());
     context.call<void>("fillRect", 2, 2, 1 + 6 * 28, 4 + 15 * 6);
     
@@ -457,7 +457,7 @@ bool WASMInterface::loadImage(string filename, Buffer &buffer) {
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++) {
             int i = (y * height + x) * 4;
-            buffer[x][y] = Color{arrayBuffer[i], arrayBuffer[i + 1], arrayBuffer[i + 2]};
+            buffer[x][y] = Color(arrayBuffer[i], arrayBuffer[i + 1], arrayBuffer[i + 2]);
         }
     }
     

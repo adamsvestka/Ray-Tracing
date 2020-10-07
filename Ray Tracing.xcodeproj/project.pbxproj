@@ -236,7 +236,7 @@
 		6630E3CC2443CD680066BCCC /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1140;
+				LastUpgradeCheck = 1200;
 				ORGANIZATIONNAME = "Adam Svestka";
 				TargetAttributes = {
 					6630E3D32443CD680066BCCC = {
@@ -286,7 +286,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "OUTPUT_DIR=$HOME/Sites/Ray-Tracing\n\n# rm -r \"$OUTPUT_DIR/\"*\n\n# cp $(ls -d \"$BUILT_PRODUCTS_DIR/\"* | egrep \"(.obj|.png|.jpe?g|.ini|.json)$\") \"$OUTPUT_DIR\"\n\n$HOME/Desktop/Xcode/emsdk/upstream/emscripten/em++ \"$PROJECT_DIR/Ray Tracing/\"*.cpp -I/usr/local/Cellar/nlohmann-json/3.8.0/include --std=c++20 -O3 --bind -s LLD_REPORT_UNDEFINED -s WASM=1 -s NO_FILESYSTEM=1 -s DISABLE_EXCEPTION_CATCHING=1 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=0 -s ASYNCIFY -s EXTRA_EXPORTED_RUNTIME_METHODS=['UTF8ToString','lengthBytesUTF8','stringToUTF8'] --shell-file \"$PROJECT_DIR/Ray Tracing/template.html\" -o \"$OUTPUT_DIR/index.html\"\n";
+			shellScript = "OUTPUT_DIR=$HOME/Sites/github/raytracing\n\n# rm -r \"$OUTPUT_DIR/\"*\n\n# cp $(ls -d \"$BUILT_PRODUCTS_DIR/\"* | egrep \"(.obj|.png|.jpe?g|.ini|.json)$\") \"$OUTPUT_DIR\"\n\n$HOME/Desktop/Xcode/emsdk/upstream/emscripten/em++ \"$PROJECT_DIR/Ray Tracing/\"*.cpp -I/usr/local/Cellar/nlohmann-json/3.8.0/include --std=c++20 -O3 --bind -s LLD_REPORT_UNDEFINED -s WASM=1 -s NO_FILESYSTEM=1 -s DISABLE_EXCEPTION_CATCHING=1 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=0 -s ASYNCIFY -s EXTRA_EXPORTED_RUNTIME_METHODS=['UTF8ToString','lengthBytesUTF8','stringToUTF8'] --shell-file \"$PROJECT_DIR/Ray Tracing/template.html\" -o \"$OUTPUT_DIR/index.html\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -350,6 +350,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -408,6 +409,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;

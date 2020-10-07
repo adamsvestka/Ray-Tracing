@@ -37,14 +37,15 @@ private:
     Color parseColor(string);
     Shader parseShader(json);
     Material parseMaterial(json);
-    Shape *parseShape(json);
+    Object *parseShape(json);
     Light *parseLight(json);
     Camera parseCamera(json);
     
-    void parseOBJ(string, vector<array<Vector3, 3>> &, vector<array<TCoords, 3>> &, vector<array<Vector3, 3>> &);
+    void parseGeometry_obj(string, vector<array<Vector3, 3>> &, vector<array<VectorUV, 3>> &, vector<array<Vector3, 3>> &);
     
 public:
     explicit Parser(NativeInterface &);
+    
     void parseSettings(string, Settings &);
-    void parseScene(string, Camera &, vector<Shape *> &, vector<Light *> &);
+    void parseScene(string, Camera &, vector<Object *> &, vector<Light *> &);
 };

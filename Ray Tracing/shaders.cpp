@@ -8,21 +8,11 @@
 
 #include "shaders.hpp"
 
-// MARK: - Functions
-float smoothstep(float x) {
-    return x * x * (3 - 2 * x);
-}
-
-Color colorRamp(float n, Color a, Color b) {
-    return a * (1 - n) + b * n;
-}
-
-
 // MARK: - Textures
 ///
 Image::Image(Buffer &image) : image(image) {}
 
-Color Image::operator()(TCoords t) const {
+Color Image::operator()(VectorUV t) const {
     return image[t.getU() * image.size()][t.getV() * image[0].size()];
 }
 
@@ -30,13 +20,13 @@ Color Image::operator()(TCoords t) const {
 ///
 Checkerboard::Checkerboard(int scale, Color primary, Color secondary) : scale(scale), primary(primary), secondary(secondary) {}
 
-Color Checkerboard::operator()(TCoords t) const {
+Color Checkerboard::operator()(VectorUV t) const {
     return (int)(t.getU() * scale) % 2 != (int)(t.getV() * scale) % 2 ? primary : secondary;
 }
 
 
 ///
-Brick::Brick(int scale, float ratio, float mortar, Color primary, Color secondary, Color tertiary, int seed) : scale(scale), ratio(ratio), mortar(mortar), primary(primary), secondary(secondary), tertiary(tertiary) {
+Bricks::Bricks(int scale, float ratio, float mortar, Color primary, Color secondary, Color tertiary, int seed) : scale(scale), ratio(ratio), mortar(mortar), primary(primary), secondary(secondary), tertiary(tertiary) {
     colors.resize(scale, vector<Color>(ceil(scale / ratio) + 1));
     
     default_random_engine engine(seed);
@@ -50,7 +40,7 @@ Brick::Brick(int scale, float ratio, float mortar, Color primary, Color secondar
      }
 }
 
-Color Brick::operator()(TCoords t) const {
+Color Bricks::operator()(VectorUV t) const {
     float dx = t.getU() * scale;
     float dy = t.getV() * scale / ratio + !((int)(t.getU() * scale) % 2) / 2.f;
     float ix = fmod(dx, 1);
@@ -60,7 +50,7 @@ Color Brick::operator()(TCoords t) const {
 
 
 ///
-Noise::Noise(int scale, int seed, Color primary) : scale(scale), primary(primary) {
+PerlinNoise::PerlinNoise(int scale, int seed, Color primary) : scale(scale), primary(primary) {
     points.resize(scale, vector<pair<float, float>>(scale));
     
     default_random_engine engine(seed);
@@ -75,18 +65,22 @@ Noise::Noise(int scale, int seed, Color primary) : scale(scale), primary(primary
     }
 }
 
-float Noise::lerp(float a, float b, float w) const {
+float PerlinNoise::smoothstep(float x) const {
+    return x * x * (3 - 2 * x);
+}
+
+float PerlinNoise::lerp(float a, float b, float w) const {
     return a + w * (b - a);
 }
 
-float Noise::dotGradient(int ix, int iy, float x, float y) const {
+float PerlinNoise::dotGradient(int ix, int iy, float x, float y) const {
     float dx = x - ix;
     float dy = y - iy;
     
     return (dx * points[iy][ix].first + dy * points[iy][ix].second);
 }
 
-Color Noise::operator()(TCoords t) const {
+Color PerlinNoise::operator()(VectorUV t) const {
     float x = t.getU() * (scale - 1);
     float y = t.getV() * (scale - 1);
     int x0 = (int)x, x1 = x0 + 1;

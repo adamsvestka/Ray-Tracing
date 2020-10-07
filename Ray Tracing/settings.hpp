@@ -43,8 +43,6 @@ struct Settings {
     
     short rendering_threads = 25;
     
-    Color ambient_lighting;
-    
     Color background_color;
 };
 

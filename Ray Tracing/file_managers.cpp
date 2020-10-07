@@ -56,7 +56,6 @@ void Parser::parseSettings(string filename, Settings &settings) {
     bindings["resolution_decrease"] = {1, &settings.resolution_decrease};
     bindings["render_region_size"] = {1, &settings.render_region_size};
     bindings["rendering_threads"] = {1, &settings.rendering_threads};
-    bindings["ambient_lighting"] = {3, &settings.ambient_lighting};
     bindings["background_color"] = {3, &settings.background_color};
     
     // MARK: Parse file to structure
@@ -146,15 +145,15 @@ Color Parser::parseColor(string s) {
 Shader Parser::parseShader(json j) {
     if (!j.is_null()) {
         switch (::hash(j.value("type", "").c_str())) {
-            case "color"_h: return [color = parseColor(j.value("value", ""))](TCoords t) { return color; };
+            case "color"_h: return [color = parseColor(j.value("value", ""))](VectorUV t) { return color; };
             case "image"_h: {
                 Buffer buffer;
                 if (!interface.loadImage(j.value("value", "image.png"), buffer)) interface.log("Couldn't open image");
-                return [image = Image(buffer)](TCoords t) { return image(t); };
+                return [image = Image(buffer)](VectorUV t) { return image(t); };
             }
-            case "checkerboard"_h: return [checkerboard = Checkerboard(j.value("scale", 2), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](TCoords t) { return checkerboard(t); };
-            case "bricks"_h: return [bricks = Brick(j.value("scale", 4), j.value("ratio", 2.f), j.value("mortar", 0.1f), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")), parseColor(j.value("tertiary", "")), j.value("seed", 0))](TCoords t) { return bricks(t); };
-            case "noise"_h: return [noise = Noise(j.value("scale", 1), j.value("seed", 0), parseColor(j.value("primary", "")))](TCoords t) { return noise(t); };
+            case "checkerboard"_h: return [checkerboard = Checkerboard(j.value("scale", 2), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](VectorUV t) { return checkerboard(t); };
+            case "bricks"_h: return [bricks = Bricks(j.value("scale", 4), j.value("ratio", 2.f), j.value("mortar", 0.1f), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")), parseColor(j.value("tertiary", "")), j.value("seed", 0))](VectorUV t) { return bricks(t); };
+            case "noise"_h: return [noise = PerlinNoise(j.value("scale", 1), j.value("seed", 0), parseColor(j.value("primary", "")))](VectorUV t) { return noise(t); };
                 
             case "named"_h: {
                 if (!j["value"].is_string()) break;
@@ -165,32 +164,32 @@ Shader Parser::parseShader(json j) {
             
             case "grayscale"_h:
                 if (!j["value"].is_object()) break;
-                return [shader = parseShader(j["value"])](TCoords t) { return Color::White * shader(t).value(); };
+                return [shader = parseShader(j["value"])](VectorUV t) { return Color::White * shader(t).asValue(); };
             case "negate"_h:
                 if (!j["value"].is_object()) break;
-                return [shader = parseShader(j["value"])](TCoords t) { return -shader(t); };
+                return [shader = parseShader(j["value"])](VectorUV t) { return -shader(t); };
             case "add"_h: {
                 if (!j["values"].is_array()) break;
                 vector<Shader> operands;
                 for (auto &shader : j["values"]) operands.push_back(parseShader(shader));
-                return [=](TCoords t) { Color result = Color::Black; for (auto &shader : operands) result += shader(t); return result; };
+                return [=](VectorUV t) { Color result = Color::Black; for (auto &shader : operands) result += shader(t); return result; };
             }
             case "multiply"_h: {
                 if (!j["values"].is_array()) break;
                 vector<Shader> operands;
                 for (auto &shader : j["values"]) operands.push_back(parseShader(shader));
-                return [=](TCoords t) { Color result = Color::White; for (auto &shader : operands) result *= shader(t); return result; };
+                return [=](VectorUV t) { Color result = Color::White; for (auto &shader : operands) result *= shader(t); return result; };
             }
             case "mix"_h: {
                 if (!j["values"].is_array() || !j["weights"].is_array() || j["values"].size() != j["weights"].size()) break;
                 vector<pair<Shader, float>> operands;
                 for (int i = 0; i < j["values"].size(); i++) operands.push_back(pair<Shader, float>(parseShader(j["values"][i]), j["weights"][i]));
-                return [=](TCoords t) { Color result = Color::Black; for (auto &[shader, weight] : operands) result += shader(t) * weight; return result; };
+                return [=](VectorUV t) { Color result = Color::Black; for (auto &[shader, weight] : operands) result += shader(t) * weight; return result; };
             }
         }
     }
     
-    return [](TCoords t) { return Color::Black; };
+    return [](VectorUV t) { return Color::Black; };
 }
 
 Material Parser::parseMaterial(json j) {
@@ -199,7 +198,7 @@ Material Parser::parseMaterial(json j) {
     return {parseShader(j["shader"]), 0.f, 0.f, 1.f, false};
 }
 
-Shape *Parser::parseShape(json j) {
+Object *Parser::parseShape(json j) {
     switch (::hash(j.value("type", "").c_str())) {
         case "sphere"_h: return new Sphere(parseVector(j["position"]), j.value("diameter", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
         case "cube"_h: return new Cuboid(parseVector(j["position"]), j.value("size", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
@@ -208,10 +207,10 @@ Shape *Parser::parseShape(json j) {
         case "plane"_h: return new Plane(parseVector(j["position"]), j.value("size_x", 1.f), j.value("size_y", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
         case "object"_h: {
             vector<array<Vector3, 3>> vertices;
-            vector<array<TCoords, 3>> textures;
+            vector<array<VectorUV, 3>> textures;
             vector<array<Vector3, 3>> normals;
-            parseOBJ(j.value("name", "object.obj"), vertices, textures, normals);
-            return new Object({vertices, textures, normals, parseVector(j["position"]), j.value("scale", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"])});
+            parseGeometry_obj(j.value("name", "object.obj"), vertices, textures, normals);
+            return new Mesh({vertices, textures, normals, parseVector(j["position"]), j.value("scale", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"])});
         }
     }
     return nullptr;
@@ -231,7 +230,7 @@ Camera Parser::parseCamera(json j) {
     return Camera(parseVector(j["position"]), parseVector(j["rotation"]), 0, 0, j.value("fov", 120));
 }
 
-void Parser::parseScene(string filename, Camera &camera, vector<Shape *> &objects, vector<Light *> &lights) {
+void Parser::parseScene(string filename, Camera &camera, vector<Object *> &objects, vector<Light *> &lights) {
     interface.log("Parsing " + filename);
     
     stringstream buffer;
@@ -274,13 +273,13 @@ void Parser::parseScene(string filename, Camera &camera, vector<Shape *> &object
 
 
 // MARK: - Wavefront .obj
-void Parser::parseOBJ(string filename, vector<array<Vector3, 3>> &overtices, vector<array<TCoords, 3>> &otextures, vector<array<Vector3, 3>> &onormals) {
+void Parser::parseGeometry_obj(string filename, vector<array<Vector3, 3>> &overtices, vector<array<VectorUV, 3>> &otextures, vector<array<Vector3, 3>> &onormals) {
     interface.log("Parsing " + filename);
     
     stringstream buffer;
     if (interface.loadFile(filename, buffer)) {
         vector<Vector3> vertices;
-        vector<TCoords> textures;
+        vector<VectorUV> textures;
         vector<Vector3> normals;
         
         regex ignore("#.*");
