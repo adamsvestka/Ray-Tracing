@@ -10,13 +10,16 @@
 
 My very own ray tracing engine which I built to prove that I could.
 
-Also, I built a WebAssembly version that can run anywhere, on any device and is hosted on my [GitHub](https://adamsvestka.github.io).
+Also, I built a WebAssembly version that can run anywhere, on any device and is hosted on my [GitHub Pages](https://adamsvestka.github.io/raytracing).
 
 ## Dependencies
 - [XQuartz](https://www.xquartz.org)
 - [CImg](https://cimg.eu)
 - [libpng](http://www.libpng.org)
 - [libjpeg](http://libjpeg.sourceforge.net)
+
+## Incorporated libraries
+- [nlohman/json](https://github.com/nlohmann/json)
 
 ---
 
@@ -49,8 +52,7 @@ key=value
 | resolution_decrease | Divide resolution by                                                                      | `int`                                 | `1`       |
 | render_region_size  | Render region size                                                                        | `int`                                 | `10`      |
 | rendering_threads   | Amount of threads for rendering                                                           | `int`                                 | `25`      |
-| ambient_lighting    | Ambient light added on top of all objects                                                 | `Color`<sup>[1](#footnoteColor)</sup> | `x0d0d0d` |
-| background_color    | Background color to fill empty space                                                      | `Color`<sup>[1](#footnoteColor)</sup> | `x1a1a1a` |
+| background_color    | Background color to fill empty space                                                      | `Color`<sup>[1](#footnoteColor)</sup> | `x000000` |
 
 ## Scene file
 
