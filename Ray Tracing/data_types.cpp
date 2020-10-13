@@ -299,7 +299,7 @@ void Color::operator/=(Color c) {
 }
 
 
-// MARK: - TCoords
+// MARK: - VectorUV
 VectorUV::VectorUV() {
     u = v = 0;
 }

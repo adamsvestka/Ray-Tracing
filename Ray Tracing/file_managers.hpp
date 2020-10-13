@@ -20,7 +20,7 @@
 
 #include "settings.hpp"
 #include "data_types.hpp"
-#include "shapes.hpp"
+#include "objects.hpp"
 #include "light_sources.hpp"
 #include "camera.hpp"
 #include "interfaces.hpp"
@@ -37,7 +37,7 @@ private:
     Color parseColor(string);
     Shader parseShader(json);
     Material parseMaterial(json);
-    Object *parseShape(json);
+    Object *parseObject(json);
     Light *parseLight(json);
     Camera parseCamera(json);
     

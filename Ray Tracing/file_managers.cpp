@@ -40,7 +40,6 @@ void Parser::parseSettings(string filename, Settings &settings) {
     interface.log("Parsing " + filename);
     
     // MARK: Bind options
-//    map<string, SettingValue> bindings;
     map<string, pair<short, void *>> bindings;
     // Ray
     bindings["max_render_distance"] = {1, &settings.max_render_distance};
@@ -198,7 +197,7 @@ Material Parser::parseMaterial(json j) {
     return {parseShader(j["shader"]), 0.f, 0.f, 1.f, false};
 }
 
-Object *Parser::parseShape(json j) {
+Object *Parser::parseObject(json j) {
     switch (::hash(j.value("type", "").c_str())) {
         case "sphere"_h: return new Sphere(parseVector(j["position"]), j.value("diameter", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
         case "cube"_h: return new Cuboid(parseVector(j["position"]), j.value("size", 1.f), parseVector(j["rotation"]), parseMaterial(j["material"]));
@@ -256,7 +255,7 @@ void Parser::parseScene(string filename, Camera &camera, vector<Object *> &objec
         // MARK: Parse objects from file
         if (jfile[objects_key].is_array()) {
             for (const auto &jobject : jfile[objects_key]) {
-                auto object = parseShape(jobject);
+                auto object = parseObject(jobject);
                 if (object != nullptr) objects.push_back(object);
             }
         } else interface.log("Missing entry: " + objects_key);

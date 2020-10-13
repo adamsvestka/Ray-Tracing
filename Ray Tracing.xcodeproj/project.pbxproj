@@ -35,7 +35,7 @@
 /* Begin PBXBuildFile section */
 		6630E3D82443CD690066BCCC /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3D72443CD690066BCCC /* main.cpp */; };
 		6630E3E32445E2B20066BCCC /* data_types.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E12445E2B20066BCCC /* data_types.cpp */; };
-		6630E3E62445E2C70066BCCC /* shapes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E42445E2C70066BCCC /* shapes.cpp */; };
+		6630E3E62445E2C70066BCCC /* objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E42445E2C70066BCCC /* objects.cpp */; };
 		6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E72445E2D70066BCCC /* light_sources.cpp */; };
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
 		6658E6AB24FD262800969C2A /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6A924FD262800969C2A /* camera.cpp */; };
@@ -82,8 +82,8 @@
 		6630E3D72443CD690066BCCC /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		6630E3E12445E2B20066BCCC /* data_types.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = data_types.cpp; sourceTree = "<group>"; };
 		6630E3E22445E2B20066BCCC /* data_types.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = data_types.hpp; sourceTree = "<group>"; };
-		6630E3E42445E2C70066BCCC /* shapes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shapes.cpp; sourceTree = "<group>"; };
-		6630E3E52445E2C70066BCCC /* shapes.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shapes.hpp; sourceTree = "<group>"; };
+		6630E3E42445E2C70066BCCC /* objects.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = objects.cpp; sourceTree = "<group>"; };
+		6630E3E52445E2C70066BCCC /* objects.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = objects.hpp; sourceTree = "<group>"; };
 		6630E3E72445E2D70066BCCC /* light_sources.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = light_sources.cpp; sourceTree = "<group>"; };
 		6630E3E82445E2D70066BCCC /* light_sources.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = light_sources.hpp; sourceTree = "<group>"; };
 		6630E3ED2445E4AB0066BCCC /* ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ray.cpp; sourceTree = "<group>"; };
@@ -202,8 +202,8 @@
 		6667E00124621D2000A1DDE1 /* Objects */ = {
 			isa = PBXGroup;
 			children = (
-				6630E3E52445E2C70066BCCC /* shapes.hpp */,
-				6630E3E42445E2C70066BCCC /* shapes.cpp */,
+				6630E3E52445E2C70066BCCC /* objects.hpp */,
+				6630E3E42445E2C70066BCCC /* objects.cpp */,
 				6630E3E82445E2D70066BCCC /* light_sources.hpp */,
 				6630E3E72445E2D70066BCCC /* light_sources.cpp */,
 			);
@@ -302,7 +302,7 @@
 				6658E6B124FD27E300969C2A /* interfaces.cpp in Sources */,
 				6630E3E32445E2B20066BCCC /* data_types.cpp in Sources */,
 				6658E6AB24FD262800969C2A /* camera.cpp in Sources */,
-				6630E3E62445E2C70066BCCC /* shapes.cpp in Sources */,
+				6630E3E62445E2C70066BCCC /* objects.cpp in Sources */,
 				6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */,
 				665B9CA224CA3824000C4E1E /* file_managers.cpp in Sources */,
 			);

@@ -1,12 +1,12 @@
 //
-//  shapes.cpp
+//  objects.cpp
 //  Ray Tracing
 //
 //  Created by Adam Svestka on 4/14/20.
 //  Copyright © 2020 Adam Svestka. All rights reserved.
 //
 
-#include "shapes.hpp"
+#include "objects.hpp"
 
 void ObjectInfo::operator+=(const ObjectInfo &i) {
     vertices += i.vertices;
@@ -215,6 +215,9 @@ ObjectInfo Plane::getInfo() const {
 
 // MARK: - Triangle
 /// @param vertices Vector3{x, y, z}[3]
+/// @param textures Vector3{x, y, z}[3]
+/// @param normals Vector3{x, y, z}[3]
+/// @param material Material{texture, n, Ks, ior, transparent}
 Triangle::Triangle(array<Vector3, 3> vertices, array<VectorUV, 3> textures, array<Vector3, 3> normals, Material &material) : v0(vertices[0]), v0v1(vertices[1] - vertices[0]), v0v2(vertices[2] - vertices[0]), textures(textures), normals(normals), material(material) {
     tc = textures[0] == textures[1] && textures[0] == textures[2];
     if ((vn = (normals[0] == Vector3::Zero))) this->normals[0] = v0v1.cross(v0v2).normalized();

@@ -18,7 +18,7 @@ struct RayIntersection;
 #include "settings.hpp"
 
 #include "data_types.hpp"
-#include "shapes.hpp"
+#include "objects.hpp"
 #include "light_sources.hpp"
 
 using namespace std;

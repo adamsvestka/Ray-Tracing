@@ -23,7 +23,7 @@ class Renderer;
 
 #include "data_types.hpp"
 #include "ray.hpp"
-#include "shapes.hpp"
+#include "objects.hpp"
 #include "light_sources.hpp"
 #include "camera.hpp"
 #include "interfaces.hpp"

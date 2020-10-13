@@ -94,7 +94,7 @@ vector<vector<RayInput>> Renderer::processPreRender(const vector<vector<RayInter
             
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
-                    auto item = buffer[min(max(x + i - 1, 0), regions_x - 1)][min(max(y + j - 1, 0), regions_y - 1)];
+                    auto item = buffer[clamp(x + i - 1, 0, regions_x - 1)][clamp(y + j - 1, 0, regions_y - 1)];
                     auto index = 3 * j + i;
                     
                     depth_matrix[index] = item.hit;

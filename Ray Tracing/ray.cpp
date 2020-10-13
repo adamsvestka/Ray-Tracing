@@ -65,7 +65,7 @@ Vector3 reflect(Vector3 direction, Vector3 normal) {
 
 // MARK: fresnel
 float fresnel(Vector3 direction, Vector3 normal, float ior) {
-    float cosi = min(max(direction * normal, -1.f), 1.f);
+    float cosi = clamp(direction * normal, -1.f, 1.f);
     float etai = 1, etat = ior;
     if (cosi > 0) swap(etai, etat);
     float sint = etai / etat * sqrt(max(0.f, 1 - cosi * cosi));
@@ -81,7 +81,7 @@ float fresnel(Vector3 direction, Vector3 normal, float ior) {
 
 // MARK: refract
 Vector3 refract(Vector3 direction, Vector3 normal, float ior) {
-    float cosi = min(max(direction * normal, -1.f), 1.f);
+    float cosi = clamp(direction * normal, -1.f, 1.f);
     float etai = 1, etat = ior;
     if (cosi < 0) cosi = -cosi;
     else {

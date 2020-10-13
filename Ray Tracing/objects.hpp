@@ -1,5 +1,5 @@
 //
-//  shapes.hpp
+//  objects.hpp
 //  Ray Tracing
 //
 //  Created by Adam Svestka on 4/14/20.

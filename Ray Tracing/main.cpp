@@ -14,7 +14,7 @@
 #include "data_types.hpp"
 #include "shaders.hpp"
 #include "file_managers.hpp"
-#include "shapes.hpp"
+#include "objects.hpp"
 #include "light_sources.hpp"
 #include "ray.hpp"
 #include "camera.hpp"

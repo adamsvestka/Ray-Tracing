@@ -43,7 +43,7 @@ struct Settings {
     
     short rendering_threads = 25;
     
-    Color background_color;
+    Color background_color = Color::Black;
 };
 
 extern Settings settings;
