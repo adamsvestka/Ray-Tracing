@@ -26,26 +26,33 @@ using namespace std;
 Settings settings;
 
 int main(int argc, const char *argv[]) {
+    // Rozhraní na interakci s OS (kreslení na obrazovku, log, vstup z klávesnice)
     NativeInterface interface;
     
+    // Objekty ve scéně
     Camera camera;
     vector<Object *> objects;
     vector<Light *> lights;
     
+    // Načtení nastavení a scény ze souborů
     Parser parser(interface);
     parser.parseSettings("settings.ini", settings);
     parser.parseScene("scene.json", camera, objects, lights);
     
+    // Vytvoření scény a vykreslení
     Renderer renderer(interface, camera, objects, lights);
     renderer.render();
     
+    // Pokud není výsledný obraz uložen v RAM, tak nezbývá než čekat na ukončení
     if (!settings.save_render) { while (interface.getChar() != 'q') continue; return 0; }
     
     int mode = settings.render_mode;
     auto buffer = renderer.getResult(mode);
     
+    // Klávesa 'q' ukončí program
     char c = '\0';
     while ((c = interface.getChar()) != 'q') {
+        // Klávesa čísel mění vykreslovací režimy
         if (c >= '0' && c < RenderTypes + '0') {
             mode = c - '0';
             buffer = renderer.getResult(mode);
@@ -55,7 +62,9 @@ int main(int argc, const char *argv[]) {
                 }
             }
             renderer.renderInfo();
+            // Klávesa 's' uloží výsledný obraz do souboru
         } else if (c == 's') interface.saveImage("output.png", buffer);
+        // Klávesa 'r' znovu vykreslý scénu
         else if (c == 'r') {
             objects.clear();
             lights.clear();
@@ -66,7 +75,7 @@ int main(int argc, const char *argv[]) {
         }
     }
     
-    interface.log("Exiting...");
+    interface.log("Ukončování...");
     
     return 0;
 }

@@ -30,6 +30,7 @@ class Renderer;
 
 using namespace std;
 
+// Strktura uchovávající bitmapu jednoho vykresleného regionu
 struct RenderRegion {
     int x, y, w, h;
     Buffer buffer;
@@ -48,6 +49,7 @@ struct RenderRegion {
     }
 };
 
+// Třída starající se o vysílání paprsků a celkové vykreslování
 class Renderer {
 private:
     NativeInterface &display;

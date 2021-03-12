@@ -25,6 +25,7 @@ Vector3 PointLight::getVector(Vector3 point) {
 Color PointLight::getDiffuseValue(Vector3 point, Vector3 normal) {
     Vector3 vector_to_light = getVector(point);
     
+    // Lambertův difúzní model - intenzita světla padá s druhou mocninou vzdálenosti a závisí na úhlu mezi normálou a světlem
     const float cosine_term = vector_to_light.normalized() * normal;
     
     return color * intensity * (float)(fmax(cosine_term, 0.f) / (vector_to_light * vector_to_light * 4 * M_PI));
@@ -33,6 +34,7 @@ Color PointLight::getDiffuseValue(Vector3 point, Vector3 normal) {
 Color PointLight::getSpecularValue(Vector3 point, Vector3 normal, Vector3 direction, int n) {
     Vector3 vector_to_light = getVector(point);
     
+    // Phongův spekulární model - intenzita závisí na úhlu pohledu
     const float cosine_term = vector_to_light.normalized() * normal;
     
     return color * pow(intensity, 0.3) * (pow(fmax(-(normal * (cosine_term * 2) - vector_to_light.normalized()) * direction, 0.f), n));
@@ -55,6 +57,7 @@ Vector3 LinearLight::getVector(Vector3 point) {
 Color LinearLight::getDiffuseValue(Vector3 point, Vector3 normal) {
     Vector3 vector_to_light = getVector(point);
     
+    // Modifikovaný Lambertův difúzní model - intenzita světla padá lineárně se vzdáleností a závisí na úhlu mezi normálou a světlem
     const float cosine_term = vector_to_light.normalized() * normal;
     
     return color * intensity * (float)(fmax(cosine_term, 0.f) / (vector_to_light.length() * 4 * M_PI));
@@ -63,6 +66,7 @@ Color LinearLight::getDiffuseValue(Vector3 point, Vector3 normal) {
 Color LinearLight::getSpecularValue(Vector3 point, Vector3 normal, Vector3 direction, int n) {
     Vector3 vector_to_light = getVector(point);
     
+    // Phongův spekulární model - intenzita závisí na úhlu pohledu
     const float cosine_term = vector_to_light.normalized() * normal;
     
     return color * pow(intensity, 0.4) * (pow(fmax(-(normal * (cosine_term * 2) - vector_to_light.normalized()) * direction, 0.f), n));
@@ -74,7 +78,7 @@ Color LinearLight::getSpecularValue(Vector3 point, Vector3 normal, Vector3 direc
 /// @param intensity int ~ (0 - 1)
 GlobalLight::GlobalLight(Color color, float intensity) : intensity(intensity) {
     this->color = color;
-    shadow = false;
+    shadow = false; // Globální (ambientní) osvětlení netvoří stíny - je všude
 }
 
 Vector3 GlobalLight::getVector(Vector3) {
@@ -104,7 +108,7 @@ Vector3 DirectionalLight::getVector(Vector3 point) {
 }
 
 Color DirectionalLight::getDiffuseValue(Vector3, Vector3) {
-    return color * intensity;
+    return color * intensity;   // Intenzita neklesá, pouze se tvoří stíny
 }
 
 Color DirectionalLight::getSpecularValue(Vector3, Vector3, Vector3, int) {

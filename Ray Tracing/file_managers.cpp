@@ -37,7 +37,7 @@ constexpr unsigned long long operator ""_h(char const *p, size_t) {
 Parser::Parser(NativeInterface &interface) : interface(interface) {};
 
 void Parser::parseSettings(string filename, Settings &settings) {
-    interface.log("Parsing " + filename);
+    interface.log("Načítám " + filename);
     
     // MARK: Bind options
     map<string, pair<short, void *>> bindings;
@@ -74,7 +74,7 @@ void Parser::parseSettings(string filename, Settings &settings) {
                 try {
                     auto it = bindings.find(matches[1].str());
                     if (it == bindings.end()) {
-                        interface.log("Unused key: " + line);
+                        interface.log("Nepoužitý klíč: " + line);
                         continue;
                     }
                     
@@ -88,17 +88,17 @@ void Parser::parseSettings(string filename, Settings &settings) {
                     
                     bindings.erase(it);
                 } catch(...) {
-                    interface.log("Invalid value: " + line);
+                    interface.log("Neplatná hodnota: " + line);
                 }
-            } else interface.log("Invalid entry: " + line);
+            } else interface.log("Neplatný záznam: " + line);
         }
-    } else interface.log("Unable to open file");
+    } else interface.log("Soubor nelze otevřít");
     
     // MARK: Add missing tags to file
     stringstream append;
     append.setf(ios_base::boolalpha);
     for (auto it : bindings) {
-        interface.log("Missing entry: " + it.first);
+        interface.log("Chybějící záznam: " + it.first);
         
         append << it.first << "=";
         switch (it.second.first) {
@@ -114,7 +114,7 @@ void Parser::parseSettings(string filename, Settings &settings) {
         }
         append << endl;
     }
-    if (!interface.saveFile(filename, append)) interface.log("Unable to update file");
+    if (!interface.saveFile(filename, append)) interface.log("Soubor nelze aktualizovat");
 }
 
 
@@ -147,7 +147,7 @@ Shader Parser::parseShader(json j) {
             case "color"_h: return [color = parseColor(j.value("value", ""))](VectorUV t) { return color; };
             case "image"_h: {
                 Buffer buffer;
-                if (!interface.loadImage(j.value("value", "image.png"), buffer)) interface.log("Couldn't open image");
+                if (!interface.loadImage(j.value("value", "image.png"), buffer)) interface.log("Obrázek se nepodařilo otevřít");
                 return [image = Image(buffer)](VectorUV t) { return image(t); };
             }
             case "checkerboard"_h: return [checkerboard = Checkerboard(j.value("scale", 2), parseColor(j.value("primary", "")), parseColor(j.value("secondary", "")))](VectorUV t) { return checkerboard(t); };
@@ -230,7 +230,7 @@ Camera Parser::parseCamera(json j) {
 }
 
 void Parser::parseScene(string filename, Camera &camera, vector<Object *> &objects, vector<Light *> &lights) {
-    interface.log("Parsing " + filename);
+    interface.log("Načítám " + filename);
     
     stringstream buffer;
     if (interface.loadFile(filename, buffer)) {
@@ -243,14 +243,14 @@ void Parser::parseScene(string filename, Camera &camera, vector<Object *> &objec
         // MARK: Parse camera from file
         if (jfile[camera_key].is_object()) {
             camera = parseCamera(jfile[camera_key]);
-        } else interface.log("Missing entry: " + camera_key);
+        } else interface.log("Chybějící záznam: " + camera_key);
         
         // MARK: Parse shaders from file
         if (jfile[shaders_key].is_object()) {
             for (const auto &[name, jshader] : jfile[shaders_key].items()) {
                 shaders[name] = parseShader(jshader);
             }
-        } else interface.log("Missing entry: " + shaders_key);
+        } else interface.log("Chybějící záznam: " + shaders_key);
         
         // MARK: Parse objects from file
         if (jfile[objects_key].is_array()) {
@@ -258,7 +258,7 @@ void Parser::parseScene(string filename, Camera &camera, vector<Object *> &objec
                 auto object = parseObject(jobject);
                 if (object != nullptr) objects.push_back(object);
             }
-        } else interface.log("Missing entry: " + objects_key);
+        } else interface.log("Chybějící záznam: " + objects_key);
         
         // MARK: Parse lights from file
         if (jfile[lights_key].is_array()) {
@@ -266,14 +266,14 @@ void Parser::parseScene(string filename, Camera &camera, vector<Object *> &objec
                 auto light = parseLight(jlight);
                 if (light != nullptr) lights.push_back(light);
             }
-        } else interface.log("Missing entry: " + lights_key);
-    } else interface.log("Unable to open file");
+        } else interface.log("Chybějící záznam: " + lights_key);
+    } else interface.log("Soubor nelze otevřít");
 }
 
 
 // MARK: - Wavefront .obj
 void Parser::parseGeometry_obj(string filename, vector<array<Vector3, 3>> &overtices, vector<array<VectorUV, 3>> &otextures, vector<array<Vector3, 3>> &onormals) {
-    interface.log("Parsing " + filename);
+    interface.log("Načítám " + filename);
     
     stringstream buffer;
     if (interface.loadFile(filename, buffer)) {
@@ -328,5 +328,5 @@ void Parser::parseGeometry_obj(string filename, vector<array<Vector3, 3>> &overt
                 } break;
             }
         }
-    } else interface.log("Unable to open file");
+    } else interface.log("Soubor nelze otevřít");
 }

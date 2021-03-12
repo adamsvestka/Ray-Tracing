@@ -28,6 +28,11 @@
 using namespace std;
 using json = nlohmann::json;
 
+// Pomocná třída na načítání dat ze souborů
+//  - INI - nastavení
+//  - JSON - scéna
+//  - PNG, JPEG - obrázky
+//  - OBJ - objekty v podobě trojúhelníkové sítě
 class Parser {
 private:
     NativeInterface &interface;

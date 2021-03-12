@@ -10,7 +10,7 @@
 
 
 // MARK: Timer
-const array<string, Timer::c> Timer::names{"intersections", "shadows", "reflections", "transmission"};
+const array<string, Timer::c> Timer::names{"průsečníků", "stínů", "odrazů", "průhlednosti"};
 const array<Color, Timer::c> Timer::colors{Color::Green, Color::Red, Color::Blue, Color::Orange};
 
 Timer::Timer() {
@@ -30,6 +30,7 @@ void Timer::operator+=(const Timer t) {
 }
 
 // MARK: RayIntersection
+// Výpočet stínované barvy v průniku
 Color RayIntersection::shaded() {
     if (!hit) return settings.background_color;
     else {
@@ -59,11 +60,13 @@ Color RayIntersection::shaded() {
 }
 
 // MARK: reflect
+// Odrazí vektor podle normály
 Vector3 reflect(Vector3 direction, Vector3 normal) {
     return direction - normal * 2 * (direction * normal);
 }
 
 // MARK: fresnel
+// Spočítá Fresnelův faktor (poměr míšení průhlednosti a odrazu u průhledných objektů)
 float fresnel(Vector3 direction, Vector3 normal, float ior) {
     float cosi = clamp(direction * normal, -1.f, 1.f);
     float etai = 1, etat = ior;
@@ -80,6 +83,7 @@ float fresnel(Vector3 direction, Vector3 normal, float ior) {
 }
 
 // MARK: refract
+// Zlomí vektor podle indexu lomu a normály
 Vector3 refract(Vector3 direction, Vector3 normal, float ior) {
     float cosi = clamp(direction * normal, -1.f, 1.f);
     float etai = 1, etat = ior;
@@ -98,6 +102,7 @@ RayIntersection castRay(Vector3 origin, Vector3 direction, const vector<Object *
     RayIntersection info;
     
     // MARK: Hit detection
+    // Výchozí hodnoty pro nestřetnutí
     info.timer = Timer();
     info.hit = false;
     info.position = origin;
@@ -110,28 +115,30 @@ RayIntersection castRay(Vector3 origin, Vector3 direction, const vector<Object *
     info.diffuse = info.specular = valarray<Color>(Color::Black, objects.size());
     info.light = info.texture = info.reflection = info.transmission = Color::Black;
     
-    if (++mask.bounce_count > settings.max_light_bounces) return info;
+    if (++mask.bounce_count > settings.max_light_bounces) return info;  // Kontrola maximálního počtu odrazů
     
+    // Smyčka přes všechny objekty ve scéně, aby se našel ten nejbližší k počátku paprsku
     ObjectHit hit;
     for (const auto &object : objects) {
         ObjectHit temp = object->intersect(origin, direction);
-        if (temp.distance > 0 && temp.distance < info.distance && (mask.lighting || !object->material.transparent)) {
+        if (temp.distance > 0 && temp.distance < info.distance && (mask.lighting || !object->material.transparent)) {   // Průhledné objekty netvoří stín
             info.object = object;
             info.distance = temp.distance;
             hit = temp;
         }
     }
     
+    // Pro vybraný objekt se dopočítají dodatečné údaje
     info.position = origin + direction * info.distance;
     if ((info.hit = info.object != nullptr)) {
-        // Return if only testing for clear line of sight
+        // Pokud se jen testuje viditelnost, tak není třeba nic dál počítat
         if (!mask.lighting) return info;
         
         info.id = (float)distance(objects.begin(), find(objects.begin(), objects.end(), info.object)) / objects.size();
         info.normal = hit.getNormal();
         info.texture = hit.getTexture();
         
-        // Offset to avoid self-intersection
+        // Posun, aby se zabránilo sebe-protnutí
         if (info.normal * direction < 0 && info.object->material.transparent) info.position -= info.normal * settings.surface_bias;
         else info.position += info.normal * settings.surface_bias;
     } else return info;
@@ -147,7 +154,7 @@ RayIntersection castRay(Vector3 origin, Vector3 direction, const vector<Object *
             if (info.object->material.Ks < 1) info.diffuse[i] = light->getDiffuseValue(info.position, info.normal);
             if (info.object->material.Ks > 0) info.specular[i] = light->getSpecularValue(info.position, info.normal, direction, info.object->material.n);
             
-            // Check clear line of sight to light
+            // Kontrola jestli bod není ve stínu
             const auto vector_to_light = light->getVector(info.position);
             if (mask.shadows[i] && light->shadow && castRay(info.position, vector_to_light.normalized(), objects, lights, shadow_mask).distance < vector_to_light.length()) {
                 info.shadows[i] = true;
@@ -171,7 +178,7 @@ RayIntersection castRay(Vector3 origin, Vector3 direction, const vector<Object *
     
     // MARK: Transmission
     info.timer();
-    if (info.object->material.transparent) {    // Nested ifs to fill info.kr but not waste computation
+    if (info.object->material.transparent) {    // Vnořené pokud aby se spočítalo kr, ale neplýtvalo zbytkem
         if ((info.kr = fresnel(direction, info.normal, info.object->material.ior)) < 1 && mask.transmission) {
             auto ray = castRay(info.position, refract(direction, info.normal, info.object->material.ior), objects, lights, reflect_mask);
             info.transmission = ray.shaded();

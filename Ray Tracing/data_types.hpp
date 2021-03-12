@@ -21,18 +21,23 @@ template<typename T> class ConcurrentQueue;
 
 using namespace std;
 
+// Vlastní datový typ na držení bitmapy
 typedef vector<vector<Color>> Buffer;
 
+// Struktura 3D vektoru
 struct Vector3 {
     float x, y, z;
     
-    float length() const;
-    Vector3 normalized() const;
-    Color asColor() const;
-    Vector3 cross(const Vector3) const;
+    // Metody vektorů
+    float length() const;   // Délka vektoru
+    Vector3 normalized() const; // Normalizovaný vektor
+    Color asColor() const;  // (x, y, x) převedeno na (r, g, b)
+    Vector3 cross(const Vector3) const; // Vektorový součin
     
+    // Předdefinované, často používané vektory
     const static Vector3 Zero, One, North, South, East, West, Up, Down;
     
+    // Vektorové operace
     Vector3 operator+(const Vector3) const;
     Vector3 operator-(const Vector3) const;
     Vector3 operator-() const;
@@ -51,17 +56,21 @@ struct Vector3 {
 };
 
 
+// Struktura matice 3 krát 3
 struct Matrix3x3 {
     float n[3][3];
     
-    Matrix3x3 inverse();
+    // Metody matic
+    Matrix3x3 inverse();    // Inverzní matice
     
+    // Předdefinované, často používané matice a inicializátory
     const static Matrix3x3 Identity;
     static Matrix3x3 RotationMatrixX(float);
     static Matrix3x3 RotationMatrixY(float);
     static Matrix3x3 RotationMatrixZ(float);
     static Matrix3x3 RotationMatrix(float, float, float);
     
+    // Maticové operace
     float operator()(const int, const int) const;
     Matrix3x3 operator+(const Matrix3x3) const;
     Matrix3x3 operator-(const Matrix3x3) const;
@@ -71,26 +80,32 @@ struct Matrix3x3 {
 };
 
 
+// Struktura barvy
 struct Color {
     float r, g, b;
     
+    // Inicializátory
     Color();
     Color(float, float, float);
     Color(int, int, int);
     
+    // Pomocná funkce na kontrolu integrity
     inline static int guard(float f);
     
-    float asValue() const;
-    array<unsigned char, 3> cimg() const;
-    string css() const;
-    Color light() const;
-    Color dark() const;
+    // Metody barev
+    float asValue() const;  // Převod na skalár
+    array<unsigned char, 3> cimg() const;   // Převod na CImg formát
+    string css() const; // Převod na CSS formát
+    Color light() const;    // Zesvětlení
+    Color dark() const; // Ztmavení
     
+    // Předdefinované, často používané barvy
     const static Color White, Gray, Black,
         Red, Orange, Yellow, Pink, Brown, Mocha, Asparagus,
         Lime, Green, Moss, Fern,
         Blue, Cyan, Magenta, Teal, Indigo, Purple;
     
+    // Barevné operace
     operator int() const;
     unsigned char operator[](short) const;
     bool operator==(const Color) const;
@@ -111,17 +126,22 @@ struct Color {
 };
 
 
+// Struktura dvojvektoru na texturové souřadnice
 struct VectorUV {
     float u, v;
     
+    // Inicializátory
     VectorUV();
     VectorUV(float, float);
     VectorUV(int, int);
     
+    // Pomocná funkce na kontrolu integrity
     inline static float guard(float f);
     
+    // Předdefinované, často používané vektory
     const static VectorUV Zero;
     
+    // Vektorové operace
     bool operator==(const VectorUV) const;
     bool operator!=(const VectorUV) const;
     VectorUV operator+(const VectorUV) const;
@@ -134,16 +154,21 @@ struct VectorUV {
     VectorUV operator/(const float) const;
     VectorUV operator/(const int) const;
     
+    // Metody vektorů
     float getU() const;
     float getV() const;
 };
 
 
+// Struktura jednoduché nervové sítě
 struct NeuralNetwork {
+    // Uloženo ve formě: pole vrstev > buňky v poli > spojení buňky s buňkami v následující vrstvě > váha spojení
     vector<vector<vector<float>>> nodes;
     
+    // Inicializace
     explicit NeuralNetwork(vector<vector<vector<float>>> &);
     
+    // Vyhodnocení
     vector<float> eval(vector<float> &);
 };
 
@@ -153,6 +178,7 @@ struct NeuralNetwork {
 #include <queue>
 #include <atomic>
 
+// Struktura na správu pole dat napříč několik vláken (FIFO)
 template<typename T>
 class ConcurrentQueue {
 private:
@@ -162,6 +188,7 @@ private:
     atomic<bool> exit_ = {false};
     
 public:
+    // Přidání prvku
     void push(T const& data) {
         exit_.store(false);
         unique_lock<mutex> lk(mutex_);
@@ -170,11 +197,13 @@ public:
         cond_.notify_one();
     }
     
+    // Zda je pole prázdné
     bool empty() {
         unique_lock<mutex> lk(mutex_);
         return queue_.empty();
     }
     
+    // Získání nejstaršího prvku
     bool pop(T& popped_value) {
         unique_lock<mutex> lk(mutex_);
         cond_.wait(lk, [&]() -> bool { return !queue_.empty() || exit_.load(); });
@@ -184,6 +213,7 @@ public:
         return true;
     }
     
+    // Nucené ukončení všech vláken
     void stop() {
         exit_.store(true);
         cond_.notify_all();

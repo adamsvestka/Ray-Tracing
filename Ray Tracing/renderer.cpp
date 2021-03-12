@@ -9,6 +9,7 @@
 #include "renderer.hpp"
 
 // MARK: Select render_mode
+// Funkce, která převede data nasbíraná paprskem na barvu podle vykreslovacího režimu
 inline Color getPixel(RayIntersection data, int mode) {
     switch (mode) {
         case RENDER_COLOR: return data.texture;
@@ -48,6 +49,7 @@ Renderer::Renderer(NativeInterface &display, Camera &camera, vector<Object *> &o
 }
 
 // MARK: - Preprocessing
+// Vyšle jeden paprsek pro každý region, podle toho pak zjistí, kde je zbytečné vykreslovat
 vector<vector<RayIntersection>> Renderer::preRender() {
     const int regions_x = ceil((float)width / settings.render_region_size);
     const int regions_y = ceil((float)height / settings.render_region_size);
@@ -70,6 +72,7 @@ vector<vector<RayIntersection>> Renderer::preRender() {
     return buffer;
 }
 
+// Rozhoddne, co vykreslovat podle výsledku předchozí funkce
 vector<vector<RayInput>> Renderer::processPreRender(const vector<vector<RayIntersection>> &buffer) {
     const int regions_x = (int)buffer.size();
     const int regions_y = (int)buffer[0].size();
@@ -87,11 +90,12 @@ vector<vector<RayInput>> Renderer::processPreRender(const vector<vector<RayInter
     
     for (int x = 0; x < regions_x; x++) {
         for (int y = 0; y < regions_y; y++) {
-            vector<float> depth_matrix(9);
-            vector<float> reflect_matrix(9);
-            vector<float> transmit_matrix(9);
-            vector<vector<float>> shadow_matrix(lights.size(), vector<float>(9));
+            vector<float> depth_matrix(9);      // Filtr na hloubku
+            vector<float> reflect_matrix(9);    // Filtr na odrazy
+            vector<float> transmit_matrix(9);   // Filtr na průhlednost
+            vector<vector<float>> shadow_matrix(lights.size(), vector<float>(9));   // Filtr na stíny
             
+            // Načte nasbíraná data do filtrů
             for (int i = 0; i < 3; i++) {
                 for (int j = 0; j < 3; j++) {
                     auto item = buffer[clamp(x + i - 1, 0, regions_x - 1)][clamp(y + j - 1, 0, regions_y - 1)];
@@ -110,17 +114,18 @@ vector<vector<RayInput>> Renderer::processPreRender(const vector<vector<RayInter
             }
             
             // MARK: Filters
-            if (depth_filter.eval(depth_matrix)[0] == 0) processed[x][y].render = false;
+            if (depth_filter.eval(depth_matrix)[0] == 0) processed[x][y].render = false;    // Pokud se v tomto regionu ani v okolních regionech nic nenachází, nevykreslovat
             else {
                 processed[x][y] = {
                     true, 0, true, true,
-                    edge_filter.eval(reflect_matrix)[0] != 0,
-                    edge_filter.eval(transmit_matrix)[0] != 0,
+                    edge_filter.eval(reflect_matrix)[0] != 0,   // To samé pro odrazy (pokud není v blízkosti reflexní objekt)
+                    edge_filter.eval(transmit_matrix)[0] != 0,  // To samé pro průhlednost
                     vector<bool>(lights.size(), true)
                 };
                 
-                for (int i = 0; i < processed[x][y].shadows.size(); i++) processed[x][y].shadows[i] = edge_filter.eval(shadow_matrix[i])[0];
+                for (int i = 0; i < processed[x][y].shadows.size(); i++) processed[x][y].shadows[i] = edge_filter.eval(shadow_matrix[i])[0];    // Nepočítat stíny, pokud není třeba
                 
+                // Při některých vykreslovacích režimech není třeba sbírat všechny data
                 switch (settings.render_mode) {
                     case RENDER_REFLECTION: if (!processed[x][y].reflections) processed[x][y].render = false; processed[x][y].diffuse = processed[x][y].transmission = false; break;
                     case RENDER_TRANSMISSION: if (!processed[x][y].transmission) processed[x][y].render = false; processed[x][y].diffuse = processed[x][y].reflections = false; break;
@@ -145,20 +150,25 @@ vector<vector<RayInput>> Renderer::processPreRender(const vector<vector<RayInter
 }
 
 // MARK: - Rendering
+// Vypíše dodatečné údaje o vykreslování do levého horního rohu
 void Renderer::renderInfo() {
-    static const vector<string> render_type_names = {"Shaded", "Textures", "Reflections", "Transmission", "Light", "Shadows", "Normals", "Inverse Normals", "Depth", "Objects"};
+    // Názvy vykreslovacích režimů
+    static const vector<string> render_type_names = {"Stinovano", "Textury", "Odrazy", "Pruhlednost", "Svetlo", "Stiny", "Normaly", "Opacne Normaly", "Hloubka", "Objekty"};
     
+    // Časování
     if (region_current < region_count) end = chrono::high_resolution_clock::now();
     display.renderInfo({region_current, region_count, (int)chrono::duration<float, milli>(end - start).count(), info.objects, timer, render_type_names[settings.render_mode]});
     
     display.refresh();
 }
 
+// Metoda na vykreslení jednoho regionu
 RenderRegion Renderer::renderRegion(RenderRegion region, const RayInput &mask, const RayIntersection &estimate) {
     for (int x = 0; x < region.w; x++) {
         for (int y = 0; y < region.h; y++) {
             auto ray = castRay(camera.getPosition(), camera.getRay(region.x + x, region.y + y), objects, lights, mask);
             
+            // Pokud není třeba počítat některé údaje, tak je odhadne
             if (!mask.reflections && ray.hit && ray.object->material.Ks) ray.reflection = estimate.reflection == Color::Black ? settings.background_color : estimate.reflection;
             if (!mask.transmission && ray.hit && ray.object->material.transparent) ray.transmission = estimate.transmission == Color::Black ? settings.background_color : estimate.transmission;
             for (int i = 0; i < mask.shadows.size(); i++) if (!mask.shadows[i] && ray.hit) if ((ray.shadows[i] = estimate.shadows[i])) ray.light = estimate.light;
@@ -178,7 +188,7 @@ RenderRegion Renderer::renderRegion(RenderRegion region, const RayInput &mask, c
 void Renderer::render() {
     start = chrono::high_resolution_clock::now();
     
-    // Reset
+    // Vynulování
     display.getDimensions(width, height);
     camera.getDimensions(width, height);
     
@@ -187,24 +197,24 @@ void Renderer::render() {
     for (const auto &object : objects) info += object->getInfo();
     if (settings.save_render) result = vector<Buffer>(RenderTypes, Buffer(width, vector<Color>(height, Color::Black)));
     
-    display.log("Starting render...");
+    display.log("Spouštění vykreslování...");
     
-    // Render at lower resolution
+    // Vykreslení při nižším rozlišení
     const auto buffer = preRender();
     
-    // Process what to render
+    // Zpracuje, co se má vykreslit
     const auto mask = processPreRender(buffer);
     
 #ifndef __EMSCRIPTEN__
     
-    // Create job queue
+    // Vytvoří seznam úloh
     ConcurrentQueue<RenderRegion> task_queue;
     do {
         task_queue.push(RenderRegion(minX, maxX, minY, maxY));
     } while (next(mask));
     renderInfo();
     
-    // Create job lambda
+    // Vytvoří lambda funkci práce
     ConcurrentQueue<RenderRegion> result_queue;
     auto func = [&]() {
         while (true) {
@@ -215,11 +225,11 @@ void Renderer::render() {
         }
     };
     
-    // Startup sibling threads
+    // Spustí vlákna
     vector<thread> threads(settings.rendering_threads);
     for (auto &it : threads) it = thread(func);
     
-    // Use main thread to render results
+    // K vykreslení výsledků se použije hlavní vlákno
     do {
         RenderRegion region;
         result_queue.pop(region);
@@ -230,12 +240,13 @@ void Renderer::render() {
         renderInfo();
     } while (region_current < region_count);
     
-    // Terminate sibling threads
+    // Ukončí se ostatní vlákna
     task_queue.stop();
     for (auto &it : threads) it.join();
     
 #else
     
+    // To samé, ale bez multithreadingu (pro WebAssembly)
     auto refresh = chrono::high_resolution_clock::now();
     
     do {
@@ -256,8 +267,9 @@ void Renderer::render() {
     
 #endif
     
-    for (short i = 0; i < timer.c; i++) display.log("Calculating " + timer.names[i] + " took " + to_string(timer.times[i] / 1000.f) + " seconds");
-    display.log("Total time was " + to_string(chrono::duration<float, milli>(end - start).count() / 1000.f) + " seconds");
+    // Statistika do konzole
+    for (short i = 0; i < timer.c; i++) display.log("Výpočet " + timer.names[i] + " trval " + to_string(timer.times[i] / 1000.f) + " sekund");
+    display.log("Celkový čas byl " + to_string(chrono::duration<float, milli>(end - start).count() / 1000.f) + " sekund");
 }
 
 Buffer Renderer::getResult(short layer) {
@@ -272,6 +284,7 @@ void Renderer::generateRange() {
     maxY = fmin(y + settings.render_region_size, height);
 }
 
+// Nastaví souřadnice prvního regionu podle vykreslovacího vzoru
 void Renderer::resetPosition() {
     switch (settings.render_pattern) {
         case PATTERN_SPIRAL:
@@ -295,6 +308,7 @@ void Renderer::resetPosition() {
     generateRange();
 }
 
+// Vygeneruje souřadnice následujícího regionu podle vykreslovacího vzoru
 bool Renderer::next(const vector<vector<RayInput>> &mask) {
     switch (settings.render_pattern) {
         case PATTERN_VERTICAL: // MARK: Vertical

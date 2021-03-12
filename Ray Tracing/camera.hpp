@@ -14,6 +14,7 @@ class Camera;
 
 #include "data_types.hpp"
 
+// Kamera se stará o generaci paprsků a taky ukládá rozlišení obrazovky
 class Camera {
 private:
     Vector3 position;
@@ -24,7 +25,7 @@ private:
 public:
     Camera();
     Camera(Vector3, Vector3, float, float, float);
-    void getDimensions(int, int);
-    Vector3 getPosition();
-    Vector3 getRay(int, int);
+    void getDimensions(int, int);   // Rozměry obrazovky
+    Vector3 getPosition();          // Poloha kamery
+    Vector3 getRay(int, int);       // Vygeneruje paprsek pro x, y souřadnice na obrazovce
 };

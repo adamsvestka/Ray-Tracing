@@ -29,6 +29,7 @@ class X11Interface;
 
 using namespace std;
 
+// Informace pro vykreslení v levém horním rohu
 struct DebugInfo {
     int region_current, region_count, render_time, object_count;
     Timer timer;
@@ -36,30 +37,32 @@ struct DebugInfo {
 };
 
 
+// Prototyp třídy pro interakci s OS (obrazovka, klávesnice, soubory, log)
 class InterfaceTemplate {
 protected:
     int width, height;
     
 public:
-    void getDimensions(int &, int &);
+    void getDimensions(int &, int &);   // Rozlišení obrazovky
     
-    virtual void drawPixel(int, int, Color) = 0;
-    virtual void drawDebugBox(int, int, RayInput) = 0;
-    virtual void renderInfo(DebugInfo) = 0;
-    virtual void refresh() = 0;
-    virtual char getChar() = 0;
+    virtual void drawPixel(int, int, Color) = 0;        // Vykreslit pixel na souřadnicích
+    virtual void drawDebugBox(int, int, RayInput) = 0;  // Vykreslit ladící kříž
+    virtual void renderInfo(DebugInfo) = 0;             // Vykreslit dodatečné informace
+    virtual void refresh() = 0; // Obnovit obrazovku
+    virtual char getChar() = 0; // Vstup z klávesnice
     
-    virtual bool loadFile(string, stringstream &) = 0;
-    virtual bool saveFile(string, const stringstream &) = 0;
+    virtual bool loadFile(string, stringstream &) = 0;          // Načíst soubor
+    virtual bool saveFile(string, const stringstream &) = 0;    // Uložit soubor
     
-    virtual bool loadImage(string, Buffer &) = 0;
-    virtual bool saveImage(string, const Buffer &) = 0;
+    virtual bool loadImage(string, Buffer &) = 0;       // Načíst obrázek
+    virtual bool saveImage(string, const Buffer &) = 0; // Uložit obrázek
     
-    virtual void log(const string &) = 0;
+    virtual void log(const string &) = 0;   // Zapsat zprávu do logu
 };
 
 #ifndef __EMSCRIPTEN__
 
+// Nativní verze pro macOS
 #include <png.h>
 #include <jpeglib.h>
 #pragma clang diagnostic push
@@ -107,6 +110,7 @@ public:
 
 #else
 
+// Verze pro WebAssembly
 #include <emscripten.h>
 #include <emscripten/val.h>
 #include <emscripten/bind.h>
@@ -117,6 +121,7 @@ using namespace emscripten;
 #define WASMInterface NativeInterface
 class WASMInterface : public InterfaceTemplate {
 private:
+    // HTML elementy
     val window = val::undefined();
     val document = val::undefined();
     val canvas = val::undefined();
@@ -146,6 +151,7 @@ public:
     
     void log(const string &);
     
+    // Pomocné funkce
     static EM_BOOL key_callback(int, const EmscriptenKeyboardEvent *, void *);
     void push_key(int);
     static void init_image(val, val);

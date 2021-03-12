@@ -25,23 +25,27 @@ class PerlinNoise;
 
 using namespace std;
 
+// Vlastní datový typ pro textury objektů / na generování barvy z UV souřadnice
 typedef function<Color(VectorUV)> Shader;
 
 // MARK: - Material
+// Struktura materiálu objektu
 struct Material {
-    Shader texture;
-    float n, Ks, ior;
-    bool transparent;
+    Shader texture; // Funkce, která vrátí barvu pro danou UV souřadnici
+    float n, Ks, ior;   // Parametry stínování: ostrost odrazu, odrazivost, index lomu světla
+    bool transparent;   // Průhlednost
 };
 
 
 // MARK: - Textures
+// Šablona pro texturu objektu
 class Texture {
 public:
     virtual Color operator()(VectorUV) const = 0;
 };
 
 
+// Obrázek načtený ze souboru jako textura
 class Image : public Texture {
 private:
     Buffer image;
@@ -53,6 +57,7 @@ public:
 };
 
 
+// Dynamicky vygenerovaná šachovnice dvou barev jako textura
 class Checkerboard : public Texture {
 private:
     int scale;
@@ -65,6 +70,7 @@ public:
 };
 
 
+// Dynamicky vygenerovaný cihlový vzor jako textura; na vstupu jsou 3 barvy: cihly náhodně interpolují mezi dvěmi, malta má třetí
 class Bricks : public Texture {
 private:
     Buffer colors;
@@ -79,6 +85,7 @@ public:
 };
 
 
+// Dynamicky vygenerovaný Perlinův šum vstupní barvy jako textura
 class PerlinNoise : public Texture {
 private:
     vector<vector<pair<float, float>>> points;

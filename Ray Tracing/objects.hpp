@@ -27,6 +27,8 @@ class Mesh;
 #include "shaders.hpp"
 #include "ray.hpp"
 
+// Struktura vypovídající o složitosti objektu tj. jak je výpočetně náročné spočítat průsečík s paprskem
+// Tohle je čistě orientační údaj pro uživatele, nemá na vykreslování žádný vliv
 struct ObjectInfo {
     int vertices = 0;
     int faces = 0;
@@ -35,6 +37,8 @@ struct ObjectInfo {
     void operator+=(const ObjectInfo &);
 };
 
+// Struktura ukládající data o průsečíku objektu s paprskem
+// V této fázi je spočítaná vzdálenost průsečíku od počátku paprsku, zbytek dat lze dopočítat vrácenými funkcemi (tyto data nejsou vždy potřeba, takže se na nich nestrácí čas)
 struct ObjectHit {
     float distance;
     function<Vector3()> getNormal;
@@ -42,22 +46,23 @@ struct ObjectHit {
 };
 
 
+// Obecný objekt ve scéně
 class Object {
 protected:
-    Vector3 center;
-    Matrix3x3 rotation, Irotation;
+    Vector3 center; // Poloha objektu
+    Matrix3x3 rotation, Irotation;  // Matice na převod mezi objektovým a globálním souřadným systémem
     
 public:
-    Material material;
+    Material material;  // Materiál
     
     Object(Vector3, Vector3, Material);
     /***/ Vector3 getCenter() const;
     /***/ Matrix3x3 getRotation() const;
     /***/ Matrix3x3 getInverseRotation() const;
-    /***/ Vector3 toObjectSpace(Vector3 point) const;
-    /***/ Vector3 toWorldSpace(Vector3 _point) const;
-    /***/ virtual ObjectHit intersect(Vector3 origin, Vector3 direction) const = 0;
-    /***/ virtual ObjectInfo getInfo() const = 0;
+    /***/ Vector3 toObjectSpace(Vector3 point) const;   // Převod bodu z globálního souřadného systému do objektového
+    /***/ Vector3 toWorldSpace(Vector3 _point) const;   // a naopak
+    /***/ virtual ObjectHit intersect(Vector3 origin, Vector3 direction) const = 0; // Spočítání průsečíku s paprskem
+    /***/ virtual ObjectInfo getInfo() const = 0;   // Vrátí složitost objektu
 };
 
 

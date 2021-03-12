@@ -39,36 +39,36 @@ Sphere::Sphere(Vector3 position, float diameter, Vector3 angles, Material materi
 ObjectHit Sphere::intersect(Vector3 origin, Vector3 direction) const {
     float t0, t1;
     
-    Vector3 path = center - origin;
-    float tca = path * direction;
-    if (tca < 0) return {-1};
+    Vector3 path = center - origin; // Vektor od počátku paprsku ke středu koule
+    float tca = path * direction;   // Kosinus úhlu mezi vektorem 'path' a směrovým vektorem paprsku
+    if (tca < 0) return {-1};   // Pokud letí paprsek na druhou stranu nemá cenu nic počítat
     
-    float d2 = path * path - tca * tca;
-    if (d2 > radius2) return {-1};
+    float d2 = path * path - tca * tca; // Čtvercová délka kolmice na vektor 'path' procházející středem koule
+    if (d2 > radius2) return {-1};  // Pokud letí paprsek mimo kouli nemá cenu nic počítat
     
-    float thc = sqrt(radius2 - d2);
-    t0 = tca - thc;
-    t1 = tca + thc;
-    if (t0 > t1) swap(t0, t1);
+    float thc = sqrt(radius2 - d2); // Délka vektoru 'path', která protíná kouli
+    t0 = tca - thc; // První průnik s koulí
+    t1 = tca + thc; // Druhý průnik s koulí
+    if (t0 > t1) swap(t0, t1);  // Vybere se ten blíž k počátku paprsku
     
-    if (t0 < 0) {
+    if (t0 < 0) {   // Střetnutí musí být ve směru paprsku
         if (t1 < 0) return {-1};
         t0 = t1;
     }
     
-    Vector3 point = origin + direction * t0;
+    Vector3 point = origin + direction * t0;    // Bod střetnutí
     return {t0, [=] { return getNormal(point); }, [=] { return getTexture(point); }};
 }
 
 Vector3 Sphere::getNormal(Vector3 point) const {
-    return rotation * toObjectSpace(point).normalized();
+    return rotation * toObjectSpace(point).normalized();    // Normála bodu je normalizovaný vektor od středu k danému bodu
 }
 
 Color Sphere::getTexture(Vector3 point) const {
     const Vector3 _point = toObjectSpace(point);
     
-    float u = asin(clamp(_point.z / radius, -1.f, 1.f)) / (2 * M_PI) + 0.25;
-    float v = atan2(clamp(_point.x / radius, -1.f, 1.f), clamp(_point.y / radius, -1.f, 1.f)) / (2 * M_PI) + 0.5;
+    float u = asin(clamp(_point.z / radius, -1.f, 1.f)) / (2 * M_PI) + 0.25;    // Šířka
+    float v = atan2(clamp(_point.x / radius, -1.f, 1.f), clamp(_point.y / radius, -1.f, 1.f)) / (2 * M_PI) + 0.5;   // Délka
     
     return material.texture({u, v});
 }
@@ -111,33 +111,34 @@ ObjectHit Cuboid::intersect(Vector3 origin, Vector3 direction) const {
     Vector3 _origin = toObjectSpace(origin) + center;
     Vector3 _direction = Irotation * direction;
     
-    Vector3 tmin = (vmin - _origin) / _direction;
-    Vector3 tmax = (vmax - _origin) / _direction;
+    Vector3 tmin = (vmin - _origin) / _direction;   // Vektor od počátku paprsku do vrcholu kvádru převeden na rychli
+    Vector3 tmax = (vmax - _origin) / _direction;   // To samé pro opačný vrchol
     
-    if (tmin.x > tmax.x) swap(tmin.x, tmax.x);
+    if (tmin.x > tmax.x) swap(tmin.x, tmax.x);  // Seřazení bodů
     if (tmin.y > tmax.y) swap(tmin.y, tmax.y);
     if (tmin.z > tmax.z) swap(tmin.z, tmax.z);
     
-    if (tmin.x > tmax.y || tmin.y > tmax.x) return {-1};
+    if (tmin.x > tmax.y || tmin.y > tmax.x) return {-1};    // Mimo
     if (tmin.y > tmin.x) tmin.x = tmin.y;
     if (tmax.y < tmax.x) tmax.x = tmax.y;
     
-    if (tmin.x > tmax.z || tmin.z > tmax.x) return {-1};
+    if (tmin.x > tmax.z || tmin.z > tmax.x) return {-1};    // Mimo
     if (tmin.z > tmin.x) tmin.x = tmin.z;
     if (tmax.z < tmax.x) tmax.x = tmax.z;
     
-    if (tmin.x < 0) {
+    if (tmin.x < 0) {   // Nejbližší průnik
         if (tmax.x < 0) return {-1};
         tmin.x = tmax.x;
     }
     
-    Vector3 point = origin + direction * tmin.x;
+    Vector3 point = origin + direction * tmin.x;    // Bod střetnutí
     return {tmin.x, [=] { return getNormal(point); }, [=] { return getTexture(point); }};
 }
 
 Vector3 Cuboid::getNormal(Vector3 point) const {
     const Vector3 _point = toObjectSpace(point);
     
+    // Normála je největší vzdálenost od středu kvádru ku délce dané strany
     if (abs(_point.x / size.x) > abs(_point.y / size.y) && abs(_point.x / size.x) > abs(_point.z / size.z)) return rotation * Vector3{_point.x > 0 ? 1.f : -1.f, 0, 0};
     else if (abs(_point.y / size.y) > abs(_point.z / size.z)) return rotation * Vector3{0, _point.y > 0 ? 1.f : -1.f, 0};
     else return rotation * Vector3{0, 0, _point.z > 0 ? 1.f : -1.f};
@@ -146,6 +147,7 @@ Vector3 Cuboid::getNormal(Vector3 point) const {
 Color Cuboid::getTexture(Vector3 point) const {
     const Vector3 _point = toObjectSpace(point);
     
+    // Souřadnice na straně, kde byla dána normála
     float u, v;
     if (abs(_point.x) > abs(_point.y) && abs(_point.x) > abs(_point.z)) {
         v = _point.y / size.y + 0.5;
@@ -179,16 +181,16 @@ Plane::Plane(Vector3 position, float size_x, float size_y, Vector3 angles, Mater
 
 ObjectHit Plane::intersect(Vector3 origin, Vector3 direction) const {
     Vector3 normal = getNormal(direction);
-    float denom = normal * direction;
+    float denom = normal * direction;   // Kosinus úhlu mezi povrchovou normálou a směrovým vektorem paprsku
     
-    if (denom < 0) {
-        Vector3 path = center - origin;
-        float t = path * normal / denom;
+    if (denom < 0) {    // Pokud letí paprsek na druhou stranu nemá cenu nic počítat
+        Vector3 path = center - origin; // Vektor od počátku paprsku ke středu plochy
+        float t = path * normal / denom;    // Vzdálenost průnik od počátku paprsku
         
         Vector3 _point = toObjectSpace(origin + direction * t);
-        if (abs(_point.x) > size_x / 2 || abs(_point.y) > size_y / 2) return {-1};
+        if (abs(_point.x) > size_x / 2 || abs(_point.y) > size_y / 2) return {-1};  // Kontrola jestli je průnik uvnitř rozměrů plochy v rovniě
         
-        Vector3 point = origin + direction * t;
+        Vector3 point = origin + direction * t; // Bod střetnutí
         return {t, [=] { return normal; }, [=] { return getTexture(point); }};
     }
     
@@ -196,7 +198,7 @@ ObjectHit Plane::intersect(Vector3 origin, Vector3 direction) const {
 }
 
 Vector3 Plane::getNormal(Vector3 direction) const {
-    return rotation * Vector3{0, 0, (Irotation * direction).z < 0 ? 1.f : -1.f};
+    return rotation * Vector3{0, 0, (Irotation * direction).z < 0 ? 1.f : -1.f};    // Normála je kolmice na plochu
 }
 
 Color Plane::getTexture(Vector3 point) const {
@@ -225,35 +227,35 @@ Triangle::Triangle(array<Vector3, 3> vertices, array<VectorUV, 3> textures, arra
 
 ObjectHit Triangle::intersect(Vector3 origin, Vector3 direction) const {
     Vector3 pvec = direction.cross(v0v2);
-    float det = v0v1 * pvec;
+    float det = v0v1 * pvec;    // Kosinus uhlu mezi jednou hranou a kolmicí na druhou hranu a směrový vektor paprsku
 
-    if (det == 0) return {-1};
+    if (det == 0) return {-1};  // Pokud letí paprsek ve stejné rovině jako trojúhelník, tak ho mine
 
     float invDet = 1 / det;
     
-    Vector3 tvec = origin - v0;
-    float u = (tvec * pvec) * invDet;
+    Vector3 tvec = origin - v0; // Vektor od vrcholu trojúhelníku k počátku paprsku
+    float u = (tvec * pvec) * invDet;   // U souřadnice na trojúhelníku
     if (u < 0 || u > 1) return {-1};
     
     Vector3 qvec = tvec.cross(v0v1);
-    float v = (direction * qvec) * invDet;
+    float v = (direction * qvec) * invDet;  // V souřadnice na trojúhelníku
     if (v < 0 || u + v > 1) return {-1};
     
     float t = (v0v2 * qvec) * invDet;
     
-    return {t, [=] { return getNormal({u, v}); }, [=] { return getTexture({u, v}); }};
+    return {t, [=] { return getNormal({u, v}); }, [=] { return getTexture({u, v}); }};  // Normála a textura používají souřadnice UV
 }
 
 Vector3 Triangle::getNormal(VectorUV t) const {
-    if (vn) return normals[0];
+    if (vn) return normals[0];  // Pokud nejsou vygenerované vrcholové normály, tak se použije povrchová
     
-    return normals[0] * (1 - t.getU() - t.getV()) + normals[1] * t.getU() + normals[2] * t.getV();
+    return normals[0] * (1 - t.getU() - t.getV()) + normals[1] * t.getU() + normals[2] * t.getV();  // Interpoluje mezi uloženými vrcholovými normálami
 }
 
 Color Triangle::getTexture(VectorUV t) const {
-    if (tc) return material.texture({0, 0});
+    if (tc) return material.texture({0, 0});    // Pokud nejsou vygenerované texturové souřadnice, tak trojúhelník bude mít jedno barvu
     
-    VectorUV tex = textures[0] * (1 - t.getU() - t.getV()) + textures[1] * t.getU() + textures[2] * t.getV();
+    VectorUV tex = textures[0] * (1 - t.getU() - t.getV()) + textures[1] * t.getU() + textures[2] * t.getV();   // Interpoluje mezi uloženými texturovými souřadnicemi
     
     return material.texture(tex);
 }
@@ -287,27 +289,27 @@ Mesh::Mesh(vector<array<Vector3, 3>> vertices, vector<array<VectorUV, 3>> textur
             else if (vertex.z > vmax.z) vmax.z = vertex.z;
         }
         
-        array<VectorUV, 3> texture{VectorUV::Zero, VectorUV::Zero, VectorUV::Zero};
+        array<VectorUV, 3> texture{VectorUV::Zero, VectorUV::Zero, VectorUV::Zero}; // Texturové souřadnice
         if (i < textures.size()) texture = textures[i];
         
-        array<Vector3, 3> normal{Vector3::Zero, Vector3::Zero, Vector3::Zero};
+        array<Vector3, 3> normal{Vector3::Zero, Vector3::Zero, Vector3::Zero};  // Vrcholové normály
         if (i < normals.size()) {
             normal = normals[i];
             for (auto &norm : normal) norm = (rotation * norm).normalized();
         }
         
-        this->triangles.push_back(Triangle(triangle, texture, normal, this->material));
+        this->triangles.push_back(Triangle(triangle, texture, normal, this->material)); // Pole trojúhelníků
     }
-    bounds = Cuboid(vmin, vmax, Vector3::Zero, {});
+    bounds = Cuboid(vmin, vmax, Vector3::Zero, {}); // Ohraničující kvádr pro zrychlení výpočtů
 }
 
 ObjectHit Mesh::intersect(Vector3 origin, Vector3 direction) const {
-    if (bounds.intersect(origin, direction).distance < 0) return {-1};
+    if (bounds.intersect(origin, direction).distance < 0) return {-1};  // Pokud paprsek neprotíná ohraničující kvádr, tak letí mimo
     
-    const Triangle *object = nullptr;
+    const Triangle *object = nullptr;   // Ukazatel na nejbližší trojúhelník
     ObjectHit best{(float)settings.max_render_distance, [] { return Vector3::Zero; }, [] { return Color::Black; }};
     
-    for (const auto &triangle : triangles) {
+    for (const auto &triangle : triangles) {    // Smyčka přes všechny trojúhelníky
         ObjectHit hit = triangle.intersect(origin, direction);
         if (hit.distance < best.distance && hit.distance > 0) {
             object = &triangle;
@@ -315,7 +317,7 @@ ObjectHit Mesh::intersect(Vector3 origin, Vector3 direction) const {
         }
     }
     
-    if (object == nullptr) return {-1};
+    if (object == nullptr) return {-1}; // Pokud se paprsek s ničím neprotnul
     
     return best;
 }

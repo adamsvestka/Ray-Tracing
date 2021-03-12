@@ -19,15 +19,16 @@ struct DirectionalLight;
 #include "data_types.hpp"
 #include "ray.hpp"
 
+// Obecný zdroj osvětlení ve scéně
 class Light {
 protected:
-    Color color;
+    Color color;    // Barva světla
     
 public:
-    bool shadow;
-    /***/ virtual Vector3 getVector(Vector3 point) = 0;
-    /***/ virtual Color getDiffuseValue(Vector3 point, Vector3 normal) = 0;
-    /***/ virtual Color getSpecularValue(Vector3 point, Vector3 normal, Vector3 direction, int n) = 0;
+    bool shadow;    // Jestli světlo tvoří stíny
+    /***/ virtual Vector3 getVector(Vector3 point) = 0; // Vektor ke světlu z daného bodu
+    /***/ virtual Color getDiffuseValue(Vector3 point, Vector3 normal) = 0; // Difúzní charakter světla
+    /***/ virtual Color getSpecularValue(Vector3 point, Vector3 normal, Vector3 direction, int n) = 0;  // Odleskový charakter světla
 };
 
 

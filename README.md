@@ -1,64 +1,63 @@
 # Ray Tracing
-[![platform](https://img.shields.io/badge/platform-macOS-lightgray)](https://www.apple.com/macos)
+[![platforma](https://img.shields.io/badge/platform-macOS-lightgray)](https://www.apple.com/macos)
 [![framework](https://img.shields.io/badge/framework-X11-brightgreen)](https://www.xquartz.org)
 [![CodeFactor](https://www.codefactor.io/repository/github/adamsvestka/ray-tracing/badge)](https://www.codefactor.io/repository/github/adamsvestka/ray-tracing)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/ce7c6be071ec40078c3f88480471cb47)](https://www.codacy.com/manual/svestka.adam1/Ray-Tracing?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=adamsvestka/Ray-Tracing&amp;utm_campaign=Badge_Grade)
-[![GitHub milestones](https://img.shields.io/github/milestones/progress-percent/adamsvestka/Ray-Tracing/2)](https://github.com/adamsvestka/Ray-Tracing/milestone/2)
-[![GitHub issues](https://img.shields.io/github/issues/adamsvestka/Ray-Tracing)](https://github.com/adamsvestka/Ray-Tracing/issues)
-[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/adamsvestka/Ray-Tracing)](https://github.com/adamsvestka/Ray-Tracing)
-[![GitHub releases](https://img.shields.io/github/v/release/adamsvestka/Ray-Tracing?include_prereleases)](https://github.com/adamsvestka/Ray-Tracing/releases)
+[![GitHubu milníky](https://img.shields.io/github/milestones/progress-percent/adamsvestka/Ray-Tracing/2)](https://github.com/adamsvestka/Ray-Tracing/milestone/2)[![GitHub problémy](https://img.shields.io/github/issues/adamsvestka/Ray-Tracing)](https://github.com/adamsvestka/Ray-Tracing/issues)
+[![GitHub velikost kódu v bajtech](https://img.shields.io/github/languages/code-size/adamsvestka/Ray-Tracing)](https://github.com/adamsvestka/Ray-Tracing)
+[![GitHub vydání](https://img.shields.io/github/v/release/adamsvestka/Ray-Tracing?include_prereleases)](https://github.com/adamsvestka/Ray-Tracing/releases)
 
-My very own ray tracing engine which I built to prove that I could.
+Můj vlastní program pro sledování paprsků, který jsem vytvořil, abych dokázal, že můžu.
 
-Also, I built a WebAssembly version that can run anywhere, on any device and is hosted on my [GitHub Pages](https://adamsvestka.github.io/raytracing).
+Také jsem vytvořil WebAssembly verzi, která může běžet kdekoli, na jakémkoli zařízení a je hostována na mých [GitHub stránkách](https://adamsvestka.github.io/raytracing).
 
-## Dependencies
+## Závislosti
 - [XQuartz](https://www.xquartz.org)
 - [CImg](https://cimg.eu)
 - [libpng](http://www.libpng.org)
 - [libjpeg](http://libjpeg.sourceforge.net)
 
-## Incorporated libraries
+## Začleněné knihovny
 - [nlohman/json](https://github.com/nlohmann/json)
 
 ---
 
-Some data is loaded at runtime from configuration files:
+Některá data se načítají za běhu z konfiguračních souborů:
 
-## Settings file
+## Soubor nastavení
 
-This file includes settings for how the scene is rendered.
-- filename: `settings.ini`
-- format: `text/ini`
+Tento soubor obsahuje nastavení způsobu vykreslení scény.
+- název souboru: `settings.ini`
+- formát: `text/ini`
 
 ```ini
-# comment
-[Section]
-key=value
+# komentář
+[Sekce]
+klíč=hodnota
 ```
 
-### List of options
+### Seznam možností
 
-| key                 | description                                                                               | type                                  | default   |
+| klíč | popis | datový typ | výchozí hodnota |
 |---------------------|-------------------------------------------------------------------------------------------|---------------------------------------|-----------|
-| max_render_distance | Far camera cutoff                                                                         | `int`                                 | `100`     |
-| surface_bias        | Collided ray offset to prevent shadow acne                                                | `float`                               | `0.001`   |
-| max_light_bounces   | Prevent infinite loops                                                                    | `int`                                 | `5`       |
-| render_mode         | What layers to collect from collisions                                                    | `enum (0-7)`                          | `0`       |
-| render_pattern      | What pattern to render region in                                                          | `enum (0-2)`                          | `1`       |
-| show_debug          | Show tiles over regions specifying what to render; preprocess must be true to take effect | `bool`                                | `true`    |
-| preprocess          | Only render what is necessary; !! may result in render issues                             | `bool`                                | `false`   |
-| save_render         | Save result to buffer to allow for layer switching afterwards                             | `bool`                                | `true`    |
-| resolution_decrease | Divide resolution by                                                                      | `int`                                 | `1`       |
-| render_region_size  | Render region size                                                                        | `int`                                 | `10`      |
-| rendering_threads   | Amount of threads for rendering                                                           | `int`                                 | `25`      |
-| background_color    | Background color to fill empty space                                                      | `Color`<sup>[1](#footnoteColor)</sup> | `x000000` |
+| max_render_distance | Zadní oříznutí scény | `int` | `100` |
+| surface_bias | Posunutí sraženého paprseku, aby se zabránilo stínovému akné `float` | `0.001` |
+| max_light_bounces | Zabránění nekonečných smyček | `int` | `5` |
+| render_mode | Jaké vrstvy se mají sbírat při srážkách | `enum (0-7)` | `0` |
+| render_pattern | Podle jakého vzoru vykreslovat regiony | `enum (0-2)` | `1` |
+| show_debug | Zobrazit terče nad oblastmi určující, co se má vykreslit; preprocess musí být true, aby se toto projevilo | `bool` | `true` |
+| preprocess | Vykreslit pouze to, co je nezbytné; !! může mít za následek problémy s vykreslením | `bool` | `false` |
+| save_render | Uložte výsledek do paměti, aby se následně mohli přepínat vrstvy | `bool` | `true` |
+| resolution_decrease | Vydělit rozlišení číslem | `int` | `1` |
+| render_region_size | Velikost vykreslovacích regionů | `int` | `10` |
+| rendering_threads | Počet vláken pro vykreslování | `int` | `25` |
+| background_color | Barva pozadí pro vyplnění prázdného místa `Color`<sup>[1](#footnoteColor)</sup> | `x000000` |
 
-## Scene file
+## Soubor scény
 
-This file defines objects and lighting in the scene.
-- filename: `scence.json`
-- format: `text/json`
+Tento soubor definuje objekty a osvětlení ve scéně.
+- název souboru: `scence.json`
+- formát: `text/json`
 
 ```js
 {
@@ -95,7 +94,7 @@ This file defines objects and lighting in the scene.
 }
 ```
 
-### Vector3 format
+### Formát Vector3
 
 ```js
 Vector3: {
@@ -105,13 +104,13 @@ Vector3: {
 }
 ```
 
-### Color format<sup>[1](#footnoteColor)</sup>
+### Formát barvy <sup>[1](#footnoteColor)</sup>
 
 ```js
 Color: string
 ```
 
-### Material format
+### Formát materiálu
 
 ```js
 Material: {
@@ -126,9 +125,9 @@ Material: {
 }
 ```
 
-### List of object types
+### Seznam typů objektů
 
-| type   | params                                                                                                            |
+| typ    | parametry                                                                                                         |
 |--------|-------------------------------------------------------------------------------------------------------------------|
 | sphere | position: `Vector3`, diameter: `float`, rotation: `Vector3`, material: `Material`                                 |
 | cube   | position: `Vector3`, size: `float`, rotation: `Vector3`, material: `Material`                                     |
@@ -137,38 +136,38 @@ Material: {
 | plane  | position: `Vector3`, size_x: `float`, size_y: `float`, rotation: `Vector3`, material: `Material`                  |
 | object | name: `string`, position: `Vector3`, scale: `float`, rotation: `Vector3`, material: `Material`                    |
 
-### List of light types
+### Seznam typů osvětlení
 
-| type        | params                                                 |
+| typ         | parametry                                              |
 |-------------|--------------------------------------------------------|
 | point       | position: `Vector3`, color: `Color`, intensity: `int`  |
 | linear      | position: `Vector3`, color: `Color`, intensity: `int`  |
 | global      | color: `Color`, intensity: `int`                       |
 | directional | direction: `Vector3`, color: `Color`, intensity: `int` |
 
-### List of shader types
+### Seznam typů shaderů
 
-| type         | params                                                                                                              | info                                                                                                                                                                                        |
+| typ          | parametry                                                                                                           | info                                                                                                                                                                                        |
 |--------------|---------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| color        | value: `Color`                                                                                                      | single color texture                                                                                                                                                                        |
-| image        | value: `string`                                                                                                     | use image as texture                                                                                                                                                                        |
-| checkerboard | scale: `int`, primary: `Color`, secondary: `Color`                                                                  | generate checkerboard pattern sized `scale`x`scale` of two colors                                                                                                                           |
-| bricks       | scale: `int`, ratio: `float`, mortar: `float`, primary: `Color`, secondary: `Color`, tertiary: `Color`, seed: `int` | generate brick pattern `scale`  high, `ratio`=width/height, `mortar`=\[0-1\], bricks interpolate between `primary` and `secondary` colors seeded by `seed`, `tertiary` defines mortar color |
-| noise        | scale: `int`, seed: `int`, primary: `Color`                                                                         | generate _Perlin_ noise of `primary` color                                                                                                                                                  |
+| color        | value: `Color`                                                                                                      | jednobarevná textura                                                                                                                                                                        |
+| image        | value: `string`                                                                                                     | použít obrázek jako texturu                                                                                                                                                                        |
+| checkerboard | scale: `int`, primary: `Color`, secondary: `Color`                                                                  | vygeneruje šachovnicový vzor o velikosti `scale`x`scale` dvou barev                                                                                                                           |
+| bricks       | scale: `int`, ratio: `float`, mortar: `float`, primary: `Color`, secondary: `Color`, tertiary: `Color`, seed: `int` | vygeneruje cihlový vzor `scale` vysoký, `ratio`=šířka/výška, `mortar`=\[0-1\], barva cihel interpoluje mezi `primary` a `secondary` barvou náhodně pomocí `seed`, `tertiary` definuje barvu malty |
+| noise        | scale: `int`, seed: `int`, primary: `Color`                                                                         | vygeneruje _Perlinův_ šum `primary` barvy                                                                                                                                                  |
 |              |                                                                                                                     |                                                                                                                                                                                             |
-| grayscale    | value: `Shader`                                                                                                     | grayscale shader `value`                                                                                                                                                                    |
-| negate       | value: `Shader`                                                                                                     | negate shader `value`                                                                                                                                                                       |
-| add          | values: `[ Shader ]`                                                                                                | add all shaders in `values`                                                                                                                                                                 |
-| multiply     | values: `[ Shader ]`                                                                                                | multiply all shaders in `values`                                                                                                                                                            |
-| mix          | values: `[ Shader ]`, weights: `[ float ]`                                                                          | add all shaders in `values` first multiplied by respectable numbers in `weights`                                                                                                            |
+| grayscale    | value: `Shader`                                                                                                     | hodnota `value` shaderu ve stupních šedi                                                                                                                                                                    |
+| negate       | value: `Shader`                                                                                                     | negace shaderu `value`                                                                                                                                                                       |
+| add          | values: `[ Shader ]`                                                                                                | součet všech shaderů ve `values`                                                                                                                                                                 |
+| multiply     | values: `[ Shader ]`                                                                                                | součin všech shaderů ve `values`                                                                                                                                                            |
+| mix          | values: `[ Shader ]`, weights: `[ float ]`                                                                          | součet všech shaderů ve `values` nejprve vynásobeno příslušnými čísly ve `weights`                                                                                                            |
 
 ---
 
-<a name="footnoteColor">1</a>: Accepted color formats:
-- `x47B3DB` 6-digit hex code prepended with 'x'
-- `gray` lowercase color name
+<a name="footnoteColor">1</a>: Přijímané barevné formáty:
+- `x47B3DB` šestimístný hexadecimální kód doplněný znakem 'x'
+- `gray` malý název barvy
 
-Supported colors:
+Podporované barvy:
         ![white](https://via.placeholder.com/10/ffffff/000000?text=+) `white`,
         ![lightGray](https://via.placeholder.com/10/ffffff/000000?text=+) `lightGray`,
         ![gray](https://via.placeholder.com/10/8e8e93/000000?text=+) `gray`,

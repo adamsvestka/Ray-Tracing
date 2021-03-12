@@ -38,13 +38,13 @@
 		6630E3E62445E2C70066BCCC /* objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E42445E2C70066BCCC /* objects.cpp */; };
 		6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E72445E2D70066BCCC /* light_sources.cpp */; };
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
+		6644399B25FA84E500A74EE9 /* libpng.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6644399A25FA84E500A74EE9 /* libpng.dylib */; };
+		664439A425FA851600A74EE9 /* libjpeg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 664439A325FA851600A74EE9 /* libjpeg.dylib */; };
+		664439AA25FA854000A74EE9 /* libX11.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 664439A925FA854000A74EE9 /* libX11.dylib */; };
 		6658E6AB24FD262800969C2A /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6A924FD262800969C2A /* camera.cpp */; };
 		6658E6AE24FD263E00969C2A /* renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6AC24FD263E00969C2A /* renderer.cpp */; };
 		6658E6B124FD27E300969C2A /* interfaces.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6AF24FD27E300969C2A /* interfaces.cpp */; };
 		665B9CA224CA3824000C4E1E /* file_managers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 665B9CA024CA3824000C4E1E /* file_managers.cpp */; };
-		665B9CC424CBAC80000C4E1E /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC324CBAC80000C4E1E /* libX11.6.dylib */; };
-		665B9CC724CBAC8F000C4E1E /* libpng16.16.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */; };
-		665B9CCA24CBAC9D000C4E1E /* libjpeg.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */; };
 		6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6667DFF924604DFC00A1DDE1 /* shaders.cpp */; };
 /* End PBXBuildFile section */
 
@@ -89,6 +89,10 @@
 		6630E3ED2445E4AB0066BCCC /* ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ray.cpp; sourceTree = "<group>"; };
 		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
+		6644399925FA84DC00A74EE9 /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../../../../../usr/local/lib/libpng.a; sourceTree = "<group>"; };
+		6644399A25FA84E500A74EE9 /* libpng.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng.dylib; path = ../../../../../usr/local/lib/libpng.dylib; sourceTree = "<group>"; };
+		664439A325FA851600A74EE9 /* libjpeg.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.dylib; path = ../../../../../usr/local/lib/libjpeg.dylib; sourceTree = "<group>"; };
+		664439A925FA854000A74EE9 /* libX11.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.dylib; path = ../../../../../opt/X11/lib/libX11.dylib; sourceTree = "<group>"; };
 		6658E6A924FD262800969C2A /* camera.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = camera.cpp; sourceTree = "<group>"; };
 		6658E6AA24FD262800969C2A /* camera.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = camera.hpp; sourceTree = "<group>"; };
 		6658E6AC24FD263E00969C2A /* renderer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = renderer.cpp; sourceTree = "<group>"; };
@@ -112,9 +116,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				665B9CC424CBAC80000C4E1E /* libX11.6.dylib in Frameworks */,
-				665B9CCA24CBAC9D000C4E1E /* libjpeg.9.dylib in Frameworks */,
-				665B9CC724CBAC8F000C4E1E /* libpng16.16.dylib in Frameworks */,
+				664439A425FA851600A74EE9 /* libjpeg.dylib in Frameworks */,
+				6644399B25FA84E500A74EE9 /* libpng.dylib in Frameworks */,
+				664439AA25FA854000A74EE9 /* libX11.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,6 +158,10 @@
 		6630E3DE2443CF020066BCCC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				664439A925FA854000A74EE9 /* libX11.dylib */,
+				664439A325FA851600A74EE9 /* libjpeg.dylib */,
+				6644399A25FA84E500A74EE9 /* libpng.dylib */,
+				6644399925FA84DC00A74EE9 /* libpng.a */,
 				665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */,
 				665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */,
 				665B9CC324CBAC80000C4E1E /* libX11.6.dylib */,
@@ -286,7 +294,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "OUTPUT_DIR=$HOME/Sites/github/raytracing\n\n# rm -r \"$OUTPUT_DIR/\"*\n\n# cp $(ls -d \"$BUILT_PRODUCTS_DIR/\"* | egrep \"(.obj|.png|.jpe?g|.ini|.json)$\") \"$OUTPUT_DIR\"\n\n$HOME/Desktop/Xcode/emsdk/upstream/emscripten/em++ \"$PROJECT_DIR/Ray Tracing/\"*.cpp -I/usr/local/Cellar/nlohmann-json/3.8.0/include --std=c++20 -O3 --bind -s LLD_REPORT_UNDEFINED -s WASM=1 -s NO_FILESYSTEM=1 -s DISABLE_EXCEPTION_CATCHING=1 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=0 -s ASYNCIFY -s EXTRA_EXPORTED_RUNTIME_METHODS=['UTF8ToString','lengthBytesUTF8','stringToUTF8'] --shell-file \"$PROJECT_DIR/Ray Tracing/template.html\" -o \"$OUTPUT_DIR/index.html\"\n";
+			shellScript = "OUTPUT_DIR=$HOME/Sites/github/raytracing\nCOMPILER=$HOME/Desktop/Xcode/emsdk/upstream/emscripten/em++\n\n$COMPILER \"$PROJECT_DIR/Ray Tracing/\"*.cpp -I/usr/local/include --std=c++20 -O3 --bind -s LLD_REPORT_UNDEFINED -s WASM=1 -s NO_FILESYSTEM=1 -s DISABLE_EXCEPTION_CATCHING=1 -s ALLOW_MEMORY_GROWTH=1 -s ASSERTIONS=0 -s ASYNCIFY -s EXTRA_EXPORTED_RUNTIME_METHODS=['UTF8ToString','lengthBytesUTF8','stringToUTF8'] --shell-file \"$PROJECT_DIR/Ray Tracing/template.html\" -o \"$OUTPUT_DIR/index.html\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -448,13 +456,12 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_OPTIMIZATION_LEVEL = s;
 				HEADER_SEARCH_PATHS = /usr/local/include;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
 				LIBRARY_SEARCH_PATHS = (
 					/opt/X11/lib,
 					/usr/local/lib,
-					/usr/local/lib,
-					/usr/local/Cellar/jpeg/9c/lib,
-					/usr/local/Cellar/libpng/1.6.36/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "-lX11";
 				OTHER_OSACOMPILEFLAGS = "";
@@ -476,13 +483,12 @@
 				FRAMEWORK_SEARCH_PATHS = "";
 				GCC_OPTIMIZATION_LEVEL = s;
 				HEADER_SEARCH_PATHS = /usr/local/include;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
 				LIBRARY_SEARCH_PATHS = (
 					/opt/X11/lib,
 					/usr/local/lib,
-					/usr/local/lib,
-					/usr/local/Cellar/jpeg/9c/lib,
-					/usr/local/Cellar/libpng/1.6.36/lib,
 				);
+				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
 				OTHER_LDFLAGS = "-lX11";
 				OTHER_OSACOMPILEFLAGS = "";
@@ -514,6 +520,8 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RTA4PXE74H;
+				HEADER_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -523,6 +531,8 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = RTA4PXE74H;
+				HEADER_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
