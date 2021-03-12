@@ -89,7 +89,6 @@
 		6630E3ED2445E4AB0066BCCC /* ray.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ray.cpp; sourceTree = "<group>"; };
 		6630E3EE2445E4AB0066BCCC /* ray.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ray.hpp; sourceTree = "<group>"; };
 		6630E3FE24477B840066BCCC /* Ray Tracing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Ray Tracing.entitlements"; sourceTree = "<group>"; };
-		6644399925FA84DC00A74EE9 /* libpng.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libpng.a; path = ../../../../../usr/local/lib/libpng.a; sourceTree = "<group>"; };
 		6644399A25FA84E500A74EE9 /* libpng.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng.dylib; path = ../../../../../usr/local/lib/libpng.dylib; sourceTree = "<group>"; };
 		664439A325FA851600A74EE9 /* libjpeg.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.dylib; path = ../../../../../usr/local/lib/libjpeg.dylib; sourceTree = "<group>"; };
 		664439A925FA854000A74EE9 /* libX11.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.dylib; path = ../../../../../opt/X11/lib/libX11.dylib; sourceTree = "<group>"; };
@@ -102,9 +101,6 @@
 		665B9C9524C8D2C4000C4E1E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		665B9CA024CA3824000C4E1E /* file_managers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_managers.cpp; sourceTree = "<group>"; };
 		665B9CA124CA3824000C4E1E /* file_managers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = file_managers.hpp; sourceTree = "<group>"; };
-		665B9CC324CBAC80000C4E1E /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
-		665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = ../../../../../usr/local/Cellar/libpng/1.6.36/lib/libpng16.16.dylib; sourceTree = "<group>"; };
-		665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.9.dylib; path = ../../../../../usr/local/Cellar/jpeg/9c/lib/libjpeg.9.dylib; sourceTree = "<group>"; };
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
 		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
@@ -161,10 +157,6 @@
 				664439A925FA854000A74EE9 /* libX11.dylib */,
 				664439A325FA851600A74EE9 /* libjpeg.dylib */,
 				6644399A25FA84E500A74EE9 /* libpng.dylib */,
-				6644399925FA84DC00A74EE9 /* libpng.a */,
-				665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */,
-				665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */,
-				665B9CC324CBAC80000C4E1E /* libX11.6.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
