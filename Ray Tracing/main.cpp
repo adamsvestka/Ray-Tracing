@@ -27,7 +27,7 @@ Settings settings;
 
 int main(int argc, const char *argv[]) {
     // Rozhraní na interakci s OS (kreslení na obrazovku, log, vstup z klávesnice)
-    NativeInterface interface;
+    NativeInterface interface(argc, argv);
     
     // Objekty ve scéně
     Camera camera;

@@ -21,6 +21,13 @@ Také jsem vytvořil WebAssembly verzi, která může běžet kdekoli, na jakém
 ## Začleněné knihovny
 - [nlohman/json](https://github.com/nlohmann/json)
 
+## Instrukce k instalaci
+1. Stáhněte si nejnovější verzi z [GitHubu](https://github.com/adamsvestka/Ray-Tracing/releases)
+1. Nainstalujte si Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+1. Nainstalujte závislosti: `brew install libpng libjpeg cimg`
+1. Stáhněte a nainstalujte [XQuartz](https://www.xquartz.org)
+1. Spusťte program `Ray Tracing`
+
 ---
 
 Některá data se načítají za běhu z konfiguračních souborů:

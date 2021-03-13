@@ -38,9 +38,6 @@
 		6630E3E62445E2C70066BCCC /* objects.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E42445E2C70066BCCC /* objects.cpp */; };
 		6630E3E92445E2D70066BCCC /* light_sources.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3E72445E2D70066BCCC /* light_sources.cpp */; };
 		6630E3EF2445E4AB0066BCCC /* ray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6630E3ED2445E4AB0066BCCC /* ray.cpp */; };
-		6644399B25FA84E500A74EE9 /* libpng.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 6644399A25FA84E500A74EE9 /* libpng.dylib */; };
-		664439A425FA851600A74EE9 /* libjpeg.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 664439A325FA851600A74EE9 /* libjpeg.dylib */; };
-		664439AA25FA854000A74EE9 /* libX11.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 664439A925FA854000A74EE9 /* libX11.dylib */; };
 		6658E6AB24FD262800969C2A /* camera.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6A924FD262800969C2A /* camera.cpp */; };
 		6658E6AE24FD263E00969C2A /* renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6AC24FD263E00969C2A /* renderer.cpp */; };
 		6658E6B124FD27E300969C2A /* interfaces.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6AF24FD27E300969C2A /* interfaces.cpp */; };
@@ -112,9 +109,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				664439A425FA851600A74EE9 /* libjpeg.dylib in Frameworks */,
-				6644399B25FA84E500A74EE9 /* libpng.dylib in Frameworks */,
-				664439AA25FA854000A74EE9 /* libX11.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -455,7 +449,11 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				OTHER_LDFLAGS = "-lX11";
+				OTHER_LDFLAGS = (
+					"-lX11",
+					"-ljpeg",
+					"-lpng",
+				);
 				OTHER_OSACOMPILEFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -482,7 +480,11 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.1;
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				OTHER_LDFLAGS = "-lX11";
+				OTHER_LDFLAGS = (
+					"-lX11",
+					"-ljpeg",
+					"-lpng",
+				);
 				OTHER_OSACOMPILEFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

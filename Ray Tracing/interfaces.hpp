@@ -86,11 +86,13 @@ private:
     int scr;
     Window window;
     GC gc;
+    string path;
     
+    inline string wrapFilename(string);
     inline void drawInfoString(int, int, stringstream &, Color);
     
 public:
-    X11Interface();
+    X11Interface(int, const char **);
     ~X11Interface();
     
     void drawPixel(int, int, Color);
@@ -134,7 +136,7 @@ private:
     inline void drawBoxCorner(vector<array<short, 2>>);
     
 public:
-    WASMInterface();
+    WASMInterface(int, const char **);
     ~WASMInterface();
     
     void drawPixel(int, int, Color);

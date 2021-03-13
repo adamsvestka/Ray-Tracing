@@ -30,7 +30,11 @@ string formatTime(int milliseconds) {
 #ifndef __EMSCRIPTEN__
 
 // MARK: - X11Interface
-X11Interface::X11Interface() {
+X11Interface::X11Interface(int argc, const char *argv[]) {
+    // Zjištění cesty k tomuto programu – na načítání souborů podle relativních cest
+    path = string(argv[0]).substr(0, string(argv[0]).find_last_of('/') + 1);
+    log("Path to executable: " + path);
+    
     // Inicializace X11
     display = XOpenDisplay(nullptr);
     scr = DefaultScreen(display);
@@ -192,8 +196,12 @@ char X11Interface::getChar() {
     }
 }
 
+inline string X11Interface::wrapFilename(string filename) {
+    return filename[0] == '/' ? filename : path + filename;
+}
+
 bool X11Interface::loadFile(string filename, stringstream &buffer) {
-    ifstream ifile(filename, ios::in);
+    ifstream ifile(wrapFilename(filename), ios::in);
     buffer.str("");
     
     if (ifile.is_open()) {
@@ -207,7 +215,7 @@ bool X11Interface::loadFile(string filename, stringstream &buffer) {
 
 
 bool X11Interface::saveFile(string filename, const stringstream &buffer) {
-    ofstream ofile(filename, ios::out | ios::app);
+    ofstream ofile(wrapFilename(filename), ios::out | ios::app);
     
     if (ofile.is_open()) {
         ofile << buffer.rdbuf();
@@ -223,7 +231,7 @@ bool X11Interface::loadImage(string filename, Buffer &buffer) {
     bool success = true;
     
     try {
-        image.load(filename.c_str());
+        image.load(wrapFilename(filename).c_str());
     } catch(...) {
         // Pokud žádaný obrázek neexistuje, tak se vygeneruje šablona
         image = CImg<unsigned char>(64, 64, 1, 3);
@@ -248,7 +256,7 @@ bool X11Interface::saveImage(string filename, const Buffer &buffer) {
     try {
         cimg_forXYC(image, x, y, c) { image(x, y, c) = buffer[x][y][c]; }
         
-        image.save(filename.c_str());
+        image.save(wrapFilename(filename).c_str());
         
         return true;
     } catch(...) {}
@@ -275,7 +283,7 @@ void WASMInterface::push_key(int code) {
     keys.call<void>("push", code);
 }
 
-WASMInterface::WASMInterface() {
+WASMInterface::WASMInterface(int argc, const char *argv[]) {
     // Inicializace HTML
     window = val::global("window");
     document = val::global("document");
@@ -343,7 +351,7 @@ void WASMInterface::drawDebugBox(int x, int y, RayInput mask) {
         {(short)((x + 1) * region_size - 2), (short)((y + 1) * region_size - 2)},
         {(short)((x + 1) * region_size - 2), (short)((y + 1 - size) * region_size - 2)}
     }};
-
+    
     context.call<void>("beginPath");
     context.set("lineWidth", 1);
     
