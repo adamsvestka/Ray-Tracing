@@ -21,6 +21,13 @@ Also, I built a WebAssembly version that can run anywhere, on any device and is 
 ## Incorporated libraries
 - [nlohman/json](https://github.com/nlohmann/json)
 
+## Installation instructions
+1. Download latest release from [GitHub](https://github.com/adamsvestka/Ray-Tracing/releases)
+1. Install Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+1. Install dependencies: `brew install libpng libjpeg cimg`
+1. Download and install [XQuartz](https://www.xquartz.org)
+1. Run the the `Ray Tracing` executable
+
 ---
 
 Some data is loaded at runtime from configuration files:
@@ -160,7 +167,7 @@ Material: {
 | negate       | value: `Shader`                                                                                                     | negate shader `value`                                                                                                                                                                       |
 | add          | values: `[ Shader ]`                                                                                                | add all shaders in `values`                                                                                                                                                                 |
 | multiply     | values: `[ Shader ]`                                                                                                | multiply all shaders in `values`                                                                                                                                                            |
-| mix          | values: `[ Shader ]`, weights: `[ float ]`                                                                          | add all shaders in `values` first multiplied by respectable numbers in `weights`                                                                                                            |
+| mix          | values: `[ Shader ]`, weights: `[ float ]`                                                                          | add all shaders in `values` first multiplied by respective numbers in `weights`                                                                                                             |
 
 ---
 

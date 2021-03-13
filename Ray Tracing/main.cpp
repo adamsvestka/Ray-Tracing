@@ -26,7 +26,7 @@ using namespace std;
 Settings settings;
 
 int main(int argc, const char *argv[]) {
-    NativeInterface interface;
+    NativeInterface interface(argc, argv);
     
     Camera camera;
     vector<Object *> objects;

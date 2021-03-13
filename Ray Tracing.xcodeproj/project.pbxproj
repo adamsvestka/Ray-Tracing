@@ -42,9 +42,6 @@
 		6658E6AE24FD263E00969C2A /* renderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6AC24FD263E00969C2A /* renderer.cpp */; };
 		6658E6B124FD27E300969C2A /* interfaces.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6658E6AF24FD27E300969C2A /* interfaces.cpp */; };
 		665B9CA224CA3824000C4E1E /* file_managers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 665B9CA024CA3824000C4E1E /* file_managers.cpp */; };
-		665B9CC424CBAC80000C4E1E /* libX11.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC324CBAC80000C4E1E /* libX11.6.dylib */; };
-		665B9CC724CBAC8F000C4E1E /* libpng16.16.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */; };
-		665B9CCA24CBAC9D000C4E1E /* libjpeg.9.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */; };
 		6667DFFB24604DFC00A1DDE1 /* shaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6667DFF924604DFC00A1DDE1 /* shaders.cpp */; };
 /* End PBXBuildFile section */
 
@@ -98,11 +95,9 @@
 		665B9C9524C8D2C4000C4E1E /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
 		665B9CA024CA3824000C4E1E /* file_managers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = file_managers.cpp; sourceTree = "<group>"; };
 		665B9CA124CA3824000C4E1E /* file_managers.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = file_managers.hpp; sourceTree = "<group>"; };
-		665B9CC324CBAC80000C4E1E /* libX11.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.6.dylib; path = ../../../../../opt/X11/lib/libX11.6.dylib; sourceTree = "<group>"; };
-		665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libpng16.16.dylib; path = ../../../../../usr/local/Cellar/libpng/1.6.36/lib/libpng16.16.dylib; sourceTree = "<group>"; };
-		665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libjpeg.9.dylib; path = ../../../../../usr/local/Cellar/jpeg/9c/lib/libjpeg.9.dylib; sourceTree = "<group>"; };
 		6667DFF924604DFC00A1DDE1 /* shaders.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = shaders.cpp; sourceTree = "<group>"; };
 		6667DFFA24604DFC00A1DDE1 /* shaders.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = shaders.hpp; sourceTree = "<group>"; };
+		667E448925FCFE1A007DE0ED /* libX11.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libX11.dylib; path = ../../../../../opt/X11/lib/libX11.dylib; sourceTree = "<group>"; };
 		66DA14C02448C570004432AC /* settings.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = settings.hpp; sourceTree = "<group>"; };
 		66FDB88025017AA70089E080 /* template.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = template.html; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -112,9 +107,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				665B9CC424CBAC80000C4E1E /* libX11.6.dylib in Frameworks */,
-				665B9CCA24CBAC9D000C4E1E /* libjpeg.9.dylib in Frameworks */,
-				665B9CC724CBAC8F000C4E1E /* libpng16.16.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -154,9 +146,7 @@
 		6630E3DE2443CF020066BCCC /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				665B9CC924CBAC9D000C4E1E /* libjpeg.9.dylib */,
-				665B9CC624CBAC8F000C4E1E /* libpng16.16.dylib */,
-				665B9CC324CBAC80000C4E1E /* libX11.6.dylib */,
+				667E448925FCFE1A007DE0ED /* libX11.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -451,12 +441,13 @@
 				LIBRARY_SEARCH_PATHS = (
 					/opt/X11/lib,
 					/usr/local/lib,
-					/usr/local/lib,
-					/usr/local/Cellar/jpeg/9c/lib,
-					/usr/local/Cellar/libpng/1.6.36/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				OTHER_LDFLAGS = "-lX11";
+				OTHER_LDFLAGS = (
+					"-lX11",
+					"-ljpeg",
+					"-lpng",
+				);
 				OTHER_OSACOMPILEFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -479,12 +470,13 @@
 				LIBRARY_SEARCH_PATHS = (
 					/opt/X11/lib,
 					/usr/local/lib,
-					/usr/local/lib,
-					/usr/local/Cellar/jpeg/9c/lib,
-					/usr/local/Cellar/libpng/1.6.36/lib,
 				);
 				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS)";
-				OTHER_LDFLAGS = "-lX11";
+				OTHER_LDFLAGS = (
+					"-lX11",
+					"-ljpeg",
+					"-lpng",
+				);
 				OTHER_OSACOMPILEFLAGS = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
