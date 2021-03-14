@@ -51,7 +51,8 @@ klíč=hodnota
 | max_render_distance | Zadní oříznutí scény | `int` | `100` |
 | surface_bias | Posunutí sraženého paprseku, aby se zabránilo stínovému akné `float` | `0.001` |
 | max_light_bounces | Zabránění nekonečných smyček | `int` | `5` |
-| render_mode | Jaké vrstvy se mají sbírat při srážkách | `enum (0-7)` | `0` |
+| | | | |
+| render_mode | Jaké vrstvy se mají sbírat při srážkách | `enum (0-9)` | `0` |
 | render_pattern | Podle jakého vzoru vykreslovat regiony | `enum (0-2)` | `1` |
 | show_debug | Zobrazit terče nad oblastmi určující, co se má vykreslit; preprocess musí být true, aby se toto projevilo | `bool` | `true` |
 | preprocess | Vykreslit pouze to, co je nezbytné; !! může mít za následek problémy s vykreslením | `bool` | `false` |
