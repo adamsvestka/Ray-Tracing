@@ -49,7 +49,7 @@ klíč=hodnota
 | klíč | popis | datový typ | výchozí hodnota |
 |---------------------|-------------------------------------------------------------------------------------------|---------------------------------------|-----------|
 | max_render_distance | Zadní oříznutí scény | `int` | `100` |
-| surface_bias | Posunutí sraženého paprseku, aby se zabránilo stínovému akné `float` | `0.001` |
+| surface_bias | Posunutí sraženého paprseku, aby se zabránilo stínovému akné | `float` | `0.001` |
 | max_light_bounces | Zabránění nekonečných smyček | `int` | `5` |
 | | | | |
 | render_mode | Jaké vrstvy se mají sbírat při srážkách | `enum (0-9)` | `0` |
@@ -60,7 +60,7 @@ klíč=hodnota
 | resolution_decrease | Vydělit rozlišení číslem | `int` | `1` |
 | render_region_size | Velikost vykreslovacích regionů | `int` | `10` |
 | rendering_threads | Počet vláken pro vykreslování | `int` | `25` |
-| background_color | Barva pozadí pro vyplnění prázdného místa `Color`<sup>[1](#footnoteColor)</sup> | `x000000` |
+| background_color | Barva pozadí pro vyplnění prázdného místa | `Color`<sup>[1](#footnoteColor)</sup> | `x000000` |
 
 ## Soubor scény
 
